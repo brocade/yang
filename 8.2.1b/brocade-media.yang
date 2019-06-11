@@ -1,0 +1,523 @@
+module brocade-media {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-media";
+  prefix brocade-media;
+
+  import brocade-fru-types {
+    prefix fru;
+  }
+  
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-media', which augments the
+    media details of the sfp.
+     
+    Brocade Proprietary and Confidential.
+    Copyright © 2019 Brocade Communications Systems LLC.
+    All Rights Reserved.
+    
+    BROCADE HIGHLY CONFIDENTIAL TRADE SECRET INFORMATION
+ 
+    Access or possession of this material grants you no right or license,
+    express, implied, statutory or otherwise, under any Brocade patent,
+    copyright, trade secret right or other intellectual property right.
+    Any such license must be contained in a written license agreement
+    signed by an authorized officer of Brocade.  Additionally, access or
+    possession of this material is limited to Brocade employees with a
+    need to know or named employees of Brocade vendors authorized by
+    Brocade in writing to access this material.
+    
+    Restricted Rights: Use, duplication, or disclosure by the U.S.
+    Government is subject to restrictions of FAR 52.227-19 and its
+    successors, or (c)(1)(ii) of the Rights in Technical Data and
+    Computer Software clause at DFAR 252.227-7013 and its successors.
+    ";
+
+  revision 2019-01-11 {
+    description
+      "
+      Initial release (FOS 8.2.1).
+      Refine descriptions.
+      ";
+    reference
+      "None";
+  } 
+
+  typedef interface-type {
+    type string {
+      length "6..16";
+      /*
+       * pattern with 3 interface types,12 slots and
+       * 1024 ports separated by a slash
+       */
+      pattern "((fc|ge|te)/([1-9]|1[0-9])/([1][0-9][0-9][0-9]|" +
+              "[1-9][1-9][0-9]|[1-9][1-9]|[1-9]))";
+    }
+    description
+      "
+      The network interface name 
+      in 3-tuple canonical format:  interface-id/slot/port.
+      The interface IDs include fc, ge, and te.
+      ";
+  }
+  typedef capable-speed-type {
+    type uint16 {
+      range "1..1000";
+    }
+    units "Gbps";
+    description
+      "
+      The supported transmission speeds of the media.
+      ";
+  }
+  typedef date-code-type {
+    type string {
+      length "1..32";
+      pattern "[ -~]{1,32}";
+    }
+    description
+      "
+      The vendor's manufacturing date code.
+      ";
+  }
+  typedef vendor-revision-type {
+    type string {
+      length "1..255";
+      pattern "[ -~]{1,255}";
+    }
+    description
+      "
+      The vendor revision number for the media.
+      ";
+  }
+  typedef vendor-name-type {
+    type string {
+      length "1..255";
+      pattern "[ -~]{1,255}";
+    }   
+    description
+      "
+      The vendor name for the media.
+      ";
+  }
+  typedef media-power-type {
+    type decimal64 {
+      fraction-digits 2;
+      range "0..9999.99";
+    }   
+    units "uW";
+    description
+      "
+      The power type of the media.
+      ";
+  }
+  typedef current-type {
+    type decimal64 {
+      fraction-digits 2;
+      range "0..999.99";
+    }   
+    units "mAmps";
+    description
+      "
+      The transceiver current of the media.
+      ";
+  }
+  typedef voltage-type {
+    type decimal64 {
+      fraction-digits 2;
+      range "0..9999.99";
+    }   
+    units "mVolts";
+    description
+      "
+      The transceiver voltage of the media.
+      ";
+  }
+  typedef temperature-type {
+    type int16 {
+      range "-128..1000";
+    }   
+    units "Centigrade";
+    description
+      "
+      The temperature of the media.
+      ";
+  }
+  grouping media-optical-product-data-group {
+    description
+      "";
+    leaf part-number {
+      type fru:part-number-type;
+      description
+        "
+        The part number assigned by the organization responsible
+        for producing or manufacturing the media.
+        ";
+    } 
+    leaf serial-number {
+      type fru:serial-number-type;
+      description
+        "
+        The factory's serial number for the blade.
+        ";
+    }
+    leaf vendor-name {
+      type vendor-name-type;
+      description
+        "
+        The vendor name of the media.
+        ";
+    }
+    leaf vendor-revision {
+      type vendor-revision-type;
+      description
+        "
+        The vendor revision number of the media.
+        ";
+    }
+    leaf date-code {
+      type date-code-type;
+      description
+        "
+        The vendor's manufacturing date code.
+        ";
+    }
+  }
+  grouping media-alerts-group {
+    description
+      "
+      A list of warning and alarm levels for media
+      ";
+    leaf high-alarm {
+      type alert-type;
+      description
+        "
+        The high alarm for the media.
+        ";
+    }
+    leaf low-alarm {
+      type alert-type;
+      description
+        "
+        The low alarm for the media.
+        ";
+    }
+    leaf high-warning {
+      type alert-type;
+      description
+        "
+        The high warning level for the media.
+        ";
+    }
+    leaf low-warning {
+      type alert-type;
+      description
+        "
+        The low warning level for the media.
+        ";
+    }
+  }
+  typedef alert-type {
+    type int16 {
+      range "-128..32767";
+    }
+    description
+      "
+      The high or low alert type for the media.
+      ";
+  }
+  container brocade-media {
+    config false;
+    description
+      "
+      The media details for both the switch port and the remote port.
+      ";
+    list media-rdp {
+      key "name";
+      description
+        "
+        A list of switch port and peer port details. 
+        Displays Small Form-factor Pluggable (SFP) transceiver information. These SFP parameters provide 
+        extended information that describes the SFP capabilities, interfaces, 
+        manufacturer, and so on.
+        ";
+      leaf name {
+        type interface-type; 
+        description
+          "
+          The name of the SFP interface in the format interface-id/slot/port.
+          The name of the interface.
+          ";
+      }
+      leaf identifier {
+        type string {
+          length "1..32";
+          pattern "SFP|XFP|QSFP|QSFP+|QSFP28|GBIC|on-board";
+        } 
+        description
+          "
+          The type of serial transceiver inserted in the port module.
+          ";
+      }
+      leaf connector {
+        type string {
+          length "1..32";
+          pattern "SC|style-1 copper|style-2 copper|BNC/TNC|coaxial|" +
+                  "fiberjack|LC|MT-RJ|MU|SG|optical pigtail|" +
+                  "MPO parallel optic|HSSDC II|copper pigtail";
+        }
+        description
+          "
+          The connector type of the media.
+          ";
+      }
+
+      container media-speed-capability {
+        description
+          "
+          A list of capable speeds supported by media.
+          ";
+        leaf-list speed {
+          type capable-speed-type;
+          description
+            "
+            The supported transmission speeds of the media.
+            ";
+        }   
+      }  
+      container media-distance {
+        description
+          "
+          A list of distances supported by media.
+          ";
+          leaf-list distance {
+          type string {
+            length "1..255";
+            pattern "intermediate|long|short|extended|extended short|" +
+                    "extended intermediate|extended long|unknown";
+          }
+          description
+            "
+            The distance supported by the media transceiver.
+            ";
+        }
+      }
+      leaf encoding {
+        type string {
+          length "1..32";
+          pattern "8B10B|64B66B";
+        }
+        description
+          "
+          The serial encoding algorithm used in transmitting data
+          on Fibre Channel and Gigabit Ethernet. Encoding supports
+          continuous transmission with a balanced number of ones and zeros
+          in the code stream, and detects single bit transmission errors.
+          ";
+      }
+      leaf vendor-oui {
+        type string {
+          length "8";
+          pattern "[ -~]{8}";
+        }
+        description
+          "
+          The vendor IEEE company ID for the media. An organizationally
+          unique identifier (OUI) is a 24-bit number that uniquely
+          identifies a vendor, manufacturer, or other organization.
+          ";
+      }
+      uses media-optical-product-data-group;
+      leaf temperature {
+        type temperature-type;
+        description
+          "
+          The temperature of the media.
+          ";
+      }
+      leaf rx-power {
+        type media-power-type;
+        description
+          "
+          The receive power of the media.
+          ";
+      } 
+      leaf tx-power {
+        type media-power-type;
+        description
+          "
+          The transmit power of the media.
+          ";
+      }
+      leaf current {
+        type current-type;
+        description
+          "
+          The transceiver current of the media.
+          ";
+      }
+      leaf voltage {
+        type voltage-type;
+        description
+          "
+          The transceiver voltage of the media.
+          ";
+      }
+      leaf wavelength {
+        type uint32 {
+          range "1..10000";
+        }
+        units "nanometer";
+        description
+          "
+          The laser wavelength of the media connector.
+          ";
+      }
+      leaf power-on-time {
+        type int32 {
+          range "-1..max";
+        }
+        units "hours";
+        description
+          "
+          The current value of the power-on time.
+          This displays for 16-Gbps or 32-Gbps SFPs and QSFPs only.
+          ";
+      }
+      leaf remote-identifier {
+        type string {
+          length "1..32";
+          pattern "SFP+|QSFP|other";
+        }
+        description
+          "
+          The identifier for the remote media.
+          ";
+      }
+      leaf remote-laser-type {
+        type string {
+          length "1..32";
+          pattern "short wave laser|long wave laser LC 1310nm|" +
+                  "long wave laser LC 1550nm|not optical or other type SFP|" +
+                  "unknown SFP type";
+        }
+        description
+          "
+          The laser type of the remote media connector.
+          ";
+      }
+      container remote-media-speed-capability {
+        description
+          "
+          A list of capable speeds supported by media.
+          ";
+        leaf-list speed {
+          type capable-speed-type;
+          description
+            "
+            The supported transmission speeds of the remote port.
+            ";
+        }
+      }
+      container remote-optical-product-data {
+        description
+          "
+          The optical product data of the remote media.
+          "; 
+        uses media-optical-product-data-group;
+      }
+      leaf remote-media-temperature {
+        type temperature-type;
+        description
+          "
+          The temperature of the remote media.
+          ";
+      }
+      leaf remote-media-rx-power {
+        type media-power-type;
+        description
+          "
+          The receive power of the remote media.
+          ";
+      }
+      leaf remote-media-tx-power {
+        type media-power-type;
+        description
+          "
+          The transmit power of the remote media.
+          ";
+      }
+      leaf remote-media-current {
+        type current-type;
+        description
+          "
+          The transceiver current of the remote media.
+          ";
+      }
+      leaf remote-media-voltage {
+        type voltage-type;
+        description
+          "
+          The transceiver voltage of the remote media.
+          ";
+      }
+      container remote-media-voltage-alert {
+        description 
+          "
+          A list of warning and alarm levels for remote media voltage.
+          ";
+        uses media-alerts-group;
+      }
+      container remote-media-temperature-alert {
+        description 
+          "
+          A list of warning and alarm levels for remote media temperature.
+          ";
+        uses media-alerts-group;
+      }
+      container remote-media-tx-bias-alert {
+        description 
+          "
+          A list of warning and alarm levels for remote media transceiver.
+          ";
+        uses media-alerts-group;
+      }
+      container remote-media-tx-power-alert {
+        description 
+          "
+          A list of warning and alarm levels for remote media transceiver power.
+          ";
+        uses media-alerts-group;
+      }
+      container remote-media-rx-power-alert {
+        description 
+          "
+          A list of warning and alarm levels for remote media receiver power.
+          ";
+        uses media-alerts-group;
+      }
+   }
+ }
+}

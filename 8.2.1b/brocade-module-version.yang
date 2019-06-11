@@ -1,0 +1,144 @@
+module brocade-module-version {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-module-version";
+  prefix brocade-module-version;
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the Yang module 'brocade-module-version', which provides
+    version details for all the supported modules and feature set.
+
+    Brocade Proprietary and Confidential.
+    Copyright © 2019 Brocade Communications Systems LLC.
+    All Rights Reserved.
+    
+    BROCADE HIGHLY CONFIDENTIAL TRADE SECRET INFORMATION
+ 
+    Access or possession of this material grants you no right or license,
+    express, implied, statutory or otherwise, under any Brocade patent,
+    copyright, trade secret right or other intellectual property right.
+    Any such license must be contained in a written license agreement
+    signed by an authorized officer of Brocade.  Additionally, access or
+    possession of this material is limited to Brocade employees with a
+    need to know or named employees of Brocade vendors authorized by
+    Brocade in writing to access this material.
+    
+    Restricted Rights: Use, duplication, or disclosure by the U.S.
+    Government is subject to restrictions of FAR 52.227-19 and its
+    successors, or (c)(1)(ii) of the Rights in Technical Data and
+    Computer Software clause at DFAR 252.227-7013 and its successors.
+    ";
+
+  reference
+    "
+    NA
+    ";
+
+  revision 2018-12-26 {
+    description
+      "
+      Fabric OS 8.2.1b
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-module-version {
+    config "false";
+    description
+      "
+      This module contains module level version information about the Yang
+      modules and submodules that are used in FOS.
+      ";
+      
+    list module {
+      description
+        "
+        Each entry represents one module version
+        supported by the server.
+        ";
+     
+      leaf name {
+        type string {
+          length "0..256";
+        }
+        description
+          "
+          It refers to Yang module name.
+          ";
+      }
+      leaf version {
+        type string {
+          length "0..256";
+          pattern "[0-9]+\\.[0-9]+\\.[0-9]+"; 
+        }
+        description
+        "
+        It refers to Yang module version in the format of x.y.z, where:
+
+        x = the major version number
+        y = the minor version number
+        z = the patch version number
+
+        Changes to the major version number denote backwards-incompatible
+        changes between two versions of a module.
+
+        Changes to the minor version number indicate there are
+        backwards-compatible features introduced or changed.
+
+        Changes to the patch version indicate backwards-compatible
+        corrections in the module.
+        ";
+      }
+      leaf uri {
+        type string {
+          length "0..256";
+        }
+        description
+        "
+        It represents a Uniform Resource Identifier (URI) of a module.
+        ";
+      }
+      container objects {
+        description
+        "
+        It lists all the supported features from this module.
+        ";
+        leaf-list object {
+          type string {
+            length "0..256";
+          }
+          description
+          "
+          List of Yang feature names from this module that are
+          supported by the server.
+          ";
+        }
+      }
+    }
+  }
+}

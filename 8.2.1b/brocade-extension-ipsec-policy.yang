@@ -1,0 +1,185 @@
+module brocade-extension-ipsec-policy {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-extension-ipsec-policy";
+  prefix brocade-extension-ipsec-policy;
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for managing
+    brocade-extension-ipsec-policy.
+
+    Brocade Proprietary and Confidential.
+    Copyright © 2017-2018 Brocade Communications Systems LLC.
+    All Rights Reserved.
+    
+    BROCADE HIGHLY CONFIDENTIAL TRADE SECRET INFORMATION
+ 
+    Access or possession of this material grants you no right or license,
+    express, implied, statutory or otherwise, under any Brocade patent,
+    copyright, trade secret right or other intellectual property right.
+    Any such license must be contained in a written license agreement
+    signed by an authorized officer of Brocade.  Additionally, access or
+    possession of this material is limited to Brocade employees with a
+    need to know or named employees of Brocade vendors authorized by
+    Brocade in writing to access this material.
+    
+    Restricted Rights: Use, duplication, or disclosure by the U.S.
+    Government is subject to restrictions of FAR 52.227-19 and its
+    successors, or (c)(1)(ii) of the Rights in Technical Data and
+    Computer Software clause at DFAR 252.227-7013 and its successors.
+    ";
+
+  revision 2018-07-06 {
+    description
+      "
+      Fabric OS 8.2.1
+      ---------------
+        Formatting
+        Organization information
+      ";
+    reference
+      "None";
+  }
+
+  typedef extension-ipsec-profile-name {
+    type enumeration {
+      enum "preshared" {
+        description
+          "Specifies the 'preshared' extension IPsec policy name";
+      }
+      enum "pki" {
+        description
+          "Specifies the 'pki' extension IPsec policy name";
+      }
+    }
+    description
+      "Specifies the extension IPsec policy name.";
+  }
+
+  typedef authentication-data {
+    type union {
+      type preshared-key;
+      type pki-key-pair;
+    }
+    description
+      "Specifies the authentication-data depending on the profile used.";
+  }
+
+  typedef preshared-key {
+    type string {
+      length "16..64";
+      pattern "[a-zA-Z0-9~@%_+:\\[\\]][a-zA-Z0-9~@%_+:\\[\\]\\-]{15,63}";
+    }
+    description
+      "
+      For 'preshared' profile, this field specifies the preshared-key to be
+      used for authentication. This operand is required with shared-key
+      authentication.
+      ";
+  }
+
+  typedef pki-key-pair {
+    type string {
+      length "1..32";
+      pattern "/" {
+        modifier "invert-match";
+      }
+    }
+    description
+      "
+      For 'pki' profile, this field specifies the local key pair name to use for
+      IKE authentication. This operand is required with PKI profile.
+      ";
+  }
+
+  container brocade-extension-ipsec-policy {
+    description
+      "Represents IPsec policy defined on extension blade or system.";
+    list extension-ipsec-policy {
+      key "policy-name";
+      description
+        "Represents IPsec policy defined on extension blade or system.";
+      leaf policy-name {
+        type string {
+          length "1..31";
+          pattern "([a-zA-Z0-9~@%_+:\\[\\]][a-zA-Z0-9~@%_+:\\[\\]\\-]{0,30})";
+          pattern "(all|none)" {
+            modifier "invert-match";
+          }
+        }
+        description
+          "
+          Specifies  the name for the IPsec policy. The IPsec policy name can be
+          up to 31 characters long and cannot contain certain special characters
+          and keywords such as 'all' and 'none'.
+          ";
+      }
+      leaf profile-name {
+        type extension-ipsec-profile-name;
+        description
+          "
+          Specifies the IPsec profile to use with the IPSec policy. Valid values
+          for profile name are 'preshared' and 'pki'.
+          ";
+      }
+      leaf authentication-data {
+        type authentication-data;
+        description
+          "
+          Specifies the authentication-data depending on the profile used:
+
+          For 'preshared' profile, this field specifies the preshared-key
+          to be used for authentication. This operand is required with
+          shared-key authentication. Preshared key length should have minimum
+          length of 16 characters and maximum length of 64 characters.
+
+          For 'pki' profile, this field specifies the local key pair name to use
+          for IKE authentication. This operand is required with PKI profile.
+          Key pair name length should have minimum length of 1 character and
+          maximum length of 32 characters.
+
+          Authentication data will returned as a zero length string for
+          read operations on policies with 'preshared' profile.
+          ";
+      }
+      leaf num-ike-sessions {
+        type uint16 {
+          range "0..128";
+        }
+        config false;
+        description
+          "Number of IKE Sessions.";
+      }
+      leaf restart-ike-sessions {
+        when "../num-ike-sessions > 0";
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "Set to 1 to restart all inactive IKE sessions for this policy.";
+      }
+    }
+  }
+}

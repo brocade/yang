@@ -1,0 +1,896 @@
+module brocade-security-yang-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-security-yang-types";
+  prefix brocade-sec;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+    ";
+
+  description
+    "
+    This module contains the collection of security YANG types.
+
+    Brocade Proprietary and Confidential.
+    Copyright © 2018 Brocade Communications Systems LLC.
+    All Rights Reserved.
+    
+    BROCADE HIGHLY CONFIDENTIAL TRADE SECRET INFORMATION
+ 
+    Access or possession of this material grants you no right or license,
+    express, implied, statutory or otherwise, under any Brocade patent,
+    copyright, trade secret right or other intellectual property right.
+    Any such license must be contained in a written license agreement
+    signed by an authorized officer of Brocade.  Additionally, access or
+    possession of this material is limited to Brocade employees with a
+    need to know or named employees of Brocade vendors authorized by
+    Brocade in writing to access this material.
+    
+    Restricted Rights: Use, duplication, or disclosure by the U.S.
+    Government is subject to restrictions of FAR 52.227-19 and its
+    successors, or (c)(1)(ii) of the Rights in Technical Data and
+    Computer Software clause at DFAR 252.227-7013 and its successors.
+    ";
+
+  reference
+    "None";
+
+  revision 2018-07-10 {
+    description
+      "Initial release.";
+    reference
+      "None";
+  }
+
+  typedef aaa-protocols-type {
+    type enumeration {
+      enum "chap" {
+        description
+          "Challenge-Handshake Authentication Protocol";
+      }
+      enum "pap" {
+        description
+          "Password Authentication Protocol";
+      }
+    }
+    description
+      "
+      Authentication protocols that are commonly used by both
+      RADIUS and TACACS+.
+      ";
+  }
+ 
+  typedef aaa-encryption-algorithm-type {
+    type enumeration {
+      enum "none" {
+        description
+          "Null encryption algorithm";
+      }
+      enum "aes256" {
+        description
+          "AES-256 algorithm";
+      }
+    }
+    description
+      "Encryption algorithm type.";
+  } 
+
+  typedef aaa-authspec-type {
+    type string {
+      length "1..128";
+      pattern "radius;local|"
+            + "radius;localbackup|"
+            + "tacacs;local|"
+            + "tacacs;localbackup|"
+            + "ldap;local|"
+            + "ldap;localbackup|"
+            + "radius|"
+            + "tacacs+|"
+            + "ldap|"
+            + "local";
+    }
+    description
+      "Authentication mode for RADIUS, TACACS+ and LDAP.";
+  }
+
+  typedef aaa-timeout-type {
+    type uint16 {
+      range "1..30";
+    }
+    units "seconds";
+    default 3;
+    description
+      "Response timeout for the RADIUS, TACACS+ and LDAP.";
+  }
+
+  typedef tls-protocol-type {
+    type string {
+      length "1..10";
+      pattern  "any|"
+             + "TLSv1.2|"
+             + "TLSv1";
+    }
+    description
+      "TLS protocol";
+  }
+
+  typedef default-string-type {
+    type string {
+      length "1..max";
+      pattern "[ -~]*";
+    }
+    description
+      "Default string";
+  }
+
+  typedef user-config-role-type {
+    type string {
+      length "4..16";
+      pattern "[a-zA-Z]{4,16}";
+    }
+    description
+      "Specifies the account's role.";
+  }
+
+  typedef user-config-user-name-type {
+    type string {
+      length "1..32";
+      pattern "([a-zA-Z][0-9a-zA-Z._]{0,31})";
+    }
+    description
+      "Specifies the name of the account.";
+  }
+
+  typedef user-config-access-hours-type {
+    type uint16 {
+      range "1..24";
+    }
+    units "hours";
+    description
+      "Hours in 24h format";
+  }
+
+  typedef user-config-access-minutes-type {
+    type uint16 {
+      range "1..60";
+    }
+    units "minutes";
+    description
+      "Minutes";
+  }
+
+  typedef home-virtual-fabric-type {
+    type fibrechannel:fabric-id-type;
+    description
+      "
+      Specifies the account's home Virtual Fabric.
+      This operand is optional.
+      ";
+  }
+
+  typedef virtual-fabric-role-id-type {
+    type string; 
+    description
+      "
+      Specifies the Virtual Fabrics to be added to the LDAP role
+      Format is <role>=<virtual-fabric-id-list> where role is the LDAP role and
+      virtual-fabric-id-list is a list of comma-seperated virtual fabric(s).
+      Example strings include:
+        o user=5
+        o admin=9-14
+        o newuserA=1,2,3
+        o newuserB=1,11-21
+      ";
+  }
+
+  grouping virtual-fabric-configuration-group {
+    description
+      "This common model is used for both user-config and ldap-role-map module";
+
+    leaf home-virtual-fabric {
+      type home-virtual-fabric-type;
+      description
+        "
+        Specifies the account's home Virtual Fabric.
+        If the value is not configured in ldap-role-map, GET will
+        fetch '0' value.
+        ";
+    }
+    leaf chassis-access-role {
+      type user-config-role-type;
+      description
+        "
+        Specifies the account's access permissions regarding chassis-level
+        commands.
+        ";
+    }
+  }
+
+  typedef ipfilter-action-type {
+    type enumeration {
+      enum "activate" {
+        description
+          "Activates the specified IP filter policy.";
+      }
+      enum "clone" {
+        description
+          "Creates a replica of an existing IP filter policy.";
+      }
+    }
+    description
+      "Indicates the action that must be taken on IPFilter policies.";
+  }
+
+  typedef password-cfg-operation-type {
+    type enumeration {
+      enum "hash-config" {
+        description
+          "Sets the hash type. Valid values are md5, sha256, or sha512.";
+      } 
+      enum "default" {
+        description
+          "Configures all password policies to their default value.";
+      }
+      enum "delete-all" {
+        description
+          "Removes the password expiration policies of all users.";
+      }
+    }
+    description
+      "Create/Delete Password policy configuration";
+  }
+
+  typedef virtual-fabric-action-type {
+    type enumeration {
+      enum "addlf" {
+        description
+          "Add virtual fabric list in existing user configuration.";
+      }
+      enum "deletelf" {
+        description
+          "Delete virtual fabric list from existing user configuration.";
+      }
+    }
+    description
+      "Add/Delete virtual fabric for user configuration";
+  }
+
+  typedef hash-algorithm-type {
+    type enumeration {
+      enum "md5" {
+        description
+          "md5 hash type.";
+      }
+      enum "sha256" {
+        description
+          "sha256 hash type.";
+      }
+      enum "sha512" {
+        description
+          "sha512 hash type.";
+      }
+    }
+    description
+      "Sets the hash type.";
+  }
+
+  typedef ipfilter-name-type {
+    type string {
+      length "1..20";
+      pattern "([a-zA-Z0-9_]{1,20})";
+      pattern "default_ipv4|default_ipv6" {
+        modifier invert-match;
+      }
+    }
+    description
+      "The name of the ipfilter policy.";
+  }
+
+  typedef host-type {
+    type union {
+      type inet:host;
+      type inet:ip-prefix;
+      type string {
+        pattern "any";
+      }
+    }
+    description
+      "Specifies the IP address.";    
+  }
+
+  typedef ipfilter-ip-version-type {
+    type enumeration {
+      enum "IPv4" {
+        description
+          "Creates an IP filter policy with the specified type IPv4.";
+      }
+      enum "IPv6" {
+        description
+          "Creates an IP filter policy with the specified type IPv6.";
+      }
+    }
+    description
+      "Indicates the type of policy IPv4 or IPv6.";
+  }
+
+  typedef ipfilter-protocol-type {
+    type enumeration {
+      enum "tcp" {
+        description
+          "Specifies the protocol type tcp";
+      }
+      enum "udp" {
+        description
+          "Specifies the protocol type udp";
+      }
+    }
+    description
+      "Types of protocol TCP or UDP.";
+  }
+
+  typedef ipfilter-permission-type {
+    type enumeration {
+      enum "permit" {
+        description
+          "Specifies the permit action associated with this rule.";
+      }
+      enum "deny" {
+        description
+          "Specifies the deny action associated with this rule.";
+      }
+    }
+    description
+      "Blocking or permitting the ports.";
+  }
+
+  typedef ipfilter-traffic-type {
+    type enumeration {
+      enum "INPUT" {
+        description
+          "Specifies the type of traffic INPUT.";
+      }
+      enum "FORWARD" {
+        description
+          "Specifies the type of traffic FORWARD.";
+      }
+    }
+    description
+      "
+      Specifying the type of traffic that are allowed for the specified
+      IP address.
+      ";
+  }
+
+  typedef sec-crypto-cfg-default-template-name-type {
+    type enumeration {
+      enum "default_generic" {
+        description
+          "Generic Template for Security Crypto Configuration.";
+      }
+      enum "default_strong" {
+        description
+          "Template for High Security Crypto Configuration.";
+      }
+      enum "default_fips" {
+        description
+          "FIPS Template for Security Crypto Configuration.";
+      }
+      enum "default_cc" {
+        description
+          "Common Criteria (CC) Template for Security Crypto Configuration.";
+      }
+    }
+    description
+      "Specify the names of default templates.";
+  }
+
+  typedef sec-crypto-cfg-template-name-type {
+    type string {
+      length "1..256";
+      pattern "[a-zA-Z0-9_]{1,256}";
+    }
+    description
+      "
+      Specify name of the template.
+      Default template names such as,
+      o default_generic
+      o default_cc
+      o default_strong
+      o default_fips
+      cannot be used for user defined template addition or deletion.
+      ";
+  }
+
+  typedef sec-crypto-cfg-file-transfer-protocol-type {
+    type enumeration {
+      enum "scp" {
+        description
+          "scp type";
+      }
+      enum "sftp" {
+        description
+          "sftp type";
+      }
+      enum "ftp" {
+        description
+          "ftp type";
+      }
+    }
+    description
+      "Specify SCP or SFTP or FTP for file transfer.";
+  }
+
+  typedef sec-crypto-cfg-actions-type {
+    type enumeration {
+      enum "apply" {
+        description
+          "Activate a default or user-defined template file.";
+      }
+      enum "verify" {
+        description
+          "
+          Verifies the running configuration against a required configuration
+          specified in the template file. If this operation returns '204 No
+          Content', the verify was successful.
+          ";
+      }
+      enum "import" {
+        description
+          "
+          Imports a template file from a specified external host.
+          The template name should not be same as default template names
+          when importing the file.
+          ";
+      }
+      enum "export" {
+        description
+          "
+          Exports a template file to the specified external host.
+          Template name should be that of a default or user defined 
+	  template that already exists.
+          Following are the default templates,
+          o default_generic
+          o default_strong
+          o default_fips
+          o default_cc
+          ";
+      }
+    }
+    description
+      "
+      o apply - Enforce default or user-defined template file.
+      o verify - Verifies the running configuration against a required
+                 configuration specified in the template file.
+      o import - Imports a template file from a specified external host.
+      o export - Exports a template file to the specified external host.
+      ";
+  }
+
+  typedef sec-crypto-cfg-tls-cipher-type {
+    type string {
+      length "1..64";
+      pattern "[-+!0-9]{0,1}[a-zA-Z0-9]{2,64}";
+    }
+    description
+      "Cipher algorithms are valid for HTTPS, RADIUS, LDAP, and SYSLOG.";
+  } 
+
+  typedef validation-mode-type {
+    type enumeration {
+      enum "basic" {
+        description
+          "Basic mode";
+      }
+      enum "strict" {
+        description
+          "Stict mode";
+      }
+    }
+    description
+      "X509 validation mode selection";
+  }
+
+  grouping import-export-param-group {
+    description
+      "
+      This model is used for importing and exporting configurations
+      to/from host.
+      ";
+    leaf remote-user-name {
+      type string {
+        length "1..256";
+        pattern "([0-9a-zA-Z_.]{1,256})";
+      }
+      description
+        "Specifies the user name for the host.";
+    }
+    leaf remote-host-ip {
+      type inet:host;
+      description
+        "Specifies the remote host ip address.";
+    }
+    leaf remote-user-password {
+      type string {
+        length "1..512";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        Password for the remote user. Password must be
+        encoded with Base64 encoding scheme
+        ";
+    }
+    leaf remote-directory {
+      type string {
+        length "1..4096";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        Specifies the remote directory fully qualified path name(FQPN).
+        ";
+    }
+  }
+
+  grouping seccrypto-import-export-param-group {
+    description
+      "
+      This model is used for importing and exporting templates
+      to/from host.
+      ";
+    leaf remote-user-name {
+      type string {
+        length "1..256";
+        pattern "([0-9a-zA-Z_.]{1,256})";
+      }
+      description
+        "Specifies the user name for the host.";
+    }
+    leaf remote-host-ip {
+      type inet:host;
+      description
+        "Specifies the remote host ip address.";
+    }
+    leaf remote-user-password {
+      type string {
+        length "1..512";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        Password for the remote user. Password must be 
+        encoded with Base64 encoding scheme
+        ";
+    }
+    leaf remote-directory {
+      type string {
+        length "1..4096";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        Specifies the remote directory fully qualified path name(FQPN).
+        If action is import, remote directory must be fully qualified file
+        name. If the action is export, remote directory can be fully qualified
+        file name (to export template with a name of user's choice) or
+        directory name (to export template with the name same as that of
+        template on switch).
+        ";
+    }
+    leaf file-transfer-protocol-type {
+      type sec-crypto-cfg-file-transfer-protocol-type;
+      description
+        "
+        Specifies the protocol as either SCP, SFTP, or FTP for file
+        transfer
+        ";
+    }
+  }
+
+  typedef user-password-type {
+    type string {
+      length "1..40";
+      pattern "[ -~]{1,40}";
+      pattern ":" {
+        modifier invert-match;
+      }
+    }
+    description
+      "Specifies a password for the account.";
+  }
+
+  typedef sshutil-algorithm-type {
+    type enumeration {
+      enum rsa {
+        description
+          "RSA type";
+      }
+      enum dsa {
+        description
+          "DSA type";
+      }
+      enum ecdsa {
+        description
+          "ECDSA type";
+      }
+    }
+    description
+      "key algorithm type";
+  }
+
+  typedef sshutil-key-type {
+    type enumeration {
+      enum public-private-key {
+        description "Generate specified public-private key pair.";
+      }
+      enum host-key {
+        description "Generate ssh host key.";
+      }
+    }
+    description "sshutil key generation type";
+  }
+  typedef sshutil-operation-type {
+    type enumeration {
+      enum import {
+        description
+        "
+        Import public key for a specified user.
+        Imported public keys are used for passwordless incoming
+        SSH connections.
+        ";
+      }
+      enum export {
+        description
+        "
+        Export public key. Exported public keys are used for
+        passwordless outgoing SSH connections.
+        ";
+      }
+    }
+    description
+      "Operations";
+  }
+
+  typedef certificate-entity-type {
+    type enumeration {
+      enum cert {
+        description
+          "Specifies a switch certificate.";       
+      }
+      enum ca-client {
+        description
+          "Specifies a CA client certificate.";
+      }
+      enum ca-server {
+        description
+          "Specifies a CA server certificate.";
+      }
+      enum csr {
+        description
+          "Specifies a CSR file.";
+      }
+    }
+    description
+      "Specifies the certificate for switch/CA/CSR";
+  }
+
+  typedef gen-certificate-entity-type {
+    type enumeration {
+      enum cert {
+        description "To Generate a switch certificate.";
+      }
+      enum csr {
+        description "To generate a CSR.";
+      }
+    }
+    description
+      "Specifies the type for certificate generation.";  
+  }
+
+  typedef certificate-application-type {
+    type enumeration {
+      enum commoncert {
+        description
+          "common certificate";
+      }
+      enum https {
+        description
+          "Certificate for HTTP secured";
+      }
+      enum radius {
+        description
+          "
+          Certificate for Remote Authentication Dial-In User Service.
+          ";
+      }
+      enum ldap {
+        description
+          "
+          Certificate for Lightweight Directory Access Protocol.
+          ";
+      }
+      enum syslog {
+        description
+          "Certificate for syslog";
+      }
+      enum fcap {
+        description
+          "Certificate for FCAP";
+      }
+    }
+    description
+      "Specifies the certificate type.";  
+  }
+
+  typedef seccertmgmt-operation-type {
+    type enumeration {
+      enum import {
+        description
+          "
+          Import certificates from the server or to download a certificate
+          issued by a CA after sending the CSR to the CA.
+          ";
+      }
+      enum export {
+        description
+          "
+          Export certificate to a host and a CSR to server to the Certification
+          Authority (CA) that issues the certificate.
+          ";
+      }
+    }
+    description
+      "certificate management operations.";
+  }
+  typedef seccertmgmt-protocol-type {
+    type enumeration {
+      enum scp {
+        description
+          "secure copy from/to remote host";
+      }
+      enum ftp {
+        description
+          "File Transfer Protocol";
+      }
+	} 
+    description
+      "Specifies the protocol as either FTP or SCP.";
+  }
+  typedef keysize-type {
+    type enumeration {
+      enum 1024 {
+        description
+          "key size of 1024 bytes";
+      }
+      enum 2048 {
+        description
+          "key size of 2048 bytes";
+      }
+      enum 4096 {
+        description
+          "
+          key size of 4096 bytes.
+          Not supported by FCAP
+          ";
+      }
+      enum 8192 {
+        description
+          "
+          key size of 8192 bytes.
+          Not supported by FCAP.
+          Key-pair generation with 8192 bytes is highly CPU intensive.
+          Can cause high CPU usage and session time out. On such instance,
+          user is advised to verify the generated status by another
+          GET instance.";
+      }
+    }
+    description
+      "
+      Specifies the size of the key. The greater the value, the more secure
+      is the connection; however, performance degrades with size.
+      ";
+  }
+  typedef seccertmgmt-hash-type {
+    type enumeration {
+      enum sha1 {
+        description
+          "
+          Secure Hash Algorithm that generates a 160-bit (20-byte) hash value
+          ";
+      }
+      enum sha256 {
+        description
+          "
+          Secure Hash Algorithm that generates a unique, fixed size 256-bit
+          (32-byte) hash
+          ";
+      }
+      enum sha512 {
+        description
+          "
+          Secure Hash Algorithm that uses 64 byte words.
+          Not supported by FCAP
+          ";
+      }
+    }
+    description
+      "Specifies the hash type.";
+  }
+  grouping certificate-details-group {
+    description
+      "Information needed to create certificate/CSR";
+    leaf country-name {
+      type string {
+        length "1..2";
+        pattern "[A-Z]+";
+      }
+      description
+        "Specifies Country name.";
+    }
+    leaf state-name {
+      type string {
+        length "1..128";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies state name.";
+    }
+    leaf locality-name {
+      type string {
+        length "1..128";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies locality name.";
+    }
+    leaf organization-name {
+      type string {
+        length "1..128";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies organization name.";
+    }
+    leaf unit-name {
+      type string {
+        length "1..128";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies unit name.";
+    }
+    leaf domain-name {
+      type string {
+        length "1..128";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies the Fully qualified Domain Name, or IP address.";
+    }
+  }
+}

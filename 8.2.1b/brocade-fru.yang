@@ -1,0 +1,582 @@
+module brocade-fru {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fru";
+  prefix brocade-fru;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import brocade-fru-types {
+    prefix fru;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-fru', which provides a
+    detailed view of configuration and runtime information of the FRU's
+    blade, Fan and PS details.
+     
+    Brocade Proprietary and Confidential.
+    Copyright © 2019 Brocade Communications Systems LLC.
+    All Rights Reserved.
+    
+    BROCADE HIGHLY CONFIDENTIAL TRADE SECRET INFORMATION
+ 
+    Access or possession of this material grants you no right or license,
+    express, implied, statutory or otherwise, under any Brocade patent,
+    copyright, trade secret right or other intellectual property right.
+    Any such license must be contained in a written license agreement
+    signed by an authorized officer of Brocade.  Additionally, access or
+    possession of this material is limited to Brocade employees with a
+    need to know or named employees of Brocade vendors authorized by
+    Brocade in writing to access this material.
+    
+    Restricted Rights: Use, duplication, or disclosure by the U.S.
+    Government is subject to restrictions of FAR 52.227-19 and its
+    successors, or (c)(1)(ii) of the Rights in Technical Data and
+    Computer Software clause at DFAR 252.227-7013 and its successors.
+    ";
+
+  revision 2019-01-11 {
+    description
+      "
+      Initial release (FOS 8.2.1).
+      Refine descriptions.
+      ";
+    reference
+      "None";
+  }
+  
+  typedef air-flow-direction-type {
+    type string {
+      length "1..255";
+      pattern "forward (non-portside exhaust)|non-portside exhaust|" +
+              "reverse (non-portside intake)|non-portside intake|" +
+              "not available";
+    }
+    description
+      "
+      The air flow direction of the fan.
+      ";
+  }
+  grouping fru-part-serial-number-group {
+    description
+       "
+       It defines the group of leafs associated with the operation.
+       ";
+      leaf part-number {
+        type fru:part-number-type;
+        config false;
+        description
+          "
+          The part number assigned by the organization responsible
+          for producing or manufacturing the blade.
+          ";
+      }
+      leaf serial-number {
+        type fru:serial-number-type;
+        config false;
+        description
+          "
+          The serial-number resource contains a printable ASCII string that
+          specifies the serial number of the chassis.
+          ";
+      }
+  }
+  grouping fru-time-detail-group {
+    description
+       "
+       It defines the group of leafs associated with the operation.
+       ";
+      leaf time-alive {
+         type fru:time-detail-type;
+         units "days";
+         config false;
+         description
+           "
+           The number of days the FRU has been powered on.
+           ";
+      }
+      leaf time-awake {
+         type fru:time-detail-type;
+         units "days";
+         config false;
+         description
+           "
+           The number of days since the FRU was last powered on.
+           ";
+      }
+  }
+
+  container brocade-fru {
+    description
+       "
+       Configuration and runtime information of the FRUs installed in the 
+       chassis. 
+       ";
+    list blade {
+      key "slot-number";
+      description
+        "
+        A list of blade details for the specified slot number.
+        ";
+
+      leaf slot-number {
+        type uint16 {
+         range "0..12";
+        }
+        description
+          "
+          The number of the physical slot in the chassis in which the 
+          blade is inserted.
+          ";
+      }
+      leaf manufacturer {
+        type string {
+          length "1..63";
+          pattern "[ -~]*";
+        }
+        config false; 
+        description
+          "
+          The name of the blade manufacturer.
+          ";
+      }
+      leaf blade-type {
+        type string {
+          length "1..32";
+          pattern "[ -~]{1,32}"; 
+        }
+        config false; 
+        description
+          "
+          The type of blade (sw blade, cp blade, core blade, ap blade).
+          ";
+      }
+      leaf blade-id {
+        when "../blade-type != 'unknown'";  
+        type uint16 {
+          range "1..1000";
+        }
+        config false; 
+        description
+          "
+          The ID of the blade.
+          "; 
+      }
+      leaf blade-state {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        config false; 
+        description
+          "
+          The current state of the blade.
+          ";
+      }
+      leaf model-name {
+        when "../blade-type != 'unknown' or ../slot-number != 0";
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        config false; 
+        description
+          "
+          A printable ASCII string that describes the model of the blade.
+          ";
+      }
+      leaf firmware-version {
+        type fru:firmware-version-type;
+        config false; 
+        description
+          "
+          A human-readable string that displays the firmware version running on
+          the switch. For an AP blade, it displays the AP blade firmware 
+          version. For other blades, it displays the active CP firmware version.
+          ";
+      }   
+      leaf fc-port-count {
+        when "../blade-type != 'cp blade' or ../blade-type != 'unknown'";
+        type uint16 {
+           range "0..256";
+        }
+        config false; 
+        description
+          "
+          The number of FC ports supported by the blade.
+          ";
+      }
+      leaf ge-port-count {
+        when "../extension-enabled = true or ../blade-id = 75";
+        type uint16 {
+           range "0..256";
+        }
+        config false; 
+        description
+          "
+          The number of GE ports supported by the blade.
+          ";
+      }
+      container ip-address-list {
+        when "../blade-type = 'cp blade'";
+        config false; 
+        description
+          "
+          A list of IP addresses assigned to the CP blade.
+          ";
+        leaf-list ip-address {
+          type inet:ip-address;
+          description
+            "
+            List of IP addresses assigned to the CP blade.
+            This parameter is applicable only for CP blades.
+            ";
+        }   
+      }   
+      container ip-gateway-list {
+        when "../blade-type = 'cp blade'";
+        config false; 
+        description
+          "
+          A list of gateway IP address of the CP blade.
+          ";
+        leaf-list ip-gateway {
+          type fru:ip-gateway-type;
+          description
+            "
+            The list of gateway IP addresses of an IP router that
+            can route packets to the destination IP address. The gateway
+            address must be on the same IP subnet as one of the port
+            IP addresses. This parameter is applicable only for CP blades.
+            ";
+        }   
+      }
+      leaf subnet-mask {
+        when "../blade-type = 'cp blade'";
+        type inet:ip-address;
+        config false; 
+        description
+          "
+          The subnet mask of the network.
+          This parameter is applicable only for CP blades.
+          ";
+      }   
+      leaf primary-firmware-version {
+        when "../blade-type = 'cp blade'";
+        type fru:firmware-version-type;
+        config false; 
+        description
+          "
+          A human-readable string that identifies the firmware version running
+          on the primary partition of the CP blade.
+          ";
+      }   
+      leaf secondary-firmware-version {
+        when "../blade-type = 'cp blade'";
+        type fru:firmware-version-type;
+        config false; 
+        description
+          "
+          A human readable string that identifies the firmware version running
+          on the secondary partition of the CP blade.
+          ";
+      }
+      leaf power-consumption {
+         type fru:power-detail-type;
+         units "watt";
+         config false;
+         description
+           "
+           The maximum power consumption allocated for the blade.
+           ";
+      }
+      leaf power-usage {
+         type fru:power-detail-type;
+         units "watt";
+         config false;
+         description
+           "
+           The real-time power consumed by the FRU.
+           ";
+      }
+      leaf extension-enabled {
+        type boolean;
+        config false; 
+        description
+          "
+          Indicates whether the switch or blade supports extension.
+          For blade ID's 154, 186, and 213 the value is set to true.
+
+          false : Extension is not supported.
+          true  : Extension is supported.
+          ";
+      }
+      leaf extension-app-mode {
+        when "../extension-enabled = true";
+        type string {
+          length "4..11";
+          pattern "FCIP|hybrid|unavailable";
+        }
+        description
+          "
+          The application mode configuration of the extension blade or switch.
+          Note that the application mode configuration change is a disruptive 
+          operation and that when the configuration change is successful, one 
+          of the following actions occur:
+
+            switch : A switch automatically reboots.
+            blade  : A blade automatically powers off and on.
+
+          Blade ID 213 supports only hybrid mode.
+          For blade ID 154 and 186, the default is FCIP mode.
+          For blade ID 213, the default is hybrid mode.
+
+          Supported modes:
+
+            FCIP        : Supports FCIP-only tunnels.
+            hybrid      : Supports FCIP with IPEXT tunnels.
+            unavailable : The value is unavailable at the moment. This is 
+                          read-only value and can be seen in specific scenarios
+                          where the information is not loaded because of slot 
+                          power off or slot faulty after reboot or powercycle.
+          ";
+      }
+      leaf extension-ve-mode {
+        when "../extension-enabled = true";
+        type string {
+          length "4..14";
+          pattern "not applicable|10VE|20VE|unavailable";
+        }
+        description
+          "
+          The VE mode configuration of the extension blade or switch. Note that 
+          a VE mode configuration change is a disruptive operation and that 
+          when the configuration change is successful, one of the following 
+          actions occur:
+
+            switch : A switch automatically reboots.
+            blade  : A blade automatically powers off and on.
+
+          For blade ID 154 and 186, the default is 10VE mode.
+          For blade ID 213, the default is not applicable.
+
+          Supported modes:
+
+            not applicable : Not a supported configuration. 
+            10VE : 10 VEs available for tunnel configuration (5 VE_Ports 
+                   per DP).
+            20VE : 20 VEs available for tunnel configuration (10 VE_Ports 
+                   per DP).
+            unavailable : The value is unavailable at the moment. This is a 
+                          read-only value and can be seen in specific scenarios
+                          where the information is not loaded because of slot 
+                          power off or slot faulty after reboot or powercycle.
+          ";
+      }
+      leaf extension-ge-mode {
+        when "../extension-enabled = true";
+        type string {
+          length "4..14";
+          pattern "not applicable|copper|optical|unavailable";
+        }
+        description
+          "
+          The GE mode configuration of the extension blade or switch.
+          In copper mode, the RJ-45 ports (ge0 and ge1) are enabled and optical 
+          ports (ge2 and ge3) are disabled. 
+          In optical mode, the optical ports (ge2 and ge3) are enabled and the 
+          RJ45 ports (ge0 and ge1) are disabled.
+
+          For blade ID 154 and 186, the default is not applicable.
+          For blade ID 213, the default is optical.
+
+          Supported modes:
+
+            not applicable : Not a supported configuration.
+            optical : ge2 and ge3 use the first two optical ports.
+            copper  : ge0 and ge1 use front end RJ45 ports.
+            unavailable : The value is unavailable at the moment. This is 
+                          read-only value and can be seen in specific scenarios 
+                          where the information is not loaded because of slot 
+                          power off or slot faulty after reboot or powercycle.
+          ";
+      }
+      uses fru-time-detail-group;
+      uses fru-part-serial-number-group;
+    }
+    list fan {
+      key "unit-number";
+      config false; 
+      description
+        "
+        The details about the fan units.
+        ";
+
+      leaf unit-number {
+        type uint16 {
+          range "1..16"; 
+        }
+        description
+          "
+          The physical slot number in the chassis where the fan is located.
+          ";
+      }
+      leaf power-consumption {
+         type fru:power-detail-type;
+         units "watt";
+         description
+           "
+           The maximum power consumption allocated for the fan.
+           ";
+      } 
+      leaf operational-state {
+        type string {
+           length "2..60";
+           pattern "faulty|ok|below minimum|above maximum|absent|" +
+                   "unknown|not ok";
+        }
+        description
+          "
+          The current operational state of the Fan.
+          The state 'not ok' displays when the unit is faulty for
+          an unknown reason.
+          ";
+      }
+      leaf speed {
+        type uint32 {
+           range "1..100000";
+        }
+        units "RPM";
+        description
+          "
+          The fan speed.
+          ";
+      }
+      leaf airflow-direction {
+        type air-flow-direction-type;
+        description
+          "
+          The air flow direction of the fan blowers.
+          ";
+      }
+      uses fru-time-detail-group;
+      uses fru-part-serial-number-group;
+    }
+    list power-supply {
+      key "unit-number";
+      config false;
+      description
+        "
+        The details about the power supply units.
+        ";
+
+      leaf unit-number {
+        type uint16 {
+           range "1..16";
+        }
+        description
+          "
+          The physical slot number of the chassis where the power supply 
+          is located.
+          ";
+      }
+      leaf power-production {
+         type uint32 {
+           range "0..10000";
+         }
+         units "watt";
+         description
+           "
+           The maximum power production for the power supply.
+           ";
+      }
+      leaf input-voltage {
+        type decimal64 {
+          fraction-digits 2;
+          range "0..900.99";
+        }
+        units "volt";
+        description
+          "
+          The input voltage of the power supply unit.
+          ";
+      }
+      leaf airflow-direction {
+        type air-flow-direction-type;
+        description
+          "
+          The airflow direction of the power supply fans.
+          ";
+      }
+      leaf power-source {
+        type string {
+          length "2..32";
+          pattern "AC|DC|HVAC|HVDC|not available";
+        }
+        description
+          "
+          The power supply input voltage type.
+
+          HVDC : high-voltage direct current
+          HVAC : high-voltage alternating current
+          ";
+      }
+      leaf operational-state {
+        type string {
+          length "2..30";
+          pattern "absent|ok|faulty|predicting failure|" +
+                  "unknown, try reseating unit";
+        }
+        description
+          "
+          The operational state of the power supply unit.
+          ";
+      }
+      leaf temperature {
+        type decimal64 {                  
+          fraction-digits 2;
+          range "0..300.00";
+        }
+        units "Centigrade";
+        description
+          "
+          The temperature of the power supply sensor.
+          ";
+      }
+      leaf power-usage {
+         type fru:power-detail-type;
+         units "watt";
+         description
+           "
+           The real-time power consumed by the FRU.
+           ";
+      }
+      uses fru-time-detail-group;
+      uses fru-part-serial-number-group;
+    }
+  }
+}
