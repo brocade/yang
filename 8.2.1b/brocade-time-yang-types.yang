@@ -33,25 +33,7 @@ module brocade-time-yang-types {
     "
     This module contains the collection of security YANG types.
 
-    Brocade Proprietary and Confidential.
-    Copyright © 2018 Brocade Communications Systems LLC.
-    All Rights Reserved.
-    
-    BROCADE HIGHLY CONFIDENTIAL TRADE SECRET INFORMATION
- 
-    Access or possession of this material grants you no right or license,
-    express, implied, statutory or otherwise, under any Brocade patent,
-    copyright, trade secret right or other intellectual property right.
-    Any such license must be contained in a written license agreement
-    signed by an authorized officer of Brocade.  Additionally, access or
-    possession of this material is limited to Brocade employees with a
-    need to know or named employees of Brocade vendors authorized by
-    Brocade in writing to access this material.
-    
-    Restricted Rights: Use, duplication, or disclosure by the U.S.
-    Government is subject to restrictions of FAR 52.227-19 and its
-    successors, or (c)(1)(ii) of the Rights in Technical Data and
-    Computer Software clause at DFAR 252.227-7013 and its successors.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
     ";
 
   reference
