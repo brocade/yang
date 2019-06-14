@@ -36,7 +36,8 @@ module brocade-fdmi {
     FDMI enables discovery of devices such as Fibre Channel
     Host Bus Adapters (HBAs).
 
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
   
   revision 2018-07-06 {
     description
