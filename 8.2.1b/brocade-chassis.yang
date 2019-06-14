@@ -39,7 +39,7 @@ module brocade-chassis {
     provides a detailed view of configuration and runtime
     information of the chassis.
      
-    Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
     ";
 
   revision 2019-01-11 {
