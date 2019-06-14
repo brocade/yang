@@ -33,7 +33,8 @@ module brocade-license {
     It provides the means for monitoring and managing the
     licenses on the switch.
 
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
 
   revision 2019-01-25 {
     description
