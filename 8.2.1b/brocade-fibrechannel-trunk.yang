@@ -40,7 +40,8 @@ module brocade-fibrechannel-trunk {
     the trunk. Even if the master port changes, the trunk area will be
     derived from the target index.
 
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
 
   revision 2019-01-11 {
     description
