@@ -40,7 +40,8 @@ module brocade-extension-tunnel {
     This module contains a collection of YANG definitions for managing
     brocade-extension-tunnel.
 
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.    
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
 
   revision 2018-12-04 {
     description
