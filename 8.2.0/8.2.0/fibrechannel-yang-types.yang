@@ -1,0 +1,317 @@
+module fibrechannel-yang-types {
+  namespace "urn:brocade.com:params:xml:ns:brocade:brocade-yang-types";
+  prefix brocade;
+
+  organization
+    "Brocade Communication Systems, Inc.";
+  contact
+    "Address :  120 Holger Way
+                     San Jose, CA 95134
+                     U.S.A
+     Phone    :  +1-408-333-8000
+     E-mail   :  support@brocade.com
+     Website  :  www.brocade.com";
+  description
+    "This module contains a collection of generally useful derived
+     YANG data types.
+     Copyright (c) 2016 by Brocade Communications Systems, Inc.
+     All rights reserved.";
+
+  revision 2017-10-18 {
+    description
+      "Initial release.";
+    reference "None";
+  }
+
+  typedef wwn-type {
+    type string {
+      pattern "([0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){7})";
+    }
+    description
+      "A 64-bit identifier, with a 60-bit value preceded
+       by a 4-bit Network_Address_Authority Identifier, used to identify
+       entities in Fibre Channel (e.g., Nx_Port, node, F_Port, or Fabric).
+           
+       Fibre channel WWN (16 hex digits with the colon separator).
+       For example 11:22:33:44:55:66:77:88.";
+  }
+
+  typedef domain-id-type {
+    type uint32 {
+      range "1..239" {
+        error-message "Invalid domainId (must be in the range 1..239)";
+      }
+    }
+    description
+      "Fibre Channel switch domain identifier.";
+  }
+
+  typedef fcid-type {
+    type uint32 {
+      range "1..255";
+    }
+    description
+      "Fibre channel ID (FCID)";
+  }
+
+  typedef time-generated-type {
+    type uint32 {
+      range "1..2147483646";
+    }
+    units "seconds";
+    description
+      "The time at which the statistics were queried. This
+          value specified the time since epoch in seconds.";
+  }
+
+  typedef fc4-type-type {
+    type bits {
+      bit IPFC {
+        position 6;
+        description
+          "";
+      }
+      bit FCP {
+        position 9;
+        description
+          "";
+      }
+      bit SBCCS {
+        position 19;
+        description
+          "";
+      }
+      bit SBCCS-CHANNEL {
+        position 29;
+        description
+          "";
+      }
+      bit SBCCS-CONTROL-UNIT {
+        position 28;
+        description
+          "";
+      }
+      bit FC-CT {
+        position 33;
+        description
+          "";
+      }
+      bit FC-SW {
+        position 35;
+        description
+          "";
+      }
+      bit FC-IFR {
+        position 38;
+        description
+          "";
+      }
+      bit FC-NVMe {
+        position 41;
+        description
+          "";
+      }
+      bit FC-VI {
+        position 89;
+        description
+          "";
+      }
+      bit FC-APS {
+        position 96;
+        description
+          "";
+      }
+    }
+    description
+      "";
+  }
+
+  typedef speed-type {
+    type bits {
+      bit speed-1-gfc {
+        position 0;
+        description
+          "";
+      }
+      bit speed-2-gfc {
+        position 1;
+        description
+          "";
+      }
+      bit speed-10-gfc {
+        position 2;
+        description
+          "";
+      }
+      bit speed-4-gfc {
+        position 3;
+        description
+          "";
+      }
+      bit speed-8-gfc {
+        position 4;
+        description
+          "";
+      }
+      bit speed-16-gfc {
+        position 5;
+        description
+          "";
+      }
+      bit speed-32-gfc {
+        position 6;
+        description
+          "";
+      }
+      bit speed-20-gfc {
+        position 7;
+        description
+          "";
+      }
+      bit speed-40-gfc {
+        position 8;
+        description
+          "";
+      }
+      bit speed-128-gfc {
+        position 9;
+        description
+          "";
+      }
+      bit speed-64-gfc {
+        position 10;
+        description
+          "";
+      }
+      bit speed-256-gfc {
+        position 11;
+        description
+          "";
+      }
+      bit speed-not-established {
+        position 15;
+        description
+          "";
+      }
+      bit speed-10-ge {
+        position 16;
+        description
+          "";
+      }
+      bit speed-40-ge {
+        position 17;
+        description
+          "";
+      }
+      bit speed-100-ge {
+        position 18;
+        description
+          "";
+      }
+      bit speed-25-ge {
+        position 19;
+        description
+          "";
+      }
+      bit speed-50-ge {
+        position 20;
+        description
+          "";
+      }
+      bit speed-400-ge {
+        position 21;
+        description
+          "";
+      }
+    }
+    description
+      "The possible Fibre Channel transmission speeds.";
+  }
+
+  typedef port-type-type {
+    type enumeration {
+      enum "n-port" {
+        value 1;
+        description
+          "";
+      }
+      enum "nl-port" {
+        value 2;
+        description
+          "";
+      }
+      enum "f/nl-port" {
+        value 3;
+        description
+          "";
+      }
+      enum "nx-port" {
+        value 127;
+        description
+          "";
+      }
+      enum "f-port" {
+        value 129;
+        description
+          "";
+      }
+      enum "fl-port" {
+        value 130;
+        description
+          "";
+      }
+      enum "e-port" {
+        value 132;
+        description
+          "";
+      }
+      enum "b-port" {
+        value 133;
+        description
+          "";
+      }
+      enum "a-port" {
+        value 134;
+        description
+          "";
+      }
+    }
+    description
+      "";
+  }
+
+  typedef class-of-service-type {
+    type bits {
+      bit class-f {
+        position 0;
+        description
+          "";
+      }
+      bit class-2 {
+        position 2;
+        description
+          "";
+      }
+      bit class-3 {
+        position 3;
+        description
+          "";
+      }
+    }
+    description
+      "";
+  }
+
+  typedef slot-port-name-type {
+    type string {
+      /* pattern with 12 slots and 1024 ports seperated by a slash */
+      pattern
+        "(([1-9]|1[0-9])/([1][0-9][0-9][0-9]|[1-9][1-9][0-9]|
+                      [1-9][1-9]|[1-9]))";
+    }
+    description
+      "Typically the name of the interface.
+       
+          The slot and port number of the port (slot/port).";
+  }
+}

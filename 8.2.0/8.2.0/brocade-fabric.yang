@@ -1,0 +1,118 @@
+module brocade-fabric {
+  namespace "urn:brocade.com:mgmt:brocade-fabric";
+  prefix fabric;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Brocade Communication Systems, Inc.";
+  contact
+    "Address :  120 Holger Way
+                     San Jose, CA 95134
+                     U.S.A
+     Phone    :  +1-408-333-8000
+     E-mail   :  support@brocade.com
+     Website  :  www.brocade.com";
+  description
+    "This module defines the YANG module 'fabric', which provides
+     a view of all of the switches in the fabric that are operational.
+      
+     Copyright (c) 2017 by Brocade Communications Systems, Inc.
+     All rights reserved.";
+
+  revision 2017-10-16 {
+    description
+      "Initial release.";
+    reference "None";
+  }
+
+  container fabric {
+    config false;
+    description
+      "Fabric state parameters. Currently, requests are made using QUERY 
+       specifiying the vf-id of the specific fabric which will provide the  
+       fabrics state parameters.";
+    list fabric-switch {
+      key "name";
+      description
+        "The list of configured switches in the fabric.";
+      leaf name {
+        type fibrechannel:wwn-type;
+        description
+          "The Fibre Channel WWN of the switch.";
+      }
+      leaf switch-user-friendly-name {
+        type string {
+          length "30";
+          pattern "([a-fA-F][0-9a-zA-Z-._]{0,29})|([0-9][0-9a-zA-Z-._])";
+        }
+        description
+          "An ascii name assigned to the switch by the administrator.";
+      }
+      leaf chassis-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The chassis WWN.";
+      }
+      leaf chassis-user-friendly-name {
+        type string {
+          length "31";
+          pattern "([a-fA-F][0-9a-zA-Z-._]{0,29})";
+        }
+        description
+          "An ascii name assigned to the switch chassis by the administrator.";
+      }
+      leaf domain-id {
+        type fibrechannel:domain-id-type;
+        description
+          "The highest level in a three-level addressing
+                 hierarchy used in the Fibre Channel address identifier. A
+                 domain typically is associated with a single Fibre Channel
+                 switch.";
+      }
+      leaf principal {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "Indicates if this switch is the fabric principal switch. The possible
+              values are:
+                1 - Switch is principal switch
+                0 - Switch is not principal switch";
+      }
+      leaf fcid {
+        type fibrechannel:fcid-type;
+        description
+          "The destination id (D_ID) of the switch.";
+      }
+      leaf ip-address {
+        type inet:ipv4-address;
+        description
+          "IPV4 address for the switch";
+      }
+      leaf fcip-address {
+        type inet:ipv4-address;
+        description
+          "The IP address the switch is using for Fibre Channel over IP.";
+      }
+      leaf ipv6-address {
+        type inet:ipv6-address;
+        description
+          "IPV6 address for the switch";
+      }
+      leaf firmware-version {
+        type string {
+          length "11";
+        }
+        description
+          "A human readable string identifying the firmware version running
+           on the switch.";
+      }
+    }
+  }
+}
