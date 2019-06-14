@@ -38,7 +38,8 @@ module brocade-fru {
     detailed view of configuration and runtime information of the FRU's
     blade, Fan and PS details.
      
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
 
   revision 2019-01-11 {
     description
