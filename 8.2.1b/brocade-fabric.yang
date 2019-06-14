@@ -38,7 +38,8 @@ module brocade-fabric {
     This module defines the YANG module 'fabric', which provides
     a view of all of the switches in the fabric that are operational.
 
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
 
   revision 2019-01-11 {
     description
