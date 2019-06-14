@@ -42,7 +42,8 @@ module brocade-fibrechannel-configuration {
     This module defines the YANG module 'brocade-fibrechannel-configuration',
     which helps configure the given switch or director.
 
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
 
   revision 2019-01-11 {
     description
