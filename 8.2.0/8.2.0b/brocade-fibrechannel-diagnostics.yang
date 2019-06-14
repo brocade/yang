@@ -1,0 +1,651 @@
+module brocade-fibrechannel-diagnostics {
+  namespace "urn:brocade.com:mgmt:brocade-fibrechannel-diagnostics";
+  prefix diag;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  organization
+    "Brocade Communication Systems, LLC";
+  contact
+    "
+    Address  :  120 Holger Way
+                San Jose, CA 95134
+                U.S.A
+    Phone    :  +1-408-333-8000
+    E-mail   :  support@brocade.com
+    Website  :  www.brocade.com
+    ";
+  description
+    "
+    This module defines the YANG module 'fibrechannel-diagnostics', which
+    provides fibre channel port diagnostics.
+
+    Copyright (c) 2017-2018 by Brocade Communications Systems, LLC.
+    All rights reserved.
+    ";
+
+  revision 2018-02-20 {
+    description
+      "
+        Fabric OS 8.2.0a
+        ----------------
+          Correction of 'payload' leaf type and pattern
+      ";
+    reference "None";
+  }
+
+  typedef result-type {
+    type string {
+      length "1..64";
+      pattern "NOT STARTED|PASSED|SKIPPED|FAILED|IN PROGRESS|RESPONDER|STOPPED|UNKNOWN";
+    }
+    description
+      "
+      Result is the completion status of the test. Valid values are:
+
+         NOT STARTED
+         PASSED
+         SKIPPED
+         FAILED
+         IN PROGRESS
+         RESPONDER
+         STOPPED
+         UNKNOWN
+      ";
+  }
+
+  typedef comments-type {
+    type string {
+      length "1..256";
+      pattern "Test failed|No SFP or chip support|See remote port results|Remote port is not ready to start the test|Too many offline events|Remote port test failed|Remote port WWN changed|Slot or port offline|Protocol error|Unable to start/restart the test|D-Port mode mismatch, Not D-Port|Module removed|No remote SFP or chip support|No remote port support or skipped|E_WRAP/O_WRAP set failed|User opted to skip|Test skipped due to SFP loopback error|Test timed out";
+    }
+    description
+      "
+      Comments are additional textual information elaborating on the completion
+      status when test is skipped or fails. They may include:
+
+           Test failed
+           No SFP or chip support
+           See remote port results
+           Remote port is not ready to start the test
+           Too many offline events
+           Remote port test failed
+           Remote port WWN changed
+           Slot or port offline
+           Protocol error
+           Unable to start/restart the test
+           D-Port mode mismatch, Not D-Port
+           Module removed
+           No remote SFP or chip support
+           No remote port support or skipped
+           E_WRAP/O_WRAP set failed
+           User opted to skip
+           Test skipped due to SFP loopback error
+           Test timed out
+      ";
+  }
+
+  container diagnostics {
+    description
+      "
+      Performs the following diagnostics:
+
+        An electrical loopback test (supported only on 16Gb and 32Gb SFPs
+        capable of electrical loopback)
+
+        An optical loopback test (supported only on 16Gb and 32Gb SFPs
+        capable of optical loopback)
+
+        A link traffic test
+
+        A link distance measurement
+
+      Support is only for dynamic d-port.
+      ";
+    list fibrechannel-diagnostics {
+      key "name";
+      description
+        "
+        The list of ports on the device.
+
+        System-controlled interfaces created by the system are always present in
+        this list, whether they are configured or not.
+        ";
+      leaf name {
+        type string {
+          length "1..32";
+          pattern "([1-9]|1[0-9])/(10[0-2][0-9]|[1-9][1-9][0-9]|[1-9][1-9]|[1-9])";
+        }
+        description
+          "
+          The name of the interface. The slot and port number of the port
+          (slot/port). Maximum of 12 slots and maximum of 1024 ports.
+          ";
+      }
+      leaf diagnostic-control {
+        type uint32 {
+          range "0..2";
+        }
+        description
+          "
+          Manually terminate the test, re-initiate the test, or stop the test on
+          a diagnostic port (D Port).
+
+            0-Stop    : Terminates the diagnostics on the D Port
+            1-Start   : Initiates the diagnostics on the D Port
+            2-Restart : Restarts the D Port diagnostic tests with the
+                        configured parameters
+
+          This option is not supported for D Port HBA connections.
+          ";
+      }
+      leaf mode {
+        type enumeration {
+          enum "manual" {
+            description
+              "Test started manually (manually restarted using CLI or API).";
+          }
+          enum "automatic" {
+            description
+              "
+              Test started automatically (initiated due to port online event).
+              ";
+          }
+        }
+        config false;
+        description
+          "
+          The testing mode. Indicates whether the test was started manually or
+          automatically.
+          ";
+      }
+      leaf state {
+        type string {
+          length "1..64";
+          pattern "PASSED|FAILED|FAILED (Protocol error)|FAILED (Unable to start/restart the test)|SKIPPED|IN PROGRESS|NOT STARTED|STOPPED";
+        }
+        config false;
+        description
+          "
+          On the link initiator, this field displays the overall test status as
+          PASSED, FAILED, FAILED (Protocol error), Unable to start/restart the
+          test, SKIPPED, IN PROGRESS, NOT STARTED, or STOPPED. On the link
+          responder, the status displays PASSED, FAILED, STOPPED, or RESPONDER.
+          ";
+      }
+      leaf distance {
+        type int32 {
+          range "-1..max";
+        }
+        units "meter";
+        config false;
+        description
+          "
+          The estimated physical distance of the inter-switch link in meters.
+          The Link distance for SPFs or ICL ports which do not support E_WRAP
+          and O_WRAP have a precision of +/- 50 meters for 8 Gbps LWL SFPs,
+          8 Gbps ELWL SFPs, 10 Gbps SFPs, ICL ports, and +/- 5 meters for
+          16 Gbps SFPs.
+
+             -1 : indicates an unknown distance
+          ";
+      }
+      container electrical-loopback-test {
+        config false;
+        description
+          "
+          An electrical loopback test; Supported only on 16 Gb and 32 Gb SFPs
+          capable of electrical loopback.
+          ";
+        leaf result {
+          type result-type;
+          description
+            "Result is the completion status of the test. ";
+        }
+        leaf comments {
+          type comments-type;
+          description
+            "
+            Comments are additional textual information elaborating on the
+            completion status when test is skipped or fails.
+            ";
+        }
+      }
+      container optical-loopback-test {
+        config false;
+        description
+          "
+          An optical loopback test; Supported only on 16 Gb and 32 Gb SFPs
+          capable of optical loopback.
+          ";
+        leaf result {
+          type result-type;
+          description
+            "Result is the completion status of the test. ";
+        }
+        leaf comments {
+          type comments-type;
+          description
+            "
+            Comments are additional textual information elaborating on the
+            completion status when test is skipped or fails.
+            ";
+        }
+      }
+      container link-traffic-test {
+        config false;
+        description
+          "The link traffic test.";
+        leaf result {
+          type result-type;
+          description
+            "Result is the completion status of the test. ";
+        }
+        leaf comments {
+          type comments-type;
+          description
+            "
+            Comments are additional textual information elaborating on the
+            completion status when test is skipped or fails.
+            ";
+        }
+      }
+      leaf start-time {
+        type yang:date-and-time;
+        config false;
+        description
+          "Time diagnostics started.";
+      }
+      leaf frame-count {
+        when "not(../time)";
+        type yang:counter32 {
+          range "1..65535";
+        }
+        units "million";
+        default "1";
+        description
+          "
+          Number of frames sent for link traffic test (default is 1 million
+          frames).
+
+          Note: This is mutually exclusive with the 'time' leaf.
+          ";
+      }
+      leaf frame-size {
+        type uint32 {
+          range "36..2112";
+        }
+        units "byte";
+        default "1024";
+        description
+          "The test frame size in bytes.";
+      }
+      leaf time {
+        when "not(../frame-count)";
+        type string {
+          length "1..8";
+          pattern "([0-9]{2}:[0-5][0-9])";
+        }
+        description
+          "
+          How long the test should run in the format hh:mm, where hh is hours
+          and mm is minutes.
+
+          Note: This is mutually exclusive with the 'frame-count' leaf.
+          ";
+      }
+      container payload-pattern {
+        description
+          "The user-defined payload pattern.";
+        leaf pattern {
+          // payload and payload are mutually exclusive
+          when "not(../payload)";
+          type string {
+            length "1..32";
+            pattern "BYTE_NOT|QUAD_NOT|WORD_NOT|BYTE_RAMP|QUAD_RAMP|WORD_RAMP|BYTE_LFSR|RANDOM|CRPAT|CSPAT|CHALF_SQ|CQTR_SQ|RDRAM_PAT|jCRPAT|jCJTPAT|jCSPAT|PRED_RAND|SMI_TEST|CJPAT|QUAD_NOTP|JSPAT|JTSPAT";
+          }
+          default "jCRPAT";
+          description
+            "
+            The name of the predefined industry pattern names used for frame
+            traffic test. The valid patterns are:
+
+                  BYTE_NOT
+                  QUAD_NOT
+                  WORD_NOT
+                  BYTE_RAMP
+                  QUAD_RAMP
+                  WORD_RAMP
+                  BYTE_LFSR
+                  RANDOM
+                  CRPAT
+                  CSPAT
+                  CHALF_SQ
+                  CQTR_SQ
+                  RDRAM_PAT
+                  jCRPAT
+                  jCJTPAT
+                  jCSPAT
+                  PRED_RAND
+                  SMI_TEST
+                  CJPAT
+                  QUAD_NOTP
+                  JSPAT
+                  JTSPAT
+            ";
+        }
+        leaf payload {
+          // payload and pattern are mutually exclusive
+          when "not(../pattern)";
+          type string {
+            length "1..10";
+            pattern "(0[xX])?[0-9a-fA-F]{1,8}";
+          }
+          description
+            "Specifies the user defined payload pattern.";
+        }
+      }
+      container fec {
+        description
+          "
+          Enables Forward Error Correction (FEC) for diagnostic testing. This
+          option is not supported on ports configured with Dense Wavelength
+          Division Multiplexing (DWDM)
+          ";
+        leaf enable {
+          type enumeration {
+            enum "no" {
+              description
+                "FEC is disabled.";
+            }
+            enum "yes" {
+              description
+                "FEC is enabled.";
+            }
+          }
+          description
+            "
+            When FEC is enabled on a port, the sender adds systematically
+            generated error-correcting code (ECC) to its data transmission.
+            This mechanism allows the receiver to detect and correct errors
+            without needing to get additional information from the sender.
+
+            This leaf only supports enabling FEC.
+            ";
+        }
+        leaf active {
+          type enumeration {
+            enum "no" {
+              description
+                "FEC is not active.";
+            }
+            enum "yes" {
+              description
+                "FEC is active";
+            }
+          }
+          config false;
+          description
+            "
+            The FEC state can be active or inactive. An active FEC state
+            indicates that FEC is enabled and actually running. An inactive
+            state can indicate two conditions: FEC is enabled, but not running
+            due to some error condition (for example, FEC may not be enabled on
+            both ends of the link). Or FEC is disabled and therefore inactive.
+            ";
+        }
+        leaf option {
+          type enumeration {
+            enum "no" {
+              description
+                "FEC is not used in D-Port tests.";
+            }
+            enum "yes" {
+              description
+                "FEC is used in D-Port tests";
+            }
+          }
+          config false;
+          description
+            "
+            The option indicates that D-Port diagnostic test is using FEC
+            feature or not.
+            ";
+        }
+      }
+      leaf rt-latency {
+        type uint32;
+        units "nanoseconds";
+        config false;
+        description
+          "
+          The round trip link latency in nanoseconds or unknown when the test is
+          in progress.  Round trip link latency is the time required for the
+          light to travel from a given port to the port at the remote side of
+          the link and back again.
+          ";
+      }
+      leaf buffers-required {
+        type string;
+        config false;
+        description
+          "
+          The  number of buffers required for the given distance and speed.
+          Irrespective of test frame size, the number of buffers required is
+          calculated for 2112-byte frames.
+          ";
+      }
+      leaf end-time {
+        type yang:date-and-time;
+        config false;
+        description
+          "The date and time that the diagnostic test ended.";
+      }
+      container cr {
+        description
+          "The Credit Recovery (CR) status.";
+        leaf enable {
+          type enumeration {
+            enum "no" {
+              description
+                "Credit Recovery is disabled.";
+            }
+            enum "yes" {
+              description
+                "Credit Recovery is enabled.";
+            }
+          }
+          description
+            "
+            The Credit Recovery enables credits or frames to be recovered.
+            This leaf only supports enabling Credit Recovery.
+            ";
+        }
+        leaf active {
+          type enumeration {
+            enum "no" {
+              description
+                "Credit Recovery is not active.";
+            }
+            enum "yes" {
+              description
+                "Credit Recovery is active.";
+            }
+          }
+          config false;
+          description
+            "Credit Recovery is active.";
+        }
+        leaf option {
+          type enumeration {
+            enum "no" {
+              description
+                "Credit Recovery (CR) is not used in D-Port tests.";
+            }
+            enum "yes" {
+              description
+                "Credit Recovery (CR) is used in D-Port tests";
+            }
+          }
+          config false;
+          description
+            "
+            The leaf option indicates whether the D-Port diagnostic test is
+            using Credit Recovery (CR).
+            ";
+        }
+      }
+      container failure-report {
+        config false;
+   description
+          "Displays details on the local port and remote port errors, if any,";
+        leaf errors-detected-local {
+          type enumeration {
+            enum "no" {
+              description
+                "Errors were not detected on the local port.";
+            }
+            enum "yes" {
+              description
+                "Errors were detected on the local port.";
+            }
+          }
+          description
+            "Displays details on the local port, if any.";
+        }
+        leaf errors-detected-remote {
+          type enumeration {
+            enum "no" {
+              description
+                "Errors were not detected on the remote port.";
+            }
+            enum "yes" {
+              description
+                "Errors were detected on the remote port.";
+            }
+          }
+          description
+            "Displays details on the remote port errors, if any.";
+        }
+      }
+      container egress-power-loss {
+        config false;
+        description
+          "
+          The power values and power loss in the transmit path. The following
+          values are displayed:
+
+          power  transmitted from the local side of the link (Tx)
+          power received on the remote side of the link (Rx), the power loss,
+          that is, the relative difference in power (Diff), and the status of
+          the power loss
+          (No Loss, within tolerable limits, and outside tolerable limits).
+          ";
+        leaf tx {
+          type decimal64 {
+            fraction-digits 1;
+            range "0..9.9";
+          }
+          units "dBm";
+          description
+            "
+            Power transmitted from the local side of the link (Tx).
+            In this case, if D-port test is failing or not yet started Tx
+            value might not be available. This will return an empty tag.
+            ";
+        }
+        leaf rx {
+          type decimal64 {
+            fraction-digits 1;
+            range "0..9.9";
+          }
+          units "dBm";
+          description
+            "
+            Power received on the remote side of the link (Rx).
+            In this case, if D-port test is failing or not yet started Rx
+            value might not be available. This will return an empty tag.
+            ";
+        }
+        leaf loss {
+          type decimal64 {
+            fraction-digits 1;
+            range "0..9.9";
+          }
+          description
+            "The power loss, that is, the relative difference in power (Diff).";
+        }
+        leaf comments {
+          type string {
+            length "1..256";
+            pattern "No Loss|Cable power loss is within tolerable limit|Cable power loss is outside tolerable limit";
+          }
+          description
+            "
+            Status of the power loss (No Loss, within tolerable limits, and
+            outside tolerable limits.)
+            ";
+        }
+      }
+      container ingress-power-loss {
+        config false;
+        description
+          "
+          The power values and power loss in the receive path. The following
+          values are displayed:
+
+          power received on the local side of the link (Rx),
+          power transmitted from the remote side of the link (Tx),
+          the power loss, that is, the relative difference in power (Diff),
+          and the status of the power loss
+          (No  Loss,  within  tolerable limits, and outside tolerable limits).
+          ";
+        leaf tx {
+          type decimal64 {
+            fraction-digits 1;
+            range "0..9.9";
+          }
+          description
+            "
+            Power transmitted from the remote side of the link (Tx).
+            In this case, if D-port test is failing or not yet started
+            Tx value might not be available. This will return an empty tag.
+            ";
+        }
+        leaf rx {
+          type decimal64 {
+            fraction-digits 1;
+            range "0..9.9";
+          }
+          description
+            "
+            Power received on the local side of the link (Rx).
+            In this case, if D-port test is failing or not yet started Rx
+            value might not be available. This will return an empty tag.
+            ";
+        }
+        leaf loss {
+          type decimal64 {
+            fraction-digits 1;
+            range "0..9.9";
+          }
+          description
+            "The power loss, that is, the relative difference in power (Diff).";
+        }
+        leaf comments {
+          type string {
+            length "1..256";
+            pattern "No Loss|Cable power loss is within tolerable limit|Cable power loss is outside tolerable limit";
+          }
+          description
+            "
+            Status of the power loss (No Loss, within tolerable limits, and
+            outside tolerable limits).
+            ";
+        }
+      }
+    }
+  }
+}

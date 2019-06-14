@@ -1,0 +1,151 @@
+module brocade-extension-ipsec-policy {
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-extension-ipsec-policy";
+  prefix brocade-extension-ipsec-policy;
+
+  organization
+    "Brocade Communication Systems, Inc.";
+  contact
+    "
+    Address  :  120 Holger Way
+                San Jose, CA 95134
+                U.S.A
+    Phone    :  +1-408-333-8000
+    E-mail   :  support@brocade.com
+    Website  :  www.brocade.com
+    ";
+  description
+    "
+    This module contains a collection of YANG definitions for managing
+    brocade-extension-ipsec-policy.
+
+    Copyright (c) 2017-2018 by Brocade Communications Systems, Inc.
+    All rights reserved.
+    ";
+
+  revision 2017-10-30 {
+    description
+      "Initial release.";
+    reference "None";
+  }
+
+  typedef extension-ipsec-profile-name {
+    type enumeration {
+      enum "preshared" {
+        description
+          "Specifies the 'preshared' extension IPsec policy name";
+      }
+      enum "pki" {
+        description
+          "Specifies the 'pki' extension IPsec policy name";
+      }
+    }
+    description
+      "Specifies the extension IPsec policy name.";
+  }
+
+  typedef authentication-data {
+    type union {
+      type preshared-key;
+      type pki-key-pair;
+    }
+    description
+      "Specifies the authentication-data depending on the profile used.";
+  }
+
+  typedef preshared-key {
+    type string {
+      length "16..64";
+      pattern "[a-zA-Z0-9~@%_+:\\[\\]][a-zA-Z0-9~@%_+:\\[\\]\\-]{15,63}";
+    }
+    description
+      "
+      For 'preshared' profile, this field specifies the preshared-key to be
+      used for authentication. This operand is required with shared-key
+      authentication.
+      ";
+  }
+
+  typedef pki-key-pair {
+    type string {
+      length "1..32";
+      pattern "/" {
+        modifier "invert-match";
+      }
+    }
+    description
+      "
+      For 'pki' profile, this field specifies the local key pair name to use for
+      IKE authentication. This operand is required with PKI profile.
+      ";
+  }
+
+  container brocade-extension-ipsec-policy {
+    description
+      "Represents IPsec policy defined on extension blade or system.";
+    list extension-ipsec-policy {
+      key "policy-name";
+      description
+        "Represents IPsec policy defined on extension blade or system.";
+      leaf policy-name {
+        type string {
+          length "1..31";
+          pattern "([a-zA-Z0-9~@%_+:\\[\\]][a-zA-Z0-9~@%_+:\\[\\]\\-]{0,30})";
+          pattern "(all|none)" {
+            modifier "invert-match";
+          }
+        }
+        description
+          "
+          Specifies  the name for the IPsec policy. The IPsec policy name can be
+          up to 31 characters long and cannot contain certain special characters
+          and keywords such as 'all' and 'none'.
+          ";
+      }
+      leaf profile-name {
+        type extension-ipsec-profile-name;
+        description
+          "
+          Specifies the IPsec profile to use with the IPSec policy. Valid values
+          for profile name are 'preshared' and 'pki'.
+          ";
+      }
+      leaf authentication-data {
+        type authentication-data;
+        description
+          "
+          Specifies the authentication-data depending on the profile used:
+
+          For 'preshared' profile, this field specifies the preshared-key
+          to be used for authentication. This operand is required with
+          shared-key authentication. Preshared key length should have minimum
+          length of 16 characters and maximum length of 64 characters.
+
+          For 'pki' profile, this field specifies the local key pair name to use
+          for IKE authentication. This operand is required with PKI profile.
+          Key pair name length should have minimum length of 1 character and
+          maximum length of 32 characters.
+
+          Authentication data will returned as a zero length string for
+          read operations on policies with 'preshared' profile.
+          ";
+      }
+      leaf num-ike-sessions {
+        type uint16 {
+          range "0..128";
+        }
+        config false;
+        description
+          "Number of IKE Sessions.";
+      }
+      leaf restart-ike-sessions {
+        when "../num-ike-sessions > 0";
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "Set to 1 to restart all inactive IKE sessions for this policy.";
+      }
+    }
+  }
+}

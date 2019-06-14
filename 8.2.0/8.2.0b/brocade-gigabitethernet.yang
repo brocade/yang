@@ -1,0 +1,270 @@
+module brocade-gigabitethernet {
+  namespace "urn:brocade.com:mgmt:brocade-gigabitethernet";
+  prefix brocade-gigabitethernet;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Brocade Communication Systems, Inc.";
+  contact
+    "
+    Address  :  120 Holger Way
+                San Jose, CA 95134
+                U.S.A
+    Phone    :  +1-408-333-8000
+    E-mail   :  support@brocade.com
+    Website  :  www.brocade.com
+    ";
+  description
+    "
+    This module contains a collection of YANG definitions for managing
+    gigabitethernet interface.
+
+    Copyright (c) 2017-2018 by Brocade Communications Systems, Inc.
+    All rights reserved.
+    ";
+
+  revision 2017-10-30 {
+    description
+      "Initial release.";
+    reference "None";
+  }
+
+  typedef speed-type {
+    type uint64 {
+      range "1000000000|10000000000|40000000000";
+    }
+    units "byte";
+    description
+      "
+      The bandwidth of the Port.
+
+      1000000000    :    1 GbE
+      10000000000   :   10 GbE
+      40000000000   :   40 GbE
+      ";
+  }
+
+  typedef ge-interface-type {
+    type string {
+      pattern "(([1][0-2]|[0-9])/(1[0-7]|[0-9]))";
+    }
+    description
+      "
+      GE interface of an Extension blade or system.
+      The slot and port number of the port (slot/port).
+      ";
+  }
+
+  container brocade-interface {
+    description
+      "Represents the brocade gigabitethernet interface";
+    list gigabitethernet {
+      key "name";
+      description
+        "
+        The list of gigabitethernet interfaces on the device. System-controlled
+        interfaces created by the system are always present in this list,
+        whether they are configured or not.
+        ";
+      leaf name {
+        type ge-interface-type;
+        description
+          "The name of the interface.";
+      }
+      leaf enabled-state {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enabled or disabled state of the interface:
+
+          0 : Disabled
+          1 : Enabled
+	   ";
+      }
+      leaf speed {
+        type speed-type;
+        description
+          "
+          For PHY types that may operate at various speeds, this leaf allows the
+          interface to be forced to operate at a particular speed.  Without any
+          explicit configuration, gigabitethernet interfaces run at the
+          maximum capable speed.
+          ";
+      }
+      leaf mac-address {
+        type yang:mac-address;
+        config false;
+        description
+          "MAC Address for the interface.";
+      }
+      leaf operational-status {
+        type uint16 {
+          range "1..2";
+        }
+        config false;
+        description
+          "
+          Operational status of the port:
+
+          1 : Online
+          2 : Offline
+          ";
+      }
+      leaf persistent-disable {
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Indicates if the port is persistently disabled or persistently enabled
+
+          1 : persistently disabled
+          0 : persistently enabled
+          ";
+      }
+    }
+    list gigabitethernet-statistics {
+      key "name";
+      description
+        "A list of interface-related statistics for gigabitethernet port.";
+      leaf name {
+        type ge-interface-type;
+        description
+          "The name of the interface.";
+      }
+      leaf out-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of packets transmitted out of the interface.";
+      }
+      leaf out-octets {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of octets transmitted out of the interface.";
+      }
+      leaf out-unicast-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of unicast packets transmitted out of
+	   the interface.
+          ";
+      }
+      leaf out-multicast-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of multicast packets transmitted out of the
+          interface.
+          ";
+      }
+      leaf out-broadcast-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of broadcast packets transmitted out of the
+          interface.
+          ";
+      }
+      leaf out-vlan-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of vlan packets transmitted out of the interface.";
+      }
+      leaf out-pause-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of pause packets transmitted out of the interface.";
+      }
+      leaf in-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The number of packets received on the interface.";
+      }
+      leaf in-octets {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of octets received on the interface.";
+      }
+      leaf in-unicast-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The number of unicast packets received on the interface.";
+      }
+      leaf in-multicast-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The number of multicast packets received on the interface.";
+      }
+      leaf in-broadcast-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The number of broadcast packets received on the interface.";
+      }
+      leaf in-vlan-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of vlan packets received on the interface.";
+      }
+      leaf in-pause-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of pause packets received on the interface.";
+      }
+      leaf carrier-loss-error {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of carrier loss errors.";
+      }
+      leaf crc-error {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of Cyclic Redundancy Check (CRC) errors.";
+      }
+      leaf jabber-error {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "The total number of jabber errors.";
+      }
+      leaf reset-statistics {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "Set to 1 to reset statistical counters.";
+      }
+      leaf time-generated {
+        type fibrechannel:time-generated-type;
+        config false;
+        description
+          "The time at which the statistics were queried.";
+      }
+    }
+  }
+}
