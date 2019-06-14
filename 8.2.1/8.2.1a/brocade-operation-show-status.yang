@@ -1,0 +1,73 @@
+module brocade-operation-show-status {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-show-status";
+  prefix show-status;
+
+  import  brocade-operation-types {
+    prefix operation;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'show-status' which provides
+    all details about the status of any REST operation.
+          
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-08-03 {
+    description
+      "
+      FOS 8.2.1
+      -----
+      Initial release for operation support.
+      Refine descriptions.
+      ";
+    reference
+      "None";
+  }
+
+  rpc show-status {
+    description 
+      "
+      The RPC asynchronous operation status based on the input message ID.
+      ";
+
+    input {
+      leaf message-id {
+        type operation:message-id-type;
+        mandatory true;
+        description 
+          "
+          The input message ID which is required to retrieve the associated
+          operation status. 
+          ";
+      }
+    }
+    output {
+      uses operation:show-status-group;
+    }
+  }
+}

@@ -1,0 +1,115 @@
+module brocade-time {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-time";
+  prefix time;
+
+  import brocade-time-yang-types {
+    prefix brocade-time-type;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'Fabric Infrastructure', commands.
+          
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-08-03 {
+    description
+      "
+      Initial release (FOS8.2.1).
+      Refine descriptions. 
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-time {
+    description
+      "The container for time-related commands.";
+    container time-zone {
+      description
+        "
+        The container to configure the system time zone name or the 
+        offset (hours,min or hours format).
+        Note that a change to the System Time Zone takes effect at next reboot.
+        On a chassis, both CPs reboot simultaneously.
+        ";
+      leaf name {
+        when "not(../gmt-offset-hours) and not(../gmt-offset-minutes)";
+        type brocade-time-type:ts-timezone-type;
+        description
+          "
+          The name of a time zone from the time zone database 
+          (for example, Europe/Andorra).
+          ";
+      }
+      leaf gmt-offset-hours {
+        when "not(../name)";
+        type int16 {
+          range "-12..12";
+        }
+        units "hours";
+        description
+          "The number of hours relative to GMT.";
+      }
+      leaf gmt-offset-minutes {
+        when "not(../name) and (../gmt-offset-hours)";
+        type int16 {
+          range "-30|0|30";
+        }
+        units "minutes";
+        description
+          "The number of minutes relative to the hour offset.";
+      }
+    }
+    container clock-server {
+      description
+        "The Network Time Protocol (NTP) IP address(es) or LOCL (local).";
+      container ntp-server-address {
+        description
+          "The NTP server IP address(es) or LOCL (for the local server).";
+        leaf-list server-address {
+          type brocade-time-type:ts-ntp-type;
+          description
+            "
+            A list of the NTP server IP addresses or LOCL (for the local 
+            server). 
+            
+            Configure an NTP server IP address to set the clock server IP 
+            address and enable fabric-wide clock synchronization with the 
+            specified clock server. You can configure up to 8 NTP servers.
+            ";
+        }
+      }
+      leaf active-server {
+        type brocade-time-type:ts-ntp-type;
+        config false;
+        description
+          "The IP address of the active server or LOCL (for the local server).";
+      }
+    }
+  }
+}

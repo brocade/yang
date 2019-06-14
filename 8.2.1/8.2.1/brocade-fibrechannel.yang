@@ -1,0 +1,1423 @@
+module brocade-fibrechannel {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fibrechannel";
+  prefix fc;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'fibrechannel', which augments the
+    'interface' and 'interface-state' lists defined in the 'ietf-interfaces'
+    module [RFC-7223] with Fibre Channel data nodes, and also adds Fibre Channel
+    state data.
+
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-07-31 {
+    description
+      "
+      Fabric OS 8.2.0a
+      ----------------
+        Deprecated 'fcid' (replaced by 'fcid-hex')
+
+      Fabric OS 8.2.1
+      ---------------
+        Refine descriptions
+        Formatting
+        Organization information
+      ";
+    reference
+      "None";
+  }
+
+  typedef port-type-type {
+    type uint16 {
+      range "0|7|10|11|15|16|17|19|20|21|22|23|25|26|32768";
+    }
+    description
+      "
+      Fibre Channel port types:
+
+      0     : Unknown
+      7     : E Port
+      10    : G Port
+      11    : U Port
+      15    : F Port
+      16    : L Port
+      17    : FCoE Port
+      19    : EX Port
+      20    : D Port
+      21    : SIM Port
+      22    : AF Port
+      23    : AE Port
+      25    : VE Port
+      26    : Ethernet Flex Port
+      29    : Flex Port
+      30    : N Port
+      32768 : LB Port
+      ";
+  }
+
+  typedef speed-type {
+    type uint64 {
+      range "0|1000000000|2000000000|4000000000|8000000000|10000000000|" +
+            "16000000000|32000000000";
+    }
+    description
+      "
+      The current bandwidth of the port.
+
+      0             : Auto negotiated.
+      1000000000    : 1 GFC
+      2000000000    : 2 GFC
+      4000000000    : 4 GFC
+      8000000000    : 8 GFC
+      10000000000   : 10 GFC
+      16000000000   : 16 GFC
+      32000000000   : 32 GFC
+      ";
+  }
+
+  container brocade-interface {
+    description
+      "
+      All Fibre Channel interface-related configuration,operational state, 
+      and statistics.
+      ";
+    list fibrechannel {
+      key "name";
+      description
+        "
+        A list of interfaces on the device.
+
+        System-controlled interfaces created by the system are
+        always present in this list, whether they are configured or not.
+        ";
+      leaf name {
+        type string {
+          /* pattern with 12 slots and 1024 ports seperated by a slash */
+          pattern "([1-9]|1[0-9])/(10[0-2][0-9]|[1-9][1-9][0-9]|[1-9][1-9]|" + 
+                  "[1-9])";
+        }
+        description
+          "
+          The name of the interface. The slot and port number of the specified 
+          port in the format slot/port.
+          ";
+      }
+      leaf wwn {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "
+          The world wide name (WWN) of the specified port.
+          ";
+      }
+      leaf operational-status {
+        type uint32 {
+          range "0|2|3|5";
+        }
+        config false;
+        description
+          "
+          The current operational status of the specified port. The possible 
+          values are:
+
+          0 : Undefined
+          2 : Online/Testing
+          3 : Offline
+          5 : Faulty
+          ";
+      }
+      leaf enabled-state {
+        type uint32 {
+          range "2|6";
+        }
+        description
+          "
+          The current state of the specified port. The possible values are:
+
+          2 : Enabled.
+          6 : Disabled.
+          ";
+      }
+      leaf user-friendly-name {
+        type string {
+          length "0..128";
+	  pattern "[ -~]*";
+	  pattern '[\(\),;@]+' {
+	    modifier invert-match;
+	  }
+        }
+        description
+          "
+          A user-friendly name to be assigned to the specified port.
+
+          A value from 1 to 128 alphanumeric characters. This name must not 
+          contain special (high-ASCII) characters, and is not case-sensitive.
+
+          When a port name is not configured, a default name is assigned.
+          The format of the default name is as follows:
+
+            - On standalone platforms, the default port name displays as
+              port<port_number>, for example, port10.
+            - On enterprise-class platforms, the default port name displays as
+              slot<slot_number> port<port_number>, for example, slot1 port5.
+
+          Provide a null string to replace the existing name with the default.
+          ";
+      }
+      leaf speed {
+        type speed-type;
+        description
+          "
+          The Fibre Channel interface may operate at various speeds; this leaf 
+          allows the port interface to be forced to operate at a particular 
+          speed. 
+          
+          Without any explicit speed set (for example, having the 
+          auto-negotiate value set), the Fibre Channel interfaces run at the 
+          maximum speed, subject to speed negotiations with their neighbor. 
+          
+          The value zero is returned only when auto-negotiate is set and the 
+          port has not yet negotiated the speed with the other end (for example,
+          if the port is offline or is syncing). Otherwise, the negotiated 
+          speed or the fixed speed is returned. 
+          
+          To determine whether the speed was auto-negotiated or fixed,
+          see the auto-negotiate leaf.
+          ";
+      }
+      leaf max-speed {
+        type speed-type;
+        config false;
+        description
+          "
+          The maximum speed the port is capable of supporting, in bits 
+          per second.
+          ";
+      }
+      leaf auto-negotiate {
+        type uint8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          Whether the port speed is auto-negotiated on the specified port.
+
+          0 : Port speed is fixed.
+          1 : Port speed is auto-negotiated.
+          ";
+      }
+      leaf g-port-locked {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Designates the specified port as a G_Port. After successful execution,
+          the switch attempts to initialize the specified port as an F_Port 
+          only and does not attempt loop initialization (FL_Port) on the port. 
+          A port that is designated as a G_Port can become an E_Port. This 
+          configuration can be cleared but not set on VE or VEX_Ports. Changes 
+          made by this command are persistent across switch reboots or 
+          power cycles.
+
+          0 : Unlocked (removes the G_Port designation from the port).
+          1 : Locked (the port is designated as a G_Port).
+          ";
+      }
+      leaf e-port-disable {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables E_Port capability on the specified port or locks 
+          down the specified port as an E_Port. E_Port capability is enabled by 
+          default. When an inter-switch link (ISL) is connected to a port and 
+          the port&apos;s E_Port capability is disabled, the ISL is segmented, 
+          and all traffic between the switches stops. Fabric management data, 
+          such as zoning information, can no longer be exchanged through 
+          this port.
+
+          0 : Enables the port as an E_Port. This is the default port state.
+          1 : Disables E_Port capability for the specified port.
+          ";
+      }
+      leaf n-port-enabled {
+        if-feature fibrechannel:access_gateway_platform;
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Indicates whether this port can operate as an N_Port. A port can 
+          operate as an N_Port only in Access Gateway Mode.
+
+          0 : N_Port is disabled as an N_Port.
+          1 : N-Port is enabled as an N_Port.
+          ";
+      }
+      leaf d-port-enable {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Indicates whether this port is configured as a D_Port.
+
+          0 : Port is disabled as a D_Port.
+          1 : Port is enabled as a D_Port.
+          ";
+      }
+      leaf persistent-disable {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Status of the persistent-disable feature of the port.
+
+          0 : Persistent-disable is not active for the port.
+          1 : Persistent-disable is active for the port.
+          ";
+      }
+      container neighbor {
+        config false;
+        description
+          "
+          A list of WWN's.
+          ";
+        leaf-list wwn {
+          type fibrechannel:wwn-type;
+          description
+            "
+            The Fibre Channel WWN of the neighbor port.
+            ";
+        }
+      }
+      leaf neighbor-node-wwn {
+        when "operational-status = 2";
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "
+          The  neighbor node WWN connected to this port.
+          ";
+        }
+      leaf fcid {
+        type fibrechannel:fcid-type;
+        config false;
+        status deprecated;
+        description
+          "
+          The Fibre Channel ID (FCID) of the port (decimal format).
+
+          Deprecated: Please use 'fcid-hex' leaf instead.
+          ";
+      }
+      leaf fcid-hex {
+        type fibrechannel:fcid-hex-string-type;
+        config false;
+        description
+          "The Fibre Channel ID (FCID) of the port (hexadecimal format).";
+      }
+      leaf port-type {
+        type port-type-type;
+        config false;
+        description
+          "
+          The port type currently enabled for the specified port. If this port 
+          is logged in, this will be the negotiated port type; otherwise, the 
+          configured port type will be reported.
+          ";
+      }
+      leaf qos-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Indicates whether QoS is enabled on the port.
+
+          0 : Port QoS disabled.
+          1 : Port QoS enabled.
+          ";
+      }
+      leaf compression-configured {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables the compression configuration on the specified 
+          port. This change is persistent. Configuring a port for compression 
+          is disruptive. You must disable the port before you can enable 
+          compression on the port. This command fails on an enabled port. 
+          The values are:
+
+          0 : Disables the compression configuration on the specified port.
+          1 : Enables the compression configuration on the specified port.
+
+          The number of configurable ports is limited by the platform ASIC.
+          ";
+      }
+      leaf compression-active {
+        type uint8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          The runtime compression status for the port.
+
+          0 : The port is enabled for compression but offline 
+              or is not enabled for compression.
+          1 : The port is online and enabled for compression.
+          ";
+      }
+      leaf encryption-active {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          The encryption status for the specified port.
+
+          0 : Encryption is disabled.
+          1 : Encryption is enabled.
+          ";
+      }
+      leaf target-driven-zoning-enable {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables the Target Driven Zoning (TDZ) configuration on 
+          the port. This change is persistent. TDZ can be configured on online
+          or offline E Ports, F Ports, and L Ports; it does not toggle the 
+          port to apply the configuration. After TDZ is configured on a port, 
+          it allows the connected target device to configure Target Driven Peer
+          Zones to be enabled and committed.
+
+          0 : Target Driven Zoning configuration is disabled.
+          1 : Target Driven Zoning configuration is enabled.
+          ";
+      }
+      leaf sim-port-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables the port as a SIM port.
+
+          0 : SIM Port is disabled.
+          1 : SIM Port is enabled.
+          ";
+      }
+      leaf mirror-port-enabled {
+        type int8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables the port as a mirror port. Port mirroring 
+          reroutes data frames between two devices to the mirror port..
+
+           0 : Mirror Port is disabled.
+           1 : Mirror Port is enabled.
+          ";
+      }
+      leaf credit-recovery-enabled {
+        type int8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables credit recovery on the port. Credit recovery 
+          enables credits or frames to be recovered.
+          
+          Configure credit recovery on a port. The credit recovery feature
+          enables credits or frames to be recovered. The default credit recovery
+          configuration is enabled.
+
+           0 : Credit Recovery is disabled.
+           1 : Credit Recovery is enabled.
+          ";
+      }
+      leaf credit-recovery-active {
+        type int8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          Whether credit recover is active on the port. Fabric OS must support 
+          credit recovery at either end of the link for credit recovery to be 
+          active.
+
+           0 : Credit Recovery is not active on the port.
+           1 : Credit Recovery is active on the port.
+          ";
+      }
+      leaf fec-active {
+        type int8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          Whether forward error correction (FEC) is active on the port. 
+          Fabric OS must support FEC at either end of the link for FEC
+          to be active.
+
+           0 : FEC is not active on the port
+           1 : FEC is active on the port
+          ";
+      }
+      leaf f-port-buffers {
+        type uint8 {
+          range "0|8..max";
+        }
+        description
+          "
+          Configures the buffer allocation for an F_Port. The minimum buffer 
+          allocation is the default number of buffers plus 1. The maximum is 
+          determined by the remaining buffer allocations in the port's port
+          group. If no buffers are configured, the value is zero. 
+          
+          The F_Port buffer feature is not supported on ports configured as 
+          EX_Ports, mirror ports, long distance ports, L_Ports, QoS ports, 
+          Fast Write, and trunk areas.
+          ";
+      }
+      leaf e-port-credit {
+        type uint8 {
+          range "0|5..160";
+        }
+        description
+          "
+          Configures the number of credits to be allocated to the specified
+          port. The minimum credit allocation is 5, and the maximum can be up
+          to 160 depending on the platform.
+          0 : E_Port Credit is disabled.
+          ";
+      }
+      leaf csctl-mode-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type int8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables Class-Specific Control (CSCTL) mode, which
+          enables traffic prioritization based on CS_CTL.
+
+           0 : CSCTL mode is disabled on the port.
+           1 : CSCTL mode is enabled on the port.
+          ";
+      }
+      leaf fault-delay-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Configures the fault delay for a port.
+
+          In the event that the link is noisy after a host power cycle, the
+          switch may go into a soft fault state, which means a delay of R_A_TOV.
+          Setting the mode value to 1 reduces the fault delay value to 1.2
+          seconds. The configuration is stored in nonvolatile memory and is
+          persistent across switch reboots and power cycles.
+
+          0 : The value is R_A_TOV. This is the default.
+          1 : The value is 1.2 seconds.
+          ";
+      }
+      leaf octet-speed-combo {
+        type int8 {
+          range "1..3";
+        }
+        description
+          "
+          The speed configuration for a port octet. Valid Octet Combo
+          values include the following:
+
+
+           1 : Auto-negotiated or fixed port speeds of 32Gbps, 16 Gbps,
+               8 Gbps, 4 Gbps, and 2 Gbps
+
+           2 : Auto-negotiated or fixed port speeds of 10 Gbps, 8 Gbps,
+               4 Gbps, and 2 Gbps
+
+           3 : Auto-negotiated or fixed port speeds of 16 Gbps and 10 Gbps
+
+          A port octet can be set to any of the three octet combinations, and
+          the ports in the octet can run on any speed supported by the port's 
+          octet combination. This applies to both auto-negotiated and 
+          fixed speeds.
+
+          The octet combination default is 1.
+          ";
+      }
+      leaf long-distance {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..7";
+        }
+        config false;
+        description
+          "
+          The long-distance level. Displays one of the following values
+          (the numerical value representing each distance level is shown
+          in parentheses):
+
+          0 : Long distance is disabled for this port.
+          1 : L0 configures the port as a regular port.
+          2 : L1 configures the port as long (<= 50 km).
+          3 : L2 configures the port as super long (<= 100km).
+          4 : LE configures an E_Port distance as greater than
+              5 km and up to 10 km.
+          5 : L0.5 configures the port as medium long (<= 25 km).
+          6 : LD configures the value as automatic long distance.
+          7 : LS mode configures the value as a static long distance link with 
+              a fixed buffer allocation greater than 10 km.
+          ";
+      }
+      leaf vc-link-init {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          The VC Link initialization.
+
+          0 : The long-distance link initialization option is turned off.
+          1 : The long-distance link initialization option is turned on for 
+              long-distance mode.
+          ";
+      }
+      leaf isl-ready-mode-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables ISL ready mode on the port.
+          
+          0 : ISL R_RDY mode is disabled on the port.
+          1 : ISL R_RDY mode is enabled on the port.
+          
+          Note: This is mutually exclusive with e-port-credit.
+          This is mutually exclusive with qos-enabled mode. 
+          This is mutually exclusive with long-distance levels.
+          ";
+      }
+      leaf rscn-suppression-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables Registered State Change Notification (RSCN) 
+          suppression on the port.
+
+          0 : Disables RSCN suppression on the port. When disabled, device
+              changes on the port generate an RSCN to all other end devices that
+              are zoned with this one. By default, RSCN suppression is disabled
+              on all ports.
+          1 : Enables RSCN suppression on the port. When enabled, any device
+              changes on the port do not generate an RSCN to any other end
+              device.
+          ";
+      }
+      leaf los-tov-mode-enabled {
+        type uint8 {
+          range "0..2";
+        }
+        description
+          "
+          Enables or disables de-bouncing of signal loss for front-end ports
+          for 100 ms.
+
+          0 : LOS_TOV mode is disabled on the port.
+          1 : LOS_TOV mode is enabled on fixed-speed ports.
+          2 : LOS_TOV mode is enabled on both fixed-speed and auto-negogiated
+              ports.
+          ";
+      }
+      leaf npiv-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables NPIV capability on the port.
+
+          0 : NPIV is disabled on the port.
+          1 : NPIV is enabled on the port.
+          ";
+      }
+      leaf npiv-pp-limit {
+        type int16 {
+          range "1..255";
+        }
+        description
+          "
+          Configures the maximum number of allowed logins for the port. Valid
+          values are 1 to 255.
+
+          1 - 255 : The maximum number of allowed logins for the port.
+          ";
+      }
+      leaf npiv-flogi-logout-enabled {
+        type int8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          Whether the base device logout feature is enabled or disabled.
+
+           0 : Base device logout is disabled on the port, which causes the 
+               NPIV devices on the same port to log out when the base device 
+               logs out.
+           1 : Base device logout is enabled on the port. The base device
+               can log out without disrupting the NPIV devices on the same port
+          ";
+      }
+      leaf ex-port-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Configures the port as an EX_Port.
+
+          0 : The port is not configured as an EX_Port.
+          1 : The port is configured as an EX_Port.
+          ";
+      }
+      leaf fec-enabled {
+        type int8 {
+          range "0..1";
+        }
+        description
+          "
+          Whether Forward Error Correction (FEC) is enabled or disabled on 
+          a port.
+
+          FEC provides a mechanism for reducing error rates during data
+          transmissions over 16 Gbps Fibre Channel links. When FEC is enabled
+          on a port, the sender adds systematically generated error-correcting
+          code (ECC) to its data transmission. This mechanism allows the
+          receiver to detect and correct errors without needing to get
+          additional information from the sender.
+
+           0 : FEC is disabled on the port.
+           1 : FEC is enabled on the port, and the port is online.
+
+          FEC is supported only at 10 Gbps and 16 Gbps speeds.
+          ";
+      }
+      leaf via-tts-fec-enabled {
+        type int8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          Whether FEC negotiation via TTS is enabled or disabled on the port.
+
+           0 : The external control of FEC is disabled.
+           1 : The control of the FEC state is permitted via TTS by an 
+               externally attached host or device.
+          ";
+      }
+      leaf port-autodisable-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables port autodisable on the port, which minimizes 
+          traffic disruption introduced in some instances of automatic port 
+          recovery. This parameter disables the port when it encounters an 
+          event that would cause the port to reinitialize.
+
+          When the autodisable flag is enabled, you can specify the conditions 
+          that prevent the port to reinitialize. Such conditions include loss 
+          of sync, loss of signal, OLS, NOS, and LIP. Note that a link reset 
+          does not cause a port autodisable. When a port is in FICON Management 
+          Server (FMS) mode, an autodisabled port remains persistently disabled 
+          across High Availability (HA) failover.
+
+          0 : Port autodisable is disabled on the port.
+          1 : Port autodisable is enabled on the port.
+          ";
+      }
+      leaf rate-limit-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type int16 {
+          range "0|200|400|600|800|1000|1500|2000|2500|3000|3500|4000|5000|" +
+                "7000|8000|9000|10000|11000|12000|13000|14000|15000|16000";
+        }
+        units "Mbps";
+        description
+          "
+          Configures the rate limits in Mbps. This is applicable only with 
+          F/FL_Ports. For E/EX_Ports, this resource is not effective. The 
+          ingress rate limit is enforced only when a given port can run at a 
+          speed higher than the speed specified in the configuration.
+          Positive numeric values indicate a rate limit in Mbps.
+
+          0 : No rate limit set.
+          ";
+      }
+      leaf non-dfe-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables non-DFE mode on the port.
+
+          Active receiver DFE uses sophisticated algorithms to automatically
+          adjust the receiver to compensate for signal distortions.
+
+            0 : Non-DFE mode is disabled on the port. Automatic receiver 
+                adjustment through DFE is activated
+            1 : Non-DFE mode is enabled on the port. If the non-DFE enabled port
+                is connected to a port that does not require fixed receiver 
+                equalization, CRC errors may be detected on the port and the 
+                link may toggle.
+
+          Even if disabled, non-DFE is still automatically activated if both of
+          following conditions are met: the port speed is 8G or N8 and the
+          fillword is IDLE.
+          ";
+      }
+      
+     leaf trunk-port-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables trunking on a port.
+
+          0 : Trunking is disabled on the port.
+          1 : Trunking is enabled on the port.
+
+          Trunking is enabled by default when a trunking license is present
+          on the switch.
+          ";
+     }
+     leaf default-index {
+       type fibrechannel:user-port-number-type;
+       config false;
+       description "Default Port Index of the port.The default port index
+			can be a port swapped area.";
+     }
+    }
+    list fibrechannel-statistics {
+      key "name";
+      description
+        "
+        Statistics for all interfaces on the device.
+
+        System-controlled interfaces created by the system are always present in
+        this list, whether they are configured or not.
+        ";
+      leaf name {
+        type string {
+          /* pattern with 12 slots and 1024 ports separated by a slash */
+          pattern "(([1-9]|1[0-9])/([1][0-9][0-9][0-9]|[1-9][1-9][0-9]" +
+                  "|[1-9][1-9]|[1-9]))";
+        }
+        description
+          "
+          The name of the interface. The slot and port number of the port in 
+          the format slot/port.
+          ";
+      }
+      leaf sampling-interval {
+        type uint16 {
+          range "1..max";
+        }
+        units "seconds";
+        config false;
+        description
+          "
+          The sampling interval in seconds.
+          ";
+      }
+      leaf time-generated {
+        type fibrechannel:time-generated-type;
+        config false;
+        description
+          "
+          The time at which the statistics were queried.
+          ";
+      }
+      leaf reset-statistics {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Resets statistic counters. The only readable value is 0, and the only 
+          settable value is 1.
+          ";
+      }
+      leaf in-octets {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of octets received on the interface, including
+          framing characters.
+          ";
+      }
+      leaf out-octets {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of octets transmitted out of the interface, including
+          framing characters.
+          ";
+      }
+      leaf in-multicast-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of packets, delivered by this sublayer to a higher
+          sublayer, that were addressed to a multicast address at this
+          sublayer.  For a MAC-layer protocol, this includes both Group and
+          Functional addresses.
+          ";
+      }
+      leaf out-multicast-pkts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of packets that higher-level protocols requested be
+          transmitted and that were addressed to a multicast address at this
+          sublayer, including those that were discarded or not sent. For a
+          MAC-layer protocol, this includes both Group and Functional addresses.
+          ";
+      }
+      leaf in-link-resets {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of link resets received.
+          ";
+      }
+      leaf out-link-resets {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of link resets transmitted.
+          ";
+      }
+      leaf in-offline-sequences {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of offline sequences received.
+          ";
+      }
+      leaf out-offline-sequences {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of offline sequences transmitted.
+          ";
+      }
+      leaf invalid-ordered-sets {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of invalid ordered sets received.
+          ";
+      }
+      leaf frames-too-long {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of frames received that were longer than 2140 octets. The
+          value of 2140 is calculated based on an assumption of 24 header bytes
+          plus 4 CRC bytes and 2112 bytes of payload.
+          ";
+      }
+      leaf truncated-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of truncated frames received.
+          ";
+      }
+      leaf address-errors {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          Count of frames received with unknown addressing. An example is an
+          unknown SID or DID, which are not known to the routing algorithm.
+          ";
+      }
+      leaf delimiter-errors {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          Count of invalid frame delimiters that are received at this port. An
+          example is a frame with a class 2 at the start and a class 3 at 
+          the end.
+          ";
+      }
+      leaf encoding-disparity-errors {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The total number of disparity errors received at this port.
+          ";
+      }
+      leaf too-many-rdys {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of instances in which the number of RDYs (readys) 
+          exceeded the number of frames received.
+          ";
+      }
+      leaf in-crc-errors {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of CRC errors for all frames received.
+          ";
+      }
+      leaf crc-errors {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of times that the CRC in a frame does not match the CRC 
+          that is computed by the receiver. This count is part of the Link Error
+          Status Block (LESB).
+          ";
+      }
+      leaf bad-eofs-received {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of bad EOF frames received.
+          ";
+      }
+      leaf encoding-errors-outside-frame {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of encoding-error or disparity-error outside frames
+          received.
+          ";
+      }
+      leaf multicast-timeouts {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of multicast frames that have timed out.
+          ";
+      }
+      leaf in-lcs {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of link control frames received.
+          ";
+      }
+      leaf in-frame-rate {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The instantaneous receive frame rate.
+          ";
+      }
+      leaf out-frame-rate {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The instantaneous transmit frame rate.
+          ";
+      }
+      leaf in-max-frame-rate {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The maximum frame receive rate since the last reset.
+          ";
+      }
+      leaf out-max-frame-rate {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The maximum frame transmit rate since the last reset.
+          ";
+      }
+      leaf in-rate {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The instantaneous byte receive rate.
+          ";
+      }
+      leaf out-rate {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The instantaneous byte transmit rate.
+          ";
+      }
+      leaf in-peak-rate {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The peak byte receive rate.
+          ";
+      }
+      leaf out-peak-rate {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The peak byte transmit rate.
+          ";
+      }
+      leaf in-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of frames received at this port.
+          ";
+      }
+      leaf out-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of frames transmitted from this port.
+          ";
+      }
+      leaf bb-credit-zero {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of transitions in and out of the BB credit zero state.
+          ";
+      }
+      leaf input-buffer-full {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of transitions in and out of the Input Buffer Full state.
+          ";
+      }
+      leaf f-busy-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of F_BSY (fabric busy) frames generated.
+          ";
+      }
+      leaf p-busy-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of P_BSY (port busy) frames generated.
+          ";
+      }
+      leaf f-rjt-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of F_RJT (fabric frame reject) frames generated.
+          ";
+      }
+      leaf p-rjt-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of P_RJT (port frame reject) frames generated.
+          ";
+      }
+      leaf class-1-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of Class 1 frames received at this port.
+          ";
+      }
+      leaf class-2-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of Class 2 frames received at this port.
+          ";
+      }
+      leaf class-3-frames {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of Class 3 frames received at this port.
+          ";
+      }
+      leaf class-3-discards {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of Class 3 frames discarded by the port.
+          ";
+      }
+      leaf link-failures {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of link failures at this port.
+          ";
+      }
+      leaf invalid-transmission-words {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of invalid transmission words received at this port.
+          ";
+      }
+      leaf primitive-sequence-protocol-error {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of primitive sequence protocol errors detected at 
+          this port.
+          ";
+      }
+      leaf loss-of-signal {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of instances of signal loss detected at this port.
+          ";
+      }
+      leaf loss-of-sync {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of instances of synchronization loss detected at this port.
+          ";
+      }
+      leaf class3-in-discards {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of class 3 receive frames discarded due to timeout.
+          ";
+      }
+      leaf class3-out-discards {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of class 3 transmit frames discarded due to timeout.
+          ";
+      }
+      leaf pcs-block-errors {
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of Physical Coding Sublayer (PCS) block errors. This
+          counter records encoding violations on 10 Gbps or 16 Gbps ports.
+          ";
+      }
+      leaf remote-link-failures {
+        when "../fibrechannel/operational-status = 2";
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of link failures at the remote F_Port.
+          ";
+      }
+      leaf remote-invalid-transmission-words {
+        when " ../fibrechannel/operational-status = 2";
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of invalid transmission words received at the remote 
+          F_Port.
+          ";
+      }
+      leaf remote-primitive-sequence-protocol-error {
+        when "../fibrechannel/operational-status = 2";
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of primitive sequence protocol errors detected at the 
+          remote F_Port.
+          ";
+      }
+      leaf remote-loss-of-signal {
+        when "../fibrechannel/operational-status = 2";
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of instances of signal loss detected at the remote F_Port.
+          ";
+      }
+      leaf remote-loss-of-sync {
+        when "../fibrechannel/operational-status = 2";
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of instances of synchronization loss detected at the remote
+          F_Port.
+          ";
+      }
+      leaf remote-crc-errors {
+        when "../fibrechannel/operational-status = 2";
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The number of frames received with an invalid CRC at the remote 
+          F_Port.
+          ";
+      }
+      leaf remote-fec-uncorrected {
+        when "../fibrechannel/operational-status = 2";
+        type yang:zero-based-counter64;
+        config false;
+        description
+          "
+          The counter denotes the number of frames uncorrected by the FEC block 
+          at the remote F_Port.
+          ";
+      }
+      container remote-buffer-credit-info {
+        when "../../fibrechannel/operational-status = 2";
+        config false;
+        description
+          "
+          The buffer credit values. Applicable only for the remote F_Port.
+          ";
+        leaf bb-credit {
+          type yang:zero-based-counter64;
+          description
+            "
+            The buffer-to-buffer (BB) credit represents the number of credits
+            available to the attached devices.
+            ";
+        }
+        leaf peer-bb-credit {
+          type yang:zero-based-counter64;
+          description
+            "
+            The peer port buffer-to-buffer(BB) credit represents the number of
+            credits available to the switch port.
+            ";
+        } 
+      } 
+    }
+  }
+}

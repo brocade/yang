@@ -1,0 +1,144 @@
+module brocade-operation-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-types";
+  prefix brocade-operation;
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module for the Remote 
+    Procedure Call (RPC) operations.
+          
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-07-06 {
+    description
+      "
+      FOS 8.2.1
+      -----
+      Initial release for operations support.
+      ";
+    reference
+      "None";
+  }
+
+  typedef message-id-type {
+    type uint32 {
+      range 1..max;
+	  }
+    description 
+      "
+      It refers to Remote Procedure Call (RPC) message. When asynchronous
+      operation is triggered, it returns the random message identifier 
+      to associate with the operation being triggered. 
+      Application could use this identifier to get
+      the status of the operation in subsequent requests. 
+      ";
+  }
+
+  grouping show-status-group {
+    description 
+      "
+      It defines the group of leafs associated with the 
+      operation. 
+      ";
+
+    container show-status {
+      description
+        "
+        RPC operation status details for the assoicated input message-id.
+        ";
+
+      leaf message-id {
+        type message-id-type;
+        description 
+          "
+          The random message-id which is required to retrieve the associated
+          operation status. 
+          ";
+      }
+
+      leaf operation {
+        type string { 
+          length "1..64";
+          pattern "supportsave";
+        }
+        description 
+          "
+          Operation name is returned as part of this   
+          leaf element. The show-status is common across all the operations 
+          supported in yang RPC feature. It would be helpful to the user to 
+          identify the exact operation status when application queries 
+          the status based on the message-id.  
+          ";
+      }
+
+      leaf status {
+        type string {
+	        length "1..32";
+          pattern "queued|in-progress|done|delivered|error|purge" +
+                  "|application-error";
+        }
+        description 
+          "
+          It indicates the exact state of the supportsave operation. 
+          When operation command is triggered, it will add into the queue 
+          i.e queued state. 'progress' status is returned until 
+          all the supportsave files are transferred 
+          to the remote server. 'done' state is set once operation 
+          is completed. When completion status is returned, it will 
+          move to 'delivered' state till its purged from the queue. 
+          If there are any supportsave operational level error or, 
+          application level error occured, it sets 'error' 
+          or 'application-error' respectively. 'purge' state is used to 
+          remove the entry from the db.  
+          ";
+      }
+
+      leaf application-name {
+        type string {
+          length "1..64";
+          pattern "[ -~]{1,64}";
+        }
+        description 
+          "
+          The name of the application which is used to trigger 
+          the operation. This is parsed from 
+          the HTTP USER_AGENT standard header. 
+          ";
+      }
+
+      leaf percentage-complete {
+        type uint8 {
+	        range 0..100;
+        }
+        description 
+          "
+          Supportsave operation completion in percentage.
+          ";
+      }
+    }
+  }
+}

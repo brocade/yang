@@ -1,0 +1,1297 @@
+module brocade-extension-tunnel {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-extension-tunnel";
+  prefix brocade-extension-tunnel;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for managing
+    brocade-extension-tunnel.
+
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-07-13 {
+    description
+      "
+      Fabric OS 8.2.1
+      ---------------
+        Formatting
+        Organization information
+      ";
+    reference
+      "None";
+  }
+
+  typedef ve-interface-type {
+    type string {
+      pattern "((([1][0-2]|[1-9])/(1[6-9]|2[0-9]|3[0-5]))|" +
+              "((0)/(2[4-9]|3[0-9]|4[0-3]))|((0)/(1[2-5])))";
+    }
+    description
+      "
+      VE interface of an Extension blade or system. The slot and port number of
+      the port (slot/port).
+      ";
+  }
+
+  typedef operational-type {
+    type uint16 {
+      range "0..40";
+    }
+    description
+      "
+      Tunnel/Circuit operational status:
+
+        0  = NULL,
+        1  = Offline,
+        2  = Online,
+        3  = Online Warning,
+        4  = Disabled,
+        5  = Degraded,
+        6  = Initializing,
+        7  = Delete Pending,
+        8  = HA Online,
+        9  = HA Offline,
+        10 = HA Ready,
+        11 = Empty,
+        12 = In Progress,
+        13 = MisConfig,
+        14 = Failover,
+        15 = Down Pending,
+        16 = Circuit Disabled/Fenced/Testing,
+        17 = Internal Error,
+        18 = IPSec Error,
+        19 = Network Error,
+        20 = Authentication Error,
+        21 = Timeout,
+        22 = TCP-Timeout,
+        23 = Remote Close Timeout,
+        24 = Remote Close,
+        25 = Rejected,
+        26 = No Port,
+        27 = No Route,
+        28 = DP Offline,
+        29 = HCL Inprogress,
+        30 = Internal Error,
+        31 = Configuration Incomplete,
+        32 = Circuit Fenced,
+        33 = Child Delete Complete,
+        34 = Delete Failure,
+        35 = Spill Over,
+        36 = Running,
+        37 = Testing,
+        38 = Aborted,
+        39 = Passed,
+        40 = Failed
+      ";
+  }
+
+  typedef tunnel-load-level {
+    type enumeration {
+      enum "default" {
+        description
+          "
+          Specifies the 'default' method for load balancing method for the
+          extension tunnel.
+          ";
+      }
+      enum "failover" {
+        description
+          "
+          Specifies the 'failover' method for load balancing method for the
+          extension tunnel.
+          ";
+      }
+      enum "spillover" {
+        description
+          "
+          Specifies the 'spillover' method for load balancing method for the
+          extension tunnel.
+          ";
+      }
+    }
+    description
+      "Load balancing method for the extension tunnel.";
+  }
+
+  container brocade-extension-tunnel {
+    description
+      "
+      Represents tunnel and circuit configuration and operational status for
+      extension blade or system.
+      ";
+    list extension-tunnel {
+      key "name";
+      description
+        "Represents tunnel interface for extension blade or system.";
+      leaf name {
+        type ve-interface-type;
+        description
+          "The name of the interface.";
+      }
+      leaf user-friendly-name {
+        type union {
+          type string {
+            length "0";
+          }
+          type string {
+            length "1..255";
+            pattern "([a-zA-Z0-9~@%_+:\\[\\]]" +
+                    "[a-zA-Z0-9~@%_+:\\[\\]\\-]{0,254})";
+          }
+        }
+        description
+          "Specifies a description for the specified tunnel.";
+      }
+      leaf local-wwn {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "Specifies the WWN of the local FC entity.";
+      }
+      leaf remote-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "
+          WWN that can be optionally configured to be verified against the WWN
+          of the remote FC entity.
+          ";
+      }
+      leaf peer-wwn {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "Specifies the WWN of the remote FC entity.";
+      }
+      leaf admin-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables the tunnel VE port. Admin status is enabled by
+          default.
+
+          0 : Disabled
+          1 : Enabled
+          ";
+      }
+      leaf fast-write-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Disables or enables the FCIP FastWrite on the specified extension
+          tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf tape-read {
+        when "../fast-write-enabled = 1 and ../tape-write =  1";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables read Tape Pipelining (FCIP FastWrite must also be enabled).
+          Read Tape Pipelining can not be enabled if write Tape Pipelining
+          is disabled.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf tape-write {
+        when "../fast-write-enabled = 1";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables write Tape Pipelining (FCIP FastWrite must also be enabled).
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf tunnel-status {
+        type operational-type;
+        config false;
+        description
+          "Tunnel operational status.";
+      }
+      leaf ipsec-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          Specifies the disabled or enabled state of Internet Protocol Security
+          (IPsec) on the specified tunnel:
+
+          0 : IPsec is disabled on the tunnel
+          1 : IPsec is enabled on the tunnel
+          ";
+      }
+      leaf ipsec-policy {
+        type string {
+          length "1..31";
+          pattern "([a-zA-Z0-9~@%_+:\\[\\]][a-zA-Z0-9~@%_+:\\[\\]\\-]{0,31})";
+        }
+        description
+          "
+          Sets the Internet Protocol Security (IPsec) on the specified tunnel to
+          use the specified IPsec Policy, or to disable IPsec for the tunnel if
+          the 'none' operand is used. Policy name can be 1 to 31 characters in
+          length.
+          ";
+      }
+      leaf ha-operational-status {
+        type uint16 {
+          range "8|9|10";
+        }
+        config false;
+        description
+          "
+          HA Oper Status of a tunnel:
+
+           8 : HA Online
+           9 : HA Offline
+          10 : HA Ready
+          ";
+      }
+      leaf ficon {
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables or disables FICON emulation on the specified extension tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf ficon-xrc-acceleration {
+        when "../ficon = 1";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables or disables FICON XRC emulation. FICON XRC Emulation allows
+          XRC (IBM eXtendedRemote Copy, also known as IBM z/OS GlobalMirroring)
+          to operate effectively at extended distances.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf ficon-tape-write-acceleration {
+        when "../ficon = 1";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables or disables FICON Tape Write Pipelining. This feature improves
+          the performance of certain applications when writing to tape over
+          extended distances.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf ficon-tape-read-acceleration {
+        when "../ficon = 1";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables or disables FICON Tape Read Pipelining. This feature improves
+          performance for certain applications when reading from FICON tape over
+          extended distances.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf ficon-tin-tir-emulation {
+        when "../ficon = 1";
+        type uint8 {
+          range "0..1";
+        }
+        default "1";
+        description
+          "
+          Enables or disables FICON TIN/TIR emulation. This feature enhances
+          recovery when a TIN/TIR exchange occurs as part of a channel recovery
+          operation during tape emulation. This feature is enabled by default
+          (recommended setting).
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf ficon-device-acknowledgement-emulation {
+        when "../ficon = 1";
+        type uint8 {
+          range "0..1";
+        }
+        default "1";
+        description
+          "
+          Enables or disables FICON Device Level Acknowledgement emulation. This
+          feature is applicable to both FICON Disk and Tape configurations. The
+          feature removes one network round trip for exchanges that end with a
+          Device Level Acknowledgement frame from the device. This feature is
+          enabled by default (recommended setting).
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf ficon-read-block-id-emulation {
+        when "../ficon = 1";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables or disables FICON read Tape Read Block ID emulation. This
+          feature permits FICON write channel programs containing embedded read
+          block ID commands (CCWs) with a byte count of exactly four bytes to be
+          processed as emulated commands during write emulation processes.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf ficon-teradata-read-acceleration {
+        when "../ficon = 1";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables or disables FICON Read Emulation for a Teradata server on the
+          specified extension tunnel.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf ficon-teradata-write-acceleration {
+        when "../ficon = 1";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables or disables FICON Write Emulation for a Teradata server on the
+          specified extension tunnel.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf ficon-tape-write-max-pipe {
+        when "../ficon = 1";
+        type uint32 {
+          range "1..100";
+        }
+        default "32";
+        description
+          "
+          Defines the maximum number of tape write channel commands (CCWs) that
+          can enter the write pipeline for a single device whether all the CCWs
+          are bundled in a single channel program or in multiple channel
+          programs.
+
+          The setting has significance only for host (channel) initiated
+          operations at this side and will not affect tape write operations
+          initiated by hosts (channels) attached at the opposite side.
+          Too small of a value will result in poor performance. The value should
+          be chosen based upon the typical tape channel program that requires
+          optimum performance.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+          ";
+      }
+      leaf ficon-tape-read-max-pipe {
+        when "../ficon = 1";
+        type uint32 {
+          range "1..100";
+        }
+        default "32";
+        description
+          "
+          Defines the maximum number of tape read channel commands (CCWs) that
+          can enter the read pipeline for a single device whether all the CCWs
+          are bundled in a single channel program or in multiple channel
+          programs. The setting has significance only for host (channel)
+          initiated operations at this side and will not affect tape write
+          operations initiated by hosts (channels) attached at the opposite
+          side. Too small of a value will result in poor performance. The value
+          should be chosen based upon the typical tape channel program that
+          requires optimum performance.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+          ";
+      }
+      leaf ficon-tape-write-max-devices {
+        when "../ficon = 1";
+        type uint32 {
+          range "1..32";
+        }
+        default "16";
+        description
+          "
+          Defines the maximum number of concurrent emulated tape write
+          operations. As concurrency increases, the value of emulation
+          decreases. Excessive concurrency has the potential to oversubscribe
+          packet data memory. The setting has significance only for host
+          (channel) initiated operations at this side and will not affect tape
+          write operations initiated by hosts (channels) attached.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+          ";
+      }
+      leaf ficon-tape-read-max-devices {
+        when "../ficon = 1";
+        type uint32 {
+          range "1..32";
+        }
+        default "16";
+        description
+          "
+          Defines the maximum number of concurrent emulated tape read
+          operations. As concurrency increases, the value of emulation
+          decreases. Excessive concurrency has the potential to oversubscribe
+          packet data memory. The setting has significance only for host
+          (channel) initiated operations at this side and will not affect tape
+          read operations initiated by hosts (channels) attached at the opposite
+          side.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+          ";
+      }
+      leaf ficon-tape-write-timer {
+        when "../ficon = 1";
+        type uint32 {
+          range "100..1500";
+        }
+        units "milliseconds";
+        default "300";
+        description
+          "
+          Defines a time limit for pipelined write chains. This value is
+          specified in milliseconds (ms). If a pipelined write chain takes
+          longer than this value to complete, the ending status for the next
+          write chain will be withheld from the channel. This limits processing
+          to what the network and device can support. Too small a value limits
+          pipelining performance. Too large a value results in too much data
+          being accepted for one device on a path.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+          ";
+      }
+      leaf ficon-tape-write-max-chain {
+        when "../ficon = 1";
+        type uint32 {
+          range "1000000..5000000";
+        }
+        units "byte";
+        default "3200000";
+        description
+          "
+          Defines the maximum amount of data that can be contained in a single
+          CCW chain in bytes. If this value is exceeded, emulation is suspended.
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+          ";
+      }
+      leaf ficon-oxid-base {
+        when "../ficon = 1";
+        type uint32 {
+          range "0|4096|8192|12288|16384|20480|24576|28672|32768|" +
+                "36864|40960|45056|49152|53248";
+        }
+        default "36864";
+        description
+          "
+          Defines the base value of an entry pool of 256 OXIDs supplied to
+          emulation-generated exchanges. It should fall outside the range used
+          by FICON channels and devices to avoid conflicts.
+
+          The default value is 0x9000 (recommended setting).
+
+          This field is valid only if FICON emulation is enabled on the
+          specified tunnel.
+          ";
+      }
+      leaf ip-extension {
+        type uint16 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Enables or disables IP Extension capability of a tunnel.
+
+          Possible values:
+
+          0 : Disable
+          1 : Enable
+          ";
+      }
+      leaf load-level {
+        type tunnel-load-level;
+        description
+          "
+          Specifies spillover or failover load-balancing method. The default
+          load-balancing method is 'failover'.
+
+          Possible values are:
+
+            'default', 'failover' and 'spillover'
+          ";
+      }
+      leaf active-load-level {
+        type tunnel-load-level;
+        config false;
+        description
+          "Load level value currently active on the tunnel.";
+      }
+      leaf peer-load-level {
+        type tunnel-load-level;
+        config false;
+        description
+          "Specifies the load level configured on the peer-end of the tunnel.";
+      }
+      leaf compression-tunnel {
+        type uint16 {
+          range "0|3..5";
+        }
+        default "0";
+        description
+          "
+          Configures compression on the specified tunnel.
+          The value (5 : Fast Deflate) is only supported on SX6 and 7840.
+
+          0 : Off (Compression disabled)
+          3 : Deflate
+          4 : Aggressive Deflate
+          5 : Fast Deflate
+          ";
+      }
+      container compression-protocol {
+        when "../ip-extension = 1";
+        description
+          "This property denotes the FC/IP compression mode for the tunnel.";
+        leaf fc-compression {
+          type string {
+            pattern "(-1|0|3|4|5)";
+          }
+          description
+            "
+            Specifies FC compression on the specified tunnel. It will return -1
+            when default or otherwise the configured compression set for
+            FC protocol.
+
+            The value (5 : Fast Deflate) is only supported on SX6 and 7840.
+
+            Specifies one of the following values for compression_level:
+
+            -1 : Default (Enable default compression level specified in
+                 compression-tunnel attribute)
+             0 : Off (Compression disabled)
+             3 : Deflate
+             4 : Aggressive Deflate
+             5 : Fast Deflate
+            ";
+        }
+        leaf ip-compression {
+          type string {
+            pattern "(-1|0|3|4)";
+          }
+          description
+            "
+            Specifies IP compression on the specified tunnel. It will return -1
+            when default or otherwise the configured compression set for
+            IP protocol.
+
+            Specifies one of the following values for compression_level:
+
+            -1 : Default (Enable default compression level specified in
+                 compression-tunnel attribute)
+             0 : Off (Compression disabled)
+             3 : Deflate
+             4 : Aggressive Deflate
+            ";
+        }
+      }
+      container qos-ratio {
+        description
+          "Specifies tunnel bandwidth distribution values.";
+        leaf distribution {
+          when "../../ip-extension = 1";
+          type string {
+            pattern "([1-2])";
+          }
+          description
+            "
+            Specifies tunnel bandwidth distribution mode:
+
+            1 : Default, for FCIP mode
+            2 : Protocol, for Hybrid mode
+            ";
+        }
+        leaf distribution-value {
+          when "../../ip-extension = 1";
+          type union {
+            type string {
+              length "0";
+            }
+            type string {
+              pattern "(([0-9]|[1-9][0-9]|100),([0-9]|[1-9][0-9]|100))";
+            }
+          }
+          description
+            "
+            Specifies values for bandwidth distribution:
+
+            '' - for FCIP mode (zero-length string is used for FCIP mode),
+            '<Percentage-for-FC-bandwidth>,<Percentage-for-IP-bandwidth>' -
+            for Hybrid mode.
+
+            For example, the value in case of Hybrid mode will be '50,50'.
+            ";
+        }
+        leaf fc-high-qos {
+          type string {
+            pattern "([1-7][0-9]|80)";
+          }
+          default "50";
+          description
+            "
+            Specifies QoS percentage for FC high priority. Each priority can
+            have a minimum of 10%. The sum of percentages must equal 100%.
+            ";
+        }
+        leaf fc-medium-qos {
+          type string {
+            pattern "([1-7][0-9]|80)";
+          }
+          default "30";
+          description
+            "
+            Specifies QoS percentage for FC medium priority. Each priority can
+            have a minimum of 10%. The sum of percentages must equal 100%.
+            ";
+        }
+        leaf fc-low-qos {
+          type string {
+            pattern "([1-7][0-9]|80)";
+          }
+          default "20";
+          description
+            "
+            Specifies QoS percentage for FC low priority. Each priority can have
+            a minimum of 10%. The sum of percentages must equal 100%.
+            ";
+        }
+        leaf ip-high-qos {
+          when "../../ip-extension = 1";
+          type string {
+            pattern "([1-7][0-9]|80)";
+          }
+          default "50";
+          description
+            "
+            Specifies QoS percentage for IP high priority. Each priority can
+            have a minimum of 10%. The sum of percentages must equal 100%.
+
+            This field is valid only if IP extension is enabled on the tunnel.
+            ";
+        }
+        leaf ip-medium-qos {
+          when "../../ip-extension = 1";
+          type string {
+            pattern "([1-7][0-9]|80)";
+          }
+          default "30";
+          description
+            "
+            Specifies QoS percentage for IP medium priority. Each priority can
+            have a minimum of 10%. The sum of percentages must equal 100%.
+
+            This field is valid only if IP extension is enabled on the tunnel.
+            ";
+        }
+        leaf ip-low-qos {
+          when "../../ip-extension = 1";
+          type string {
+            pattern "([1-7][0-9]|80)";
+          }
+          default "20";
+          description
+            "
+            Specifies QoS percentage for IP low priority. Each priority can have
+            a minimum of 10%. The sum of percentages must equal 100%.
+
+            This field is valid only if IP extension is enabled on the tunnel.
+            ";
+        }
+      }
+    }
+    list extension-tunnel-statistics {
+      key "name";
+      config false;
+      description
+        "Represents tunnel statistics for extension blade or system.";
+      leaf name {
+        type ve-interface-type;
+        description
+          "The name of the interface.";
+      }
+      leaf flow-status {
+        type uint16 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          Flow control status:
+
+          0 : flow control is off
+          1 : flow control is on
+          ";
+      }
+      leaf operational-status {
+        type operational-type;
+        config false;
+        description
+          "Tunnel operational status.";
+      }
+      leaf connection-count {
+        type yang:zero-based-counter32;
+        config false;
+        description
+          "Active connection count.";
+      }
+      leaf duration {
+        type uint32;
+        units "seconds";
+        config false;
+        description
+          "Connection duration (in seconds).";
+      }
+      leaf uncompressed-bytes {
+        type yang:zero-based-counter64;
+        units "byte";
+        config false;
+        description
+          "Uncompressed Bytes.";
+      }
+      leaf compressed-bytes {
+        type yang:zero-based-counter64;
+        units "byte";
+        config false;
+        description
+          "Compressed Bytes.";
+      }
+    }
+    list extension-circuit {
+      key "name circuit-id";
+      description
+        "Represents circuit interface for extension blade or system.";
+      leaf name {
+        type ve-interface-type;
+        description
+          "The name of the interface.";
+      }
+      leaf circuit-id {
+        type uint16 {
+          range "0..9";
+        }
+        description
+          "Circuit identifier.
+           In case of 7810 the range is restricted to 0..5.
+          ";
+      }
+      leaf local-ip-address {
+        type inet:ip-address;
+        description
+          "Specifies the local IP address to use for the circuit.";
+      }
+      leaf remote-ip-address {
+        type inet:ip-address;
+        description
+          "Specifies the remote IP address to use for the circuit.";
+      }
+      leaf metric {
+        type uint32 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Specifies the metric for the configured circuit. A lower metric
+          assigns a higher priority to the circuit. As data is flowing through
+          the extension  tunnel, it automatically traverses the lowest metric
+          cost circuits. For example, if a tunnel has four circuits, three of
+          which are set to a metric of 0 and one is set to a metric of 1, all
+          data will flow over the metric 0 circuits.
+
+          This parameter is meaningful only, if you configure more than one
+          circuit.
+
+          0 : Primary
+          1 : Failover
+          ";
+      }
+      leaf failover-group-id {
+        type uint32 {
+          range "0..9";
+        }
+        default "0";
+        description
+          "
+          Specifies the failover group ID for the configured circuit. The
+          circuit failover groups must be defined at both ends of the extension
+          tunnel and each failover group should include at least one metric 0
+          and one metric 1 circuit. If all metric 0 circuits in the failover
+          group go down, the transmission fails over to the metric 1 circuits in
+          the group. If all metric 0 circuits in a tunnel go down, by default
+          the traffic will run over the metric 1 circuits. This field has no
+          meaning when load level for the tunnel is 'spillover'.
+          ";
+      }
+      leaf admin-enabled {
+        type uint8 {
+          range "0..5";
+        }
+        default "1";
+        description
+          "
+          Is Circuit admin status enabled. Default: 1,
+          Values supported are 0..5 However user is  not allowed to
+          set all of them as some of them are Internal RO states.
+          Supported configure values are Disabled and Enabled only.
+          Internal values are Config, HA-disabled, Fenced and Test.
+
+          0 - Disabled
+          1 - Enabled
+          2 - Config
+          3 - HA-disabled
+          4 - Fenced
+          5 - Test.
+          ";
+      }
+      leaf path-mtu-discovered {
+        type uint32 {
+          range "1280..9216";
+        }
+        config false;
+        description
+          "
+          Discovered Path MTU value. This field is valid only when Path MTU
+          discovery is enabled.
+          ";
+      }
+      leaf minimum-communication-rate {
+        type uint32 {
+          range "0|20000..10000000";
+        }
+        units "kbps";
+        default "0";
+        description
+          "
+          Minimum Communication Rate of the tunnel in kbps. You can set a
+          minimum and a maximum for the committed rate to configure the tunnel
+          for Adaptive Rate Limiting (ARL), which allows for a more effective
+          sharing of bandwidth between applications. The maximum committed rate
+          can be no larger than five times the minimum committed rate, and both
+          sides of the circuit must have matching configurations.
+
+          The range on 7810 is restricted to 0|20000..2500000.
+          ";
+      }
+      leaf maximum-communication-rate {
+        type uint32 {
+          range "0|20000..10000000";
+        }
+        units "kbps";
+        default "0";
+        description
+          "
+          Maximum Communication Rate of the tunnel in kbps. You can set a
+          minimum and a maximum for the committed rate to configure the tunnel
+          for Adaptive Rate Limiting (ARL), which allows for a more effective
+          sharing of bandwidth between applications. The maximum committed rate
+          can be no larger than five times the minimum committed rate, and both
+          sides of the circuit must have matching configurations.
+
+          The range on 7810 is restricted to 0|20000..2500000.
+          ";
+      }
+      leaf keep-alive-timeout {
+        type uint32 {
+          range "500..7200000";
+        }
+        units "milliseconds";
+        description
+          "
+          Specifies the keep alive timeout in milliseconds. If the tunnel does
+          not already have FICON Emulation enabled, circuits created on the
+          tunnel default to the the keep alive timeout of 6000 ms (6 seconds).
+          If FICON emulation is enabled on the extension tunnel when a circuit
+          is created, the keep alive timeout defaults to 1000 ms (1 seconds).
+          ";
+      }
+      leaf vlan-id {
+        type uint32 {
+          range "0|1..4095";
+        }
+        config false;
+        description
+          "Specifies the VLAN ID. When not set, this value will show up as 0.";
+      }
+      container l2-cos {
+        description
+          "
+          L2 class of service/priority as defined by IEEE 802.1p for
+          the tunnel.
+          ";
+        leaf priority-control {
+          type string {
+            pattern "([0-7])";
+          }
+          default "0";
+          description
+            "
+            Specifies the Layer 2 Class of Service (L2CoS) value for F-Class
+            Traffic. This priority setting controls connections between
+            switches.
+            ";
+        }
+        leaf fc-priority-high {
+          type string {
+            pattern "([0-7])";
+          }
+          default "0";
+          description
+            "Specifies the L2CoS value for FC High Priority Traffic.";
+        }
+        leaf fc-priority-medium {
+          type string {
+            pattern "([0-7])";
+          }
+          default "0";
+          description
+            "Specifies the L2CoS value for FC  Medium Priority Traffic.";
+        }
+        leaf fc-priority-low {
+          type string {
+            pattern "([0-7])";
+          }
+          default "0";
+          description
+            "Specifies the L2CoS value for FC Low Priority Traffic.";
+        }
+        leaf ip-priority-high {
+          when "../../../extension-tunnel[name = ../../name]/ip-extension = 1";
+          type string {
+            pattern "([0-7])";
+          }
+          default "0";
+          description
+            "Specifies the L2CoS value for IP High Priority Traffic.";
+        }
+        leaf ip-priority-medium {
+          when "../../../extension-tunnel[name = ../../name]/ip-extension = 1";
+          type string {
+            pattern "([0-7])";
+          }
+          default "0";
+          description
+            "Specifies the L2CoS value for IP Medium Priority Traffic.";
+        }
+        leaf ip-priority-low {
+          when "../../../extension-tunnel[name = ../../name]/ip-extension = 1";
+          type string {
+            pattern "([0-7])";
+          }
+          default "0";
+          description
+            "Specifies the L2CoS value for IP Low Priority Traffic.";
+        }
+      }
+      container dscp {
+        description
+          "
+          The Internet Protocol (IP) Differentiated Services Code Point markings
+          for frames.
+          ";
+        leaf priority-control {
+          type string {
+            pattern "([0-9]|[1-5][0-9]|6[0-3])";
+          }
+          default "0";
+          description
+            "
+            Specifies the DSCP value for F-Class Traffic.
+            The range is 0 to 63.
+            ";
+        }
+        leaf fc-priority-high {
+          type string {
+            pattern "([0-9]|[1-5][0-9]|6[0-3])";
+          }
+          default "0";
+          description
+            "
+            Specifies the DSCP value for FC High Priority.
+            The range is 0 to 63.
+            ";
+        }
+        leaf fc-priority-medium {
+          type string {
+            pattern "([0-9]|[1-5][0-9]|6[0-3])";
+          }
+          default "0";
+          description
+            "
+            Specifies the DSCP value for FC Medium Priority.
+            The range is 0 to 63.
+            ";
+        }
+        leaf fc-priority-low {
+          type string {
+            pattern "([0-9]|[1-5][0-9]|6[0-3])";
+          }
+          default "0";
+          description
+            "
+            Specifies the DSCP value for FC Low Priority.
+            The range is 0 to 63.
+            ";
+        }
+        leaf ip-priority-high {
+          when "../../../extension-tunnel[name = ../../name]/ip-extension = 1";
+          type string {
+            pattern "([0-9]|[1-5][0-9]|6[0-3])";
+          }
+          default "0";
+          description
+            "
+            Specifies the DSCP value for IP High Priority.
+            The range is 0 to 63.
+            ";
+        }
+        leaf ip-priority-medium {
+          when "../../../extension-tunnel[name = ../../name]/ip-extension = 1";
+          type string {
+            pattern "([0-9]|[1-5][0-9]|6[0-3])";
+          }
+          default "0";
+          description
+            "
+            Specifies the DSCP value for IP Medium Priority.
+            The range is 0 to 63.
+            ";
+        }
+        leaf ip-priority-low {
+          when "../../../extension-tunnel[name = ../../name]/ip-extension = 1";
+          type string {
+            pattern "([0-9]|[1-5][0-9]|6[0-3])";
+          }
+          default "0";
+          description
+            "
+            Specifies the DSCP value for IP Low Priority.
+            The range is 0 to 63.
+            ";
+        }
+      }
+      leaf circuit-status {
+        type operational-type;
+        config false;
+        description
+          "Circuit operational status";
+      }
+      leaf local-ha-ip-address {
+        type inet:ip-address;
+        description
+          "Specifies the local HA IP address to use for the circuit.
+           This HA configuration is only supported on 7840 and SX6.
+          ";
+      }
+      leaf remote-ha-ip-address {
+        type inet:ip-address;
+        description
+          "Specifies the remote HA IP address to use for the circuit.";
+      }
+      leaf arl-algorithm-mode {
+        type uint32 {
+          range "0..3";
+        }
+        default "0";
+        description
+          "
+          Specifies Adaptive Rate Limiting (ARL) algorithm.
+
+          Allowable modes are:
+
+          0 : auto
+          1 : reset
+          2 : step-down
+          3 : timed-step-down
+          ";
+      }
+    }
+    list extension-circuit-statistics {
+      key "name circuit-id";
+      config false;
+      description
+        "Represents circuit statistics for extension blade or system.";
+      leaf name {
+        type ve-interface-type;
+        description
+          "The name of the interface.";
+      }
+      leaf circuit-id {
+        type uint16 {
+          range "0..9";
+        }
+        description
+          "Circuit identifier.";
+      }
+      leaf flow-status {
+        type uint16 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          Flow control status:
+
+          0 : flow control is off
+          1 : flow control is on
+          ";
+      }
+      leaf operational-status {
+        type operational-type;
+        config false;
+        description
+          "Circuit operational status.";
+      }
+      leaf connection-count {
+        type yang:zero-based-counter32;
+        config false;
+        description
+          "Active connection count.";
+      }
+      leaf duration {
+        type uint32;
+        units "seconds";
+        config false;
+        description
+          "Connection duration (in seconds).";
+      }
+      leaf out-packet-lost {
+        type yang:zero-based-counter64;
+        units "tcp packets";
+        config false;
+        description
+          "Number of TCP packets lost because of delay/drop in the Network.";
+      }
+      leaf out-packet-total {
+        type yang:zero-based-counter64;
+        units "tcp packets";
+        config false;
+        description
+          "Number of total TCP packets sent out in the Network.";
+      }
+    }
+  }
+}

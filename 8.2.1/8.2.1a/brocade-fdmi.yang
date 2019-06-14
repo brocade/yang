@@ -1,0 +1,730 @@
+module brocade-fdmi {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fdmi";
+  prefix fdmi;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-fdmi', which provides
+    a detailed view of Fabric Device Management Interface (FDMI).
+    FDMI enables discovery of devices such as Fibre Channel
+    Host Bus Adapters (HBAs).
+
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-07-06 {
+    description
+      "
+      FOS 8.2.0a
+      -----
+        Initial release
+
+      FOS 8.2.1
+      -----
+        Formatting
+        Organization information
+      ";
+    reference
+      "
+      ANSI INCITS 548-2017, Fibre Channel - Generic Services - 8
+      (FC-GS-8).
+
+      ANSI INCITS 511-2016, Fibre Channel - Switch Fabric - 6
+      (FC-SW-6).
+
+      ANSI INCITS 508-2014, Storage Management - Host Bus
+      Adapter Application Programming Interface - 2nd Generation
+      (SM-HBA-2)
+      ";
+  }
+
+  container brocade-fdmi {
+    config false;
+    description
+      "A detailed view of Fabric Device Management Interface (FDMI).";
+    list hba {
+      key "hba-id";
+      description
+        "List of HBA attributes registered with FDMI.";
+      leaf hba-id {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The hba-id resource is a 64-bit Name_Identifier that is uniquely
+          associated with the HBA among all HBAs in the same Fibre Channel
+          interaction space (see FC-FS). The HBA Identifier for an HBA
+          may be the same as the Name_Identifier of an Nx_Port on the HBA
+          if the required persistence is satisfied. Once an HBA has
+          registered a Name_Identifier as its HBA Identifier, that
+          Name_Identifier persists (e.g., across power cycles) as the HBA
+          Identifier for the HBA.
+          ";
+      }
+      leaf domain-id {
+        type fibrechannel:domain-id-type;
+        description
+          "
+          The domain-id resource is the domain the HBA is directly attached to.
+          ";
+      }
+      leaf manufacturer {
+        type string {
+          length "1..63";
+          pattern "[ -~]{1,63}";
+        }
+        description
+          "
+          The manufacturer resource contains a Printable ASCII String that
+          specifies the manufacturer of the host adapter. The value may
+          match the name by which the manufacturer identifies itself in
+          a telephone directory. The registration of this attribute is
+          optional.
+          ";
+      }
+      leaf serial-number {
+        type string {
+          length "1..63";
+          pattern "[ -~]{1,63}";
+        }
+        description
+          "
+          The serial-number resource contains a Printable ASCII String that
+          specifies the serial number of the host adapter. The value
+          should match a serial number engraved or printed on the host
+          bus adapter, if there is any. The registration of this attribute
+          is optional.
+          ";
+      }
+      leaf model {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The model resource contains a Printable ASCII String that specifies
+          the model of the host adapter. The value may match an encoded
+          string used on purchase orders to identify the host adapter
+          model. Some management applications limit this resource to 63
+          bytes. The registration of this attribute is optional.
+          ";
+      }
+      leaf model-description {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The Model Description resource contains a printable ASCII string
+          that describes the model of the host adapter. The value may
+          provide more detailed or human oriented identification of the
+          model of the host bus adapter than the model resource does.
+          The registration of this attribute is optional.
+          ";
+      }
+      leaf node-name {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The node-name resource contains an 8 byte value that identifies
+          the node that contains the Nx_Ports on the host adapter. If
+          all Nx_Ports on the host bus adapter have the same node name,
+          the node-name resource returned for the host bus adapter shall
+          match the node-name resource for its Nx_Ports. If not all
+          Nx_Ports on the host bus adapter have the same node name, the
+          node-name resource will not be returned.
+          ";
+      }
+      leaf node-symbolic-name {
+        type string {
+          length "4..255";
+          pattern "[ -~]{4,255}";
+        }
+        description
+          "
+          The node-symbolic-name resource is the name registered with the
+          Name Server as a Name Server Symbolic Node Name object and is
+          subject to all the description and constraints of that object.
+          If not all Nx_Ports on the host bus adapter have the same node
+          name, the node-symbolic-name resource will not be returned.
+          The registration of this attribute is optional.
+          ";
+      }
+      leaf hardware-version {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The hardware-version resource contains a Printable ASCII String
+          that identifies the hardware version level of the host adapter.
+          Some management applications limit this to a length of 63
+          characters. The registration of this attribute is optional.
+          ";
+      }
+      leaf driver-version {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The driver-version resource contains a Printable ASCII String that
+          identifies the version level of the driver software controlling
+          a host adapter. If a host bus adapter is concurrently under
+          control of multiple driver software modules with different
+          versions, this resource may indicate the versions for more than
+          one driver module. The registration of this attribute is
+          optional.
+          ";
+      }
+      leaf option-rom-version {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The option-rom-version resource contains a Printable ASCII String
+          that identifies the option ROM or BIOS version of a host
+          adapter. The registration of this attribute is optional.
+          ";
+      }
+      leaf firmware-version {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The firmware-version resource contains a Printable ASCII String
+          that identifies the version of firmware executed by a host
+          adapter. If a host bus adapter contains and has the capability
+          to execute multiple firmware modules with different versions,
+          this resource may indicate the versions for more than one
+          firmware module. The registration of this attribute is
+          optional.
+          ";
+      }
+      leaf os-name-and-version {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The os-name-and-version resource contains a Printable ASCII String
+          that describes the type and version of the operating system
+          controlling the host bus adapter. The registration of this
+          attribute is optional.
+          ";
+      }
+      leaf max-ct-payload {
+        type uint32 {
+          range "0..max";
+        }
+        description
+          "
+          The max-ct-payload resource is 32-bit unsigned integer equal to
+          the maximum size CT payload in 32-bit words, including all CT
+          headers but no FC frame header(s), that may be sent or received
+          by application software resident in the host in which the host
+          bus adapter is installed. If the host bus adapter does not
+          support generic CT capability for application software on the
+          host in which it is installed, this resource will not be
+          returned. The registration of this attribute is optional.
+          ";
+      }
+      leaf vendor-id {
+        type string {
+          length "1..8";
+          pattern "[ -~]{1,8}";
+        }
+        description
+          "
+          The vendor-id resource contains the T10 Vendor ID of the
+          manufacturer of the HBA, or an OEM of the HBA. The registration
+          of this attribute is optional.
+          ";
+      }
+      leaf vendor-specific-info {
+        type fibrechannel:brocade-hex-string-type {
+		  length "10";
+        }
+        description
+          "
+          The vendor-specific-info resource contains a value with vendor
+          specific use. The registration of this attribute is optional.
+          ";
+      }
+      leaf number-of-ports {
+        type uint32 {
+          range "0..max";
+        }
+        description
+          "
+          The number-of-ports resource contains a value equal to the number
+          of Nx_Ports on the HBA. The registration of this attribute is
+          optional.
+          ";
+      }
+      leaf fabric-name {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The fabric-name resource contains an 8 byte binary value equal to
+          the Fabric_Name of the Fabric associated with the HBA. If the
+          HBA is associated with more than one Fabric, this resource will
+          not be provided. The registration of this attribute is optional.
+          ";
+      }
+      leaf boot-bios-version {
+        type string {
+          length "4..255";
+          pattern "[ -~]{4,255}";
+        }
+        description
+          "
+          The boot-bios-version resource contains a Printable ASCII String
+          that describes the identification and version of a boot BIOS
+          provided by the HBA. The registration of this attribute is
+          optional.
+          ";
+      }
+      leaf boot-bios-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          The boot-bios-enabled resource indicates whether a boot BIOS
+          provided by the HBA is enabled or disabled. The registration
+          of this attribute is optional.
+
+          0 : Disabled
+          1 : Enabled
+          ";
+      }
+      container hba-port-list {
+        description
+          "
+          A list of port WWNs associated with the HBA. Corresponds with the
+          port-name resource under the port list.
+          ";
+        leaf-list wwn {
+          type fibrechannel:wwn-type;
+          description
+            "
+            The WWN of the port on the HBA. Corresponds to the port-name
+            resource under the port list.
+            ";
+        }
+      }
+    }
+    list port {
+      key "port-name";
+      description
+        "List of HBA port attributes registered with FDMI.";
+      leaf port-name {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The port-name resource contains a WWN that identifies the port
+          associated with the host bus adapter specified by the hba-id
+          resource.
+          ";
+      }
+      leaf hba-id {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The hba-id resource is a 64-bit Name_Identifier that is uniquely
+          associated with the HBA among all HBAs in the same Fibre Channel
+          interaction space (see FC-FS). The HBA Identifier for an HBA may
+          be the same as the Name_Identifier of an Nx_Port on the HBA if
+          the required persistence is satisfied. Once an HBA has registered
+          a Name_Identifier as its HBA Identifier, that Name_Identifier
+          persists (e.g., across power cycles) as the HBA Identifier for
+          the HBA. Corresponds to the hba-id resource under the hba list.
+          ";
+      }
+      leaf domain-id {
+        type fibrechannel:domain-id-type;
+        description
+          "
+          The domain-id resource is the domain the HBA port is directly
+          attached to.
+          ";
+      }
+      leaf port-symbolic-name {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The port-symbolic-name resource is the Symbolic Port Name object
+          registered with the Name Server and is subject to all the
+          description and constraints of that object as defined in FC-GS. The
+          registration of this attribute is optional.
+          ";
+      }
+      leaf port-id {
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "
+          The port-id resource is the Port Identifier object registered with
+          the Name Server and is subject to all the description and
+          constraints of that object as defined in FC-GS. The registration of
+          this attribute is optional.
+          ";
+      }
+      leaf port-type {
+        type fibrechannel:port-type-string-type;
+        description
+          "
+          The port-type resource is the Port Type object registered with the
+          Name Server and is subject to all the description and constraints
+          of that object as defined in FC-GS. The registration of this
+          attribute is optional.
+          ";
+      }
+      leaf supported-class-of-service {
+        type fibrechannel:class-of-service-type;
+        description
+          "
+          The supported-class-of-service resource is the Class of Service
+          object registered with the Name Server and is subject to all the
+          description and constraints of that object as defined in FC-GS. The
+          registration of this attribute is optional.
+          ";
+      }
+      leaf supported-fc4-type {
+        type fibrechannel:fc4-type-type;
+        description
+          "
+          The supported-fc4-type resource indicates support for any FC-4 type
+          that the Nx_Port is able to be configured to support. The
+          registration of this attribute is optional.
+          ";
+      }
+      leaf active-fc4-type {
+        type fibrechannel:fc4-type-type;
+        description
+          "
+          The active-fc4-type resource is the FC-4 Types object registered with
+          the Name Server and is subject to all the description and
+          constraints of that object as defined in FC-GS. The resource
+          indicates support for any FC-4 type that the Nx_Port is currently
+          configured to support. The registration of this attribute is
+          optional.
+          ";
+      }
+      leaf supported-speed {
+        type fibrechannel:speed-type;
+        description
+          "
+          The supported-speed resource indicates the supported transmission
+          speeds of the Nx_Port. The registration of this attribute is
+          optional.
+          ";
+      }
+      leaf current-port-speed {
+        type fibrechannel:speed-type;
+        description
+          "
+          The current-port-speed resource indicates the current transmission
+          speed of the Nx_Port. If the HBA Management Server is able to
+          determine a speed, the value returned for the current-port-speed
+          resource will be the speed determined by the HBA Management
+          Server, regardless of any value registered. The registration of this
+          attribute is optional.
+          ";
+      }
+      leaf maximum-frame-size {
+        type uint32 {
+          range "0..max";
+        }
+        description
+          "
+          The maximum-frame-size resource is a 32-bit unsigned integer the
+          value of which is the maximum FC frame payload in bytes. This does
+          not include the FC header but includes any optional headers. The
+          registration of this attribute is optional.
+          ";
+      }
+      leaf os-device-name {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The os-device-name resource contains a Printable ASCII String that is
+          recognized as a reference to the Nx_Port by the OS that controls
+          it. If there are several such OS device names that reference the
+          same Nx_Port, this resource may be a comma-separated list of as
+          many such names as fit in 255 bytes. The registration of this
+          attribute is optional.
+          ";
+      }
+      leaf host-name {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          The host-name resource contains a Printable ASCII String that
+          describes the name of the host associated with the Nx_Port. If
+          there are several such names that reference the same host, this
+          resource may be a comma-separated list of as many such names  as
+          fit in 255 bytes. The registration of this attribute is optional.
+          ";
+      }
+      leaf node-name {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The node-name resource contains an 8 byte value that identifies the
+          node that contains the Nx_Port. The node_name resource is equal
+          to the Node_Name registered with the Name Server for the Nx_Port.
+          ";
+      }
+      leaf fabric-name {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The fabric-name resource contains an 8 byte binary value equal to the
+          Fabric_Name of the Fabric associated with the Nx_Port (see FC-SW).
+          The registration of this attribute is optional.
+          ";
+      }
+      leaf port-state {
+        type fibrechannel:brocade-hex-string-type {
+	   length "3..10";
+        }
+        description
+          "
+          The port-state resource is the the Port State (see SM-HBA) for the
+          specified Nx_Port. The port-state is an integer where the value
+          indicates the current state of the Nx_Port. The sequence and
+          timing of port-states that are exhibited due to  errors or
+          transient conditions is vendor specific. The registration of this
+          attribute is optional.
+
+          0x0 : Undefined
+          0x1 : Unknown
+          0x2 : Fully Operational
+          0x3 : Administratively Offline
+          0x4 : Bypassed
+          0x5 : In Diagnostics Mode
+          0x6 : Link Down
+          0x7 : Phy Error
+          0x8 : Loopback
+          0x9 : Degraded, but Operational Mode
+          ";
+      }
+      leaf number-of-discovered-ports {
+        type uint32 {
+          range "0..max";
+        }
+        description
+          "
+          The number-of-discovered-ports resource is the number of FC_Ports
+          that are visible to the Nx_Port identified in the request. At a
+          minimum, this is the number of FC_Ports mapped to a device, but
+          may not reflect all of the nodes on a network. The registration of
+          this attribute is optional.
+          ";
+      }
+      leaf vsa-service-category {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          Vendor-Specific service category resource. The registration of this
+          attribute is optional.
+          ";
+      }
+      leaf vsa-guid {
+        type string {
+          length "1..34";
+          pattern "[ -~]{1,34}";
+        }
+        description
+          "
+          Vendor-Specific guid resource. The registration of this attribute
+          is optional.
+          ";
+      }
+      leaf vsa-version {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          Vendor-Specific version resource. The registration of this attribute
+          is optional.
+          ";
+      }
+      leaf vsa-product-name {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        description
+          "
+          Vendor-Specific product name resource. The registration of this
+          attribute is optional.
+          ";
+      }
+      leaf vsa-port-info {
+        type string {
+          length "1..63";
+          pattern "[ -~]{1,63}";
+        }
+        description
+          "
+          Vendor-Specific port info resource. The registration of this
+          attribute is optional.
+          ";
+      }
+      leaf vsa-qos-supported {
+        type string {
+          length "1..63";
+          pattern "[ -~]{1,63}";
+        }
+        description
+          "
+          Vendor-Specific qos supported resource. The registration of this
+          attribute is optional.
+          ";
+      }
+      leaf vsa-security {
+        type string {
+          length "1..63";
+          pattern "[ -~]{1,63}";
+        }
+        description
+          "
+          Vendor-Specific security resource. The registration of this
+          attribute is optional.
+          ";
+      }
+      leaf vsa-storage-array-family {
+        type string {
+          length "1..63";
+          pattern "[ -~]{1,63}";
+        }
+        description
+          "
+          Vendor-Specific storage array family resource. The registration
+          of this attribute is optional.
+          ";
+      }
+      leaf vsa-storage-array-name {
+        type string {
+          length "1..63";
+          pattern "[ -~]{1,63}";
+        }
+        description
+          "
+          Vendor-Specific storage array name resource. The registration of
+          this attribute is optional.
+          ";
+      }
+      leaf vsa-storage-array-system-model {
+        type string {
+          length "1..63";
+          pattern "[ -~]{1,63}";
+        }
+        description
+          "
+          Vendor-Specific storage array system model resource. The
+          registration of this attribute is optional.
+          ";
+      }
+      leaf vsa-storage-array-os {
+        type string {
+          length "1..63";
+          pattern "[ -~]{1,63}";
+        }
+        description
+          "
+          Vendor-Specific storage array os resource. The registration of
+          this attribute is optional.
+          ";
+      }
+      leaf vsa-storage-array-node-count {
+        type uint32 {
+          range "0..max";
+        }
+        description
+          "
+          Vendor-Specific storage array node count resource. The registration
+          of this attribute is optional.
+          ";
+      }
+      container vsa-storage-array-nodes {
+        description
+          "A list of storage array nodes.";
+        leaf-list nodes {
+          type string {
+            length "1..255";
+            pattern "[ -~]{1,255}";
+          }
+          description
+            "
+            Vendor-Specific storage array node resource. The registration of
+            this attribute is optional.
+            ";
+        }
+      }
+      container vsa-connected-ports {
+        description
+          "A list of connected ports.";
+        leaf-list wwns {
+          type fibrechannel:wwn-type;
+          description
+            "
+            Vendor-Specific connected port resource. The registration of this
+            attribute is optional.
+            ";
+        }
+      }
+    }
+  }
+}

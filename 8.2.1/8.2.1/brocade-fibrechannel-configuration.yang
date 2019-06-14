@@ -1,0 +1,345 @@
+module brocade-fibrechannel-configuration {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fibrechannel-configuration";
+  prefix brocade-fibrechannel-configuration;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import brocade-fibrechannel-switch {
+    prefix fibrechannel-switch;
+  }
+
+  import brocade-fibrechannel-logical-switch {
+    prefix fibrechannel-logical-switch;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-fibrechannel-configuration',
+    which helps configure the given switch or director
+
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-07-31 {
+    description
+      "
+      Initial release (FOS 8.2.1)
+      Refine descriptions
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-fibrechannel-configuration {
+    description 
+      "This is the top level container of configuration parameters.";
+
+    container switch-configuration {
+      description 
+        "Provides switch configuration parameters.";
+
+      leaf trunk-enabled {
+        type boolean;
+        description 
+          "
+          Enables or disables trunking on all ports in the logical switch. 
+          At the port level, you can disable trunking using the port-level REST 
+          method. Note that this operation is persistent and disruptive for all 
+          ports in the logical switch.
+          
+		  true : Trunking is enabled on all ports in the logical switch.
+		  false : Trunking is disabled on all ports in the logical switch.
+          ";
+
+      }
+      leaf wwn-port-id-mode {
+        when "fibrechannel-logical-switch:base-switch-enabled = 0";
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description 
+          "
+          Indicates whether WWN port ID mode is enabled on a switch.
+          
+          When enabled, WWN port ID mode supports both dynamic and static 
+          WWN-based PID assignment. Every time the device logs into the switch, 
+          the device is guaranteed the same PID.it is  guaranteed to get the 
+          same PID.
+          
+            true  : WWN port ID mode is enabled on the 
+            false : WWN port ID mode is disabled on the switch. 
+          ";
+      }
+      leaf edge-hold-time {
+        type uint16 {
+          range "80..500";
+        }
+        units "milliseconds";
+        description 
+          "
+          The maximum time that a frame can wait after it is received on the 
+          ingress port and before it is delivered to the egress port.
+          Initial Value is Medium (220 ms).
+          
+          For a non-default logical switch, valid values include:
+            80  : Edge Hold Time, Low (80 ms),
+            220 : Edge Hold Time, Medium (220 ms),
+            500 : Edge Hold Time. Medium (500 ms).
+          
+          For a default switch the valid values can be:
+            80..500 : User-defined values are allowed only on default switch.
+          ";
+      }
+      leaf area-mode {
+        when "fibrechannel-switch:enabled-state = 3 and 
+              (fibrechannel-logical-switch:default-switch-status = 1 or
+              (fibrechannel-logical-switch:default-switch-status = 0 and
+              fibrechannel-logical-switch:ficon-mode-enabled = 0))";
+        if-feature fibrechannel:fibrechannel_chassis_platform;
+        type uint8 {
+          range "0..2";
+        }
+        description
+          "
+          The area mode for a default switch or non-default, non-FICON logical 
+          switch. Note that the switch must be in a disabled state to configure 
+          the area mode.
+
+          For a default switch, valid values include:
+
+            0 : 10-bit addressing mode (default)
+            1 : Zero-based area assignment (8-bit address mode)
+          
+          For a non-default and non-FICON logical switch, valid values include:
+
+            0 : 10-bit addressing mode (default)
+            1 : Zero-based area assignment
+            2 : Zero-based area assignment 
+
+          A non-default logical switch with FICON mode enabled is not supported.
+          ";                                        
+      }
+    }
+    container f-port-login-settings {
+      must "fibrechannel-switch:enabled-state = 3";
+      description
+        "
+        Provides parameters for F_Port login settings. Note that the switch must
+        be in a disabled state to configure F_Port login settings.
+        ";
+      leaf max-logins {
+        type uint16 {
+          range "0..max";
+        }
+        description
+          "
+          The maximum number of allowed logins for the switch.The maximum value 
+          is determined by multiplying 126 * no_of_ports_in_switch. The initial 
+          default value is 16 * no_of_ports_in_switch.
+          ";
+      }
+      leaf max-flogi-rate-per-switch {
+        type uint16 {
+          range "0..max";
+        }
+        units "logins per second";
+        description
+          "The maximum number of FLOGIs allowed on a switch.";
+      }
+      leaf stage-interval {
+        type uint16 {
+          range "0..10000";
+        }
+        units "milliseconds";
+        description
+          "
+          The interval setting for the rate at which F_Ports are enabled.
+          ";
+      }
+      leaf free-fdisc {
+        type uint16 {
+          range "0..255";
+        }
+        description
+          "
+          The number of logins allowed before staging.
+
+          The values indicate:
+            0       : Disables the staging of FDISC logins.
+            1..255  : Enables staging and allows the specified number of logins.
+
+          This parameter, if nonzero, enables staging of FDISC logins by
+          rejecting the FDISC requests with logical busy, when the requests
+          are more than the number of configured logins per second.
+          ";
+      }
+      leaf enforce-login {
+        type uint16 {
+          range "0..2";
+        }
+        description
+          "
+          The precedence for login when 2 devices with the same port WWN (PWWN)
+          compete for login. All modes are for NPIV and non-NPIV F_Ports.
+          The initial value is 0.
+
+          The values indicate:
+            0 : The first FLOGI/FDISC login takes precedence,
+            1 : The second FLOGI/FDISC login takes precedence,
+            2 : The second FDISC login takes precedence on FDISC and
+                on FLOGI login the first FLOGI takes precedence.
+          ";
+      }
+      leaf max-flogi-rate-per-port {
+        type uint16 {
+          range "0..100";
+        }
+        units "logins per second";
+        description
+          "
+          The maximum number of logins allowed, per second, on a given port.
+          If the rate is exceeded, the port is fenced.
+          ";
+      }
+    }
+
+    container port-configuration {
+      description
+        "Port configuration parameters.";
+      leaf portname-mode {
+        type string {
+          length "0..15";
+          pattern "off|default|fdmi|dynamic";
+      	}
+      	description
+      	  "
+      	  The available port name modes:
+
+            off     : No port name configuration.
+            default : The port name corresponds to the port index.
+
+          The following modes are not available in AG mode:
+
+            fdmi    : The port name corresponds to the attached FDMI host name.
+            dynamic : The port name corresponds to the format defined by the 
+                      dynamic-portname-format leaf.
+          ";
+      }
+      leaf dynamic-portname-format {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type string {
+          length "0..13";
+          pattern "[STICAFR](([.]|_|-)[STICAFR])*";
+        }
+        description
+          "
+          The format of the dynamic port name is composed of fields that are 
+          mapped using the following characters:
+
+            S : Switch name
+            T : Port type
+            I : Port index
+            C : Slot number/port number (only applicable on the chassis)
+            A : Alias name
+            F : FDMI host name
+            R : Remote switch name
+
+          Multiple unique fields may be specified, separated by hyphens (-), 
+          periods (.), or underscores (_). Fields may not be repeated and field
+          separaters must be the same.
+          ";
+      }
+
+      leaf dynamic-d-port-enabled {
+        type boolean;
+        description
+          "
+          The port has D_Port capability but it is not explicitly configured. 
+          Tests are always initiated by the remote side of the port.
+
+            true  : Dynamic D_Port configuration is enabled.
+            false : Dynamic D_Port configuration is disabled.
+          ";
+      }
+      leaf on-demand-d-port-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+          The port has D_Port capability, but it is not explicitly configured. 
+          The test is initiated by internal events of the switch, such as
+          slotpoweroff/slotpoweron or persistentdisable/enable.
+          The port remains a D_Port until the test is successful.
+
+            true  : On demand D_Port configuration is enabled.
+            false : On demand D_Port configuration is disabled.
+          ";
+      }
+    }
+
+    container zone-configuration {
+      description
+        "Zoning configuration parameters.";
+      leaf node-name-zoning-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+          Enables or disables node name checking for zoning. The switch must be
+          disabled to change this value.
+
+            true  : Node name checking for zoning is enabled.
+            false : Node name checking for zoning is disabled.
+          ";
+      }
+    }
+
+    container fabric {
+      description
+        "Provides attributes applicable for a switch.";
+      leaf insistent-domain-id-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+          Indicates whether Insistent Domain ID (IDID) is enabled.
+          
+          For a FICON switch, this leaf is read only and you cannot update 
+          the parameter. 
+
+            true  : IDID is enabled. Switches that cannot be programmed with a 
+                    unique domain ID will segment from the fabric. Check each 
+                    switch that has IDID configured, and make sure that their 
+                    domain IDs are unique within the configuration.
+            false : IDID is disabled. The fabric automatically resolves domain 
+                    ID conflicts during fabric merges or builds unless IDID is 
+                    configured.
+          ";
+      }
+    }
+  }
+}

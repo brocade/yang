@@ -1,0 +1,107 @@
+module brocade-fru-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fru-types";
+  prefix fru;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains the collection of fru YANG types.
+
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-07-06 {
+    description
+      "
+      Initial release (FOS 8.2.1).
+      ";
+    reference
+      "None";
+  }
+
+  typedef ip-gateway-type {
+    type union {
+      type inet:ip-address;
+      type string {
+        length "1";
+        pattern "[*]";
+      }
+    }
+    description
+      "
+      Specifies the IP address of an IP router that can
+      route packets to the destination IP address. This attribute can
+      contain '*' while retrieving route entries which are created
+      internally by the system.
+      ";
+  }
+  typedef manufacturer-type {
+    type string {
+      length "1..63";
+      pattern "[ -~]*";
+    }   
+    description
+      "
+      The name of the organization responsible for producing the blade.
+      ";
+  }
+  typedef part-number-type {
+    type string {
+      length "1..14";
+      pattern "[ -~]{1,14}";
+    }
+    description
+      "
+      The part number assigned by the organization responsible for
+      producing or manufacturing the PhysicalElement.
+      ";
+  }
+  typedef serial-number-type {
+    type string {
+      length "1..12";
+      pattern "[ -~]{1,12}";
+    }
+    description
+      "
+      The serial-number resource contains a Printable ASCII String that
+      specifies the serial number of the chassis
+      ";
+  }
+  typedef firmware-version-type {
+    type string {
+      length "1..255";
+      pattern "[ -~]{1,255}";
+    }
+    description
+       "
+       A human readable string identifying the firmware version running
+       on the switch.
+       ";
+  }
+}

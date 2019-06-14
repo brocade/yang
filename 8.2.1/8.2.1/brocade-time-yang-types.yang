@@ -1,0 +1,1650 @@
+module brocade-time-yang-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-time-yang-types";
+  prefix brocade-time-type;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains the collection of security YANG types.
+
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  reference
+    "";
+
+  revision 2018-07-06 {
+    description
+      "Initial release.";
+    reference
+      "None";
+  }
+
+  typedef ts-timezone-type {
+    type enumeration {
+      enum "Africa/Abidjan" {
+        description
+          "";
+      }
+      enum "Africa/Accra" {
+        description
+          "";
+      }
+      enum "Africa/Addis_Ababa" {
+        description
+          "";
+      }
+      enum "Africa/Algiers" {
+        description
+          "";
+      }
+      enum "Africa/Asmara" {
+        description
+          "";
+      }
+      enum "Africa/Bamako" {
+        description
+          "";
+      }
+      enum "Africa/Bangui" {
+        description
+          "";
+      }
+      enum "Africa/Banjul" {
+        description
+          "";
+      }
+      enum "Africa/Bissau" {
+        description
+          "";
+      }
+      enum "Africa/Blantyre" {
+        description
+          "";
+      }
+      enum "Africa/Brazzaville" {
+        description
+          "";
+      }
+      enum "Africa/Bujumbura" {
+        description
+          "";
+      }
+      enum "Africa/Cairo" {
+        description
+          "";
+      }
+      enum "Africa/Casablanca" {
+        description
+          "";
+      }
+      enum "Africa/Ceuta" {
+        description
+          "";
+      }
+      enum "Africa/Conakry" {
+        description
+          "";
+      }
+      enum "Africa/Dakar" {
+        description
+          "";
+      }
+      enum "Africa/Dar_es_Salaam" {
+        description
+          "";
+      }
+      enum "Africa/Djibouti" {
+        description
+          "";
+      }
+      enum "Africa/Douala" {
+        description
+          "";
+      }
+      enum "Africa/El_Aaiun" {
+        description
+          "";
+      }
+      enum "Africa/Freetown" {
+        description
+          "";
+      }
+      enum "Africa/Gaborone" {
+        description
+          "";
+      }
+      enum "Africa/Harare" {
+        description
+          "";
+      }
+      enum "Africa/Johannesburg" {
+        description
+          "";
+      }
+      enum "Africa/Kampala" {
+        description
+          "";
+      }
+      enum "Africa/Khartoum" {
+        description
+          "";
+      }
+      enum "Africa/Kigali" {
+        description
+          "";
+      }
+      enum "Africa/Kinshasa" {
+        description
+          "";
+      }
+      enum "Africa/Lagos" {
+        description
+          "";
+      }
+      enum "Africa/Libreville" {
+        description
+          "";
+      }
+      enum "Africa/Lome" {
+        description
+          "";
+      }
+      enum "Africa/Luanda" {
+        description
+          "";
+      }
+      enum "Africa/Lubumbashi" {
+        description
+          "";
+      }
+      enum "Africa/Lusaka" {
+        description
+          "";
+      }
+      enum "Africa/Malabo" {
+        description
+          "";
+      }
+      enum "Africa/Maputo" {
+        description
+          "";
+      }
+      enum "Africa/Maseru" {
+        description
+          "";
+      }
+      enum "Africa/Mbabane" {
+        description
+          "";
+      }
+      enum "Africa/Mogadishu" {
+        description
+          "";
+      }
+      enum "Africa/Monrovia" {
+        description
+          "";
+      }
+      enum "Africa/Nairobi" {
+        description
+          "";
+      }
+      enum "Africa/Ndjamena" {
+        description
+          "";
+      }
+      enum "Africa/Niamey" {
+        description
+          "";
+      }
+      enum "Africa/Nouakchott" {
+        description
+          "";
+      }
+      enum "Africa/Ouagadougou" {
+        description
+          "";
+      }
+      enum "Africa/Porto-Novo" {
+        description
+          "";
+      }
+      enum "Africa/Sao_Tome" {
+        description
+          "";
+      }
+      enum "Africa/Tripoli" {
+        description
+          "";
+      }
+      enum "Africa/Tunis" {
+        description
+          "";
+      }
+      enum "Africa/Windhoek" {
+        description
+          "";
+      }
+      enum "America/Adak" {
+        description
+          "";
+      }
+      enum "America/Anchorage" {
+        description
+          "";
+      }
+      enum "America/Anguilla" {
+        description
+          "";
+      }
+      enum "America/Antigua" {
+        description
+          "";
+      }
+      enum "America/Araguaina" {
+        description
+          "";
+      }
+      enum "America/Argentina/Buenos_Aires" {
+        description
+          "";
+      }
+      enum "America/Argentina/Catamarca" {
+        description
+          "";
+      }
+      enum "America/Argentina/Cordoba" {
+        description
+          "";
+      }
+      enum "America/Argentina/Jujuy" {
+        description
+          "";
+      }
+      enum "America/Argentina/La_Rioja" {
+        description
+          "";
+      }
+      enum "America/Argentina/Mendoza" {
+        description
+          "";
+      }
+      enum "America/Argentina/Rio_Gallegos" {
+        description
+          "";
+      }
+      enum "America/Argentina/San_Juan" {
+        description
+          "";
+      }
+      enum "America/Argentina/San_Luis" {
+        description
+          "";
+      }
+      enum "America/Argentina/Tucuman" {
+        description
+          "";
+      }
+      enum "America/Argentina/Ushuaia" {
+        description
+          "";
+      }
+      enum "America/Aruba" {
+        description
+          "";
+      }
+      enum "America/Asuncion" {
+        description
+          "";
+      }
+      enum "America/Bahia" {
+        description
+          "";
+      }
+      enum "America/Barbados" {
+        description
+          "";
+      }
+      enum "America/Belem" {
+        description
+          "";
+      }
+      enum "America/Belize" {
+        description
+          "";
+      }
+      enum "America/Blanc-Sablon" {
+        description
+          "";
+      }
+      enum "America/Boa_Vista" {
+        description
+          "";
+      }
+      enum "America/Bogota" {
+        description
+          "";
+      }
+      enum "America/Boise" {
+        description
+          "";
+      }
+      enum "America/Cambridge_Bay" {
+        description
+          "";
+      }
+      enum "America/Campo_Grande" {
+        description
+          "";
+      }
+      enum "America/Cancun" {
+        description
+          "";
+      }
+      enum "America/Caracas" {
+        description
+          "";
+      }
+      enum "America/Cayenne" {
+        description
+          "";
+      }
+      enum "America/Cayman" {
+        description
+          "";
+      }
+      enum "America/Chihuahua" {
+        description
+          "";
+      }
+      enum "America/Chicago" {
+        description
+          "";
+      }
+      enum "America/Costa_Rica" {
+        description
+          "";
+      }
+      enum "America/Cuiaba" {
+        description
+          "";
+      }
+      enum "America/Curacao" {
+        description
+          "";
+      }
+      enum "America/Danmarkshavn" {
+        description
+          "";
+      }
+      enum "America/Dawson" {
+        description
+          "";
+      }
+      enum "America/Dawson_Creek" {
+        description
+          "";
+      }
+      enum "America/Denver" {
+        description
+          "";
+      }
+      enum "America/Detroit" {
+        description
+          "";
+      }
+      enum "America/Dominica" {
+        description
+          "";
+      }
+      enum "America/Edmonton" {
+        description
+          "";
+      }
+      enum "America/Eirunepe" {
+        description
+          "";
+      }
+      enum "America/El_Salvador" {
+        description
+          "";
+      }
+      enum "America/Fortaleza" {
+        description
+          "";
+      }
+      enum "America/Glace_Bay" {
+        description
+          "";
+      }
+      enum "America/Godthab" {
+        description
+          "";
+      }
+      enum "America/Goose_Bay" {
+        description
+          "";
+      }
+      enum "America/Grand_Turk" {
+        description
+          "";
+      }
+      enum "America/Grenada" {
+        description
+          "";
+      }
+      enum "America/Guadeloupe" {
+        description
+          "";
+      }
+      enum "America/Guatemala" {
+        description
+          "";
+      }
+      enum "America/Guayaquil" {
+        description
+          "";
+      }
+      enum "America/Guyana" {
+        description
+          "";
+      }
+      enum "America/Halifax" {
+	description
+	  "";
+      }
+      enum "America/Havana" {
+	description
+	  "";
+      }
+      enum "America/Hermosillo" {
+	description
+	  "";
+      }
+      enum "America/Indiana/Indianapolis" {
+        description
+          "";
+      }
+      enum "America/Indiana/Knox" {
+        description
+          "";
+      }
+      enum "America/Indiana/Marengo" {
+        description
+          "";
+      }
+      enum "America/Indiana/Petersburg" {
+        description
+          "";
+      }
+      enum "America/Indiana/Tell_City" {
+        description
+          "";
+      }
+      enum "America/Indiana/Vevay" {
+        description
+          "";
+      }
+      enum "America/Indiana/Vincennes" {
+        description
+          "";
+      }
+      enum "America/Indiana/Winamac" {
+        description
+          "";
+      }
+      enum "America/Iqaluit" {
+        description
+          "";
+      }
+      enum "America/Inuvik" {
+        description
+          "";
+      }
+      enum "America/Jamaica" {
+        description
+          "";
+      }
+      enum "America/Juneau" {
+        description
+          "";
+      }
+      enum "America/Kentucky/Monticello" {
+        description
+          "";
+      }
+      enum "America/La_Paz" {
+        description
+          "";
+      }
+      enum "America/Lima" {
+        description
+          "";
+      }
+      enum "America/Los_Angeles" {
+        description
+          "";
+      }
+      enum "America/Maceio" {
+        description
+          "";
+      }
+      enum "America/Marigot" {
+        description
+          "";
+      }
+      enum "America/Martinique" {
+        description
+          "";
+      }
+      enum "America/Manaus" {
+        description
+          "";
+      }
+      enum "America/Managua" {
+        description
+          "";
+      }
+      enum "America/Mazatlan" {
+        description
+          "";
+      }
+      enum "America/Menominee" {
+        description
+          "";
+      }
+      enum "America/Merida" {
+        description
+          "";
+      }
+      enum "America/Mexico_City" {
+        description
+          "";
+      }
+      enum "America/Moncton" {
+        description
+          "";
+      }
+      enum "America/Monterrey" {
+        description
+          "";
+      }
+      enum "America/Montreal" {
+        description
+          "";
+      }
+      enum "America/Montserrat" {
+        description
+          "";
+      }
+      enum "America/Montevideo" {
+        description
+          "";
+      }
+      enum "America/Miquelon" {
+        description
+          "";
+      }
+      enum "America/Nassau" {
+        description
+          "";
+      }
+      enum "America/New_York" {
+        description
+          "";
+      }
+      enum "America/Nipigon" {
+        description
+          "";
+      }
+      enum "America/Nome" {
+        description
+          "";
+      }
+      enum "America/Noronha" {
+        description
+          "";
+      }
+      enum "America/North_Dakota/Center" {
+        description
+          "";
+      }
+      enum "America/North_Dakota/New_Salem" {
+        description
+          "";
+      }
+      enum "America/Panama" {
+        description
+          "";
+      }
+      enum "America/Pangnirtung" {
+        description
+          "";
+      }
+      enum "America/Paramaribo" {
+        description
+          "";
+      }
+      enum "America/Phoenix" {
+        description
+          "";
+      }
+      enum "America/Port-au-Prince" {
+        description
+          "";
+      }
+      enum "America/Port_of_Spain" {
+        description
+          "";
+      }
+      enum "America/Porto_Velho" {
+        description
+          "";
+      }
+      enum "America/Puerto_Rico" {
+        description
+          "";
+      }
+      enum "America/Rankin_Inlet" {
+        description
+          "";
+      }
+      enum "America/Rainy_River" {
+        description
+          "";
+      }
+      enum "America/Recife" {
+        description
+          "";
+      }
+      enum "America/Regina" {
+        description
+          "";
+      }
+      enum "America/Resolute" {
+        description
+          "";
+      }
+      enum "America/Rio_Branco" {
+        description
+          "";
+      }
+      enum "America/Santarem" {
+        description
+          "";
+      }
+      enum "America/Santiago" {
+        description
+          "";
+      }
+      enum "America/Santo_Domingo" {
+        description
+          "";
+      }
+      enum "America/Sao_Paulo" {
+        description
+          "";
+      }
+      enum "America/Scoresbysund" {
+        description
+          "";
+      }
+      enum "America/Shiprock" {
+        description
+          "";
+      }
+      enum "America/St_Barthelemy" {
+        description
+          "";
+      }
+      enum "America/St_Johns" {
+        description
+          "";
+      }
+      enum "America/St_Kitts" {
+        description
+          "";
+      }
+      enum "America/St_Lucia" {
+        description
+          "";
+      }
+      enum "America/St_Thomas" {
+        description
+          "";
+      }
+      enum "America/St_Vincent" {
+        description
+          "";
+      }
+      enum "America/Swift_Current" {
+        description
+          "";
+      }
+      enum "America/Tegucigalpa" {
+        description
+          "";
+      }
+      enum "America/Thule" {
+        description
+          "";
+      }
+      enum "America/Thunder_Bay" {
+        description
+          "";
+      }
+      enum "America/Tijuana" {
+        description
+          "";
+      }
+      enum "America/Toronto" {
+        description
+          "";
+      }
+      enum "America/Tortola" {
+        description
+          "";
+      }
+      enum "America/Vancouver" {
+        description
+          "";
+      }
+      enum "America/Whitehorse" {
+        description
+          "";
+      }
+      enum "America/Winnipeg" {
+        description
+          "";
+      }
+      enum "America/Yakutat" {
+        description
+          "";
+      }
+      enum "America/Yellowknife" {
+        description
+          "";
+      }
+      enum "Antarctica/Casey" {
+        description
+          "";
+      }
+      enum "Antarctica/Davis" {
+        description
+          "";
+      }
+      enum "Antarctica/DumontDUrville" {
+        description
+          "";
+      }
+      enum "Antarctica/Mawson" {
+        description
+          "";
+      }
+      enum "Antarctica/McMurdo" {
+        description
+          "";
+      }
+      enum "Antarctica/Rothera" {
+        description
+          "";
+      }
+      enum "Antarctica/South_Pole" {
+        description
+          "";
+      }
+      enum "Antarctica/Syowa" {
+        description
+          "";
+      }
+      enum "Antarctica/Vostok" {
+        description
+          "";
+      }
+      enum "Arctic/Longyearbyen" {
+        description
+          "";
+      }
+      enum "Asia/Aden" {
+        description
+          "";
+      }
+      enum "Asia/Almaty" {
+        description
+          "";
+      }
+      enum "Asia/Amman" {
+        description
+          "";
+      }
+      enum "Asia/Anadyr" {
+        description
+          "";
+      }
+      enum "Asia/Aqtau" {
+        description
+          "";
+      }
+      enum "Asia/Aqtobe" {
+        description
+          "";
+      }
+      enum "Asia/Ashgabat" {
+        description
+          "";
+      }
+      enum "Asia/Baghdad" {
+        description
+          "";
+      }
+      enum "Asia/Bahrain" {
+        description
+          "";
+      }
+      enum "Asia/Baku" {
+        description
+          "";
+      }
+      enum "Asia/Bangkok" {
+        description
+          "";
+      }
+      enum "Asia/Beirut" {
+        description
+          "";
+      }
+      enum "Asia/Bishkek" {
+        description
+          "";
+      }
+      enum "Asia/Brunei" {
+        description
+          "";
+      }
+      enum "Asia/Choibalsan" {
+        description
+          "";
+      }
+      enum "Asia/Chongqing" {
+        description
+          "";
+      }
+      enum "Asia/Colombo" {
+        description
+          "";
+      }
+      enum "Asia/Damascus" {
+        description
+          "";
+      }
+      enum "Asia/Dhaka" {
+        description
+          "";
+      }
+      enum "Asia/Dili" {
+        description
+          "";
+      }
+      enum "Asia/Dubai" {
+        description
+          "";
+      }
+      enum "Asia/Dushanbe" {
+        description
+          "";
+      }
+      enum "Asia/Gaza" {
+        description
+          "";
+      }
+      enum "Asia/Harbin" {
+        description
+          "";
+      }
+      enum "Asia/Ho_Chi_Minh" {
+        description
+          "";
+      }
+      enum "Asia/Hong_Kong" {
+        description
+          "";
+      }
+      enum "Asia/Hovd" {
+        description
+          "";
+      }
+      enum "Asia/Irkutsk" {
+        description
+          "";
+      }
+      enum "Asia/Jayapura" {
+        description
+          "";
+      }
+      enum "Asia/Jakarta" {
+        description
+          "";
+      }
+      enum "Asia/Jerusalem" {
+        description
+          "";
+      }
+      enum "Asia/Kabul" {
+        description
+          "";
+      }
+      enum "Asia/Kamchatka" {
+        description
+          "";
+      }
+      enum "Asia/Karachi" {
+        description
+          "";
+      }
+      enum "Asia/Kashgar" {
+        description
+          "";
+      }
+      enum "Asia/Katmandu" {
+        description
+          "";
+      }
+      enum "Asia/Kolkata" {
+        description
+          "";
+      }
+      enum "Asia/Krasnoyarsk" {
+        description
+          "";
+      }
+      enum "Asia/Kuala_Lumpur" {
+        description
+          "";
+      }
+      enum "Asia/Kuching" {
+        description
+          "";
+      }
+      enum "Asia/Kuwait" {
+        description
+          "";
+      }
+      enum "Asia/Macau" {
+        description
+          "";
+      }
+      enum "Asia/Magadan" {
+        description
+          "";
+      }
+      enum "Asia/Manila" {
+        description
+          "";
+      }
+      enum "Asia/Makassar" {
+        description
+          "";
+      }
+      enum "Asia/Muscat" {
+        description
+          "";
+      }
+      enum "Asia/Nicosia" {
+        description
+          "";
+      }
+      enum "Asia/Novosibirsk" {
+        description
+          "";
+      }
+      enum "Asia/Omsk" {
+        description
+          "";
+      }
+      enum "Asia/Oral" {
+        description
+          "";
+      }
+      enum "Asia/Phnom_Penh" {
+        description
+          "";
+      }
+      enum "Asia/Pontianak" {
+        description
+          "";
+      }
+      enum "Asia/Pyongyang" {
+        description
+          "";
+      }
+      enum "Asia/Qatar" {
+        description
+          "";
+      }
+      enum "Asia/Qyzylorda" {
+        description
+          "";
+      }
+      enum "Asia/Rangoon" {
+        description
+          "";
+      }
+      enum "Asia/Riyadh" {
+        description
+          "";
+      }
+      enum "Asia/Sakhalin" {
+        description
+          "";
+      }
+      enum "Asia/Samarkand" {
+        description
+          "";
+      }
+      enum "Asia/Seoul" {
+        description
+          "";
+      }
+      enum "Asia/Shanghai" {
+        description
+          "";
+      }
+      enum "Asia/Singapore" {
+        description
+          "";
+      }
+      enum "Asia/Taipei" {
+        description
+          "";
+      }
+      enum "Asia/Tashkent" {
+        description
+          "";
+      }
+      enum "Asia/Tbilisi" {
+        description
+          "";
+      }
+      enum "Asia/Tehran" {
+        description
+          "";
+      }
+      enum "Asia/Thimphu" {
+        description
+          "";
+      }
+      enum "Asia/Tokyo" {
+        description
+          "";
+      }
+      enum "Asia/Ulaanbaatar" {
+        description
+          "";
+      }
+      enum "Asia/Urumqi" {
+        description
+          "";
+      }
+      enum "Asia/Vientiane" {
+        description
+          "";
+      }
+      enum "Asia/Vladivostok" {
+        description
+          "";
+      }
+      enum "Asia/Yekaterinburg" {
+        description
+          "";
+      }
+      enum "Asia/Yakutsk" {
+        description
+          "";
+      }
+      enum "Asia/Yerevan" {
+        description
+          "";
+      }
+      enum "Atlantic/Azores" {
+        description
+          "";
+      }
+      enum "Atlantic/Bermuda" {
+        description
+          "";
+      }
+      enum "Atlantic/Canary" {
+        description
+          "";
+      }
+      enum "Atlantic/Cape_Verde" {
+        description
+          "";
+      }
+      enum "Atlantic/Faroe" {
+        description
+          "";
+      }
+      enum "Atlantic/Madeira" {
+        description
+          "";
+      }
+      enum "Atlantic/South_Georgia" {
+        description
+          "";
+      }
+      enum "Atlantic/St_Helena" {
+        description
+          "";
+      }
+      enum "Atlantic/Stanley" {
+        description
+          "";
+      }
+      enum "Atlantic/Reykjavik" {
+        description
+          "";
+      }
+      enum "Australia/Adelaide" {
+        description
+          "";
+      }
+      enum "Australia/Brisbane" {
+        description
+          "";
+      }
+      enum "Australia/Currie" {
+        description
+          "";
+      }
+      enum "Australia/Darwin" {
+        description
+          "";
+      }
+      enum "Australia/Eucla" {
+        description
+          "";
+      }
+      enum "Australia/Hobart" {
+        description
+          "";
+      }
+      enum "Australia/Lindeman" {
+        description
+          "";
+      }
+      enum "Australia/Lord_Howe" {
+        description
+          "";
+      }
+      enum "Australia/Melbourne" {
+        description
+          "";
+      }
+      enum "Australia/Perth" {
+        description
+          "";
+      }
+      enum "Australia/Sydney" {
+        description
+          "";
+      }
+      enum "Europe/Amsterdam" {
+        description
+          "";
+      }
+      enum "Europe/Andorra" {
+        description
+          "";
+      }
+      enum "Europe/Athens" {
+        description
+          "";
+      }
+      enum "Europe/Belgrade" {
+        description
+          "";
+      }
+      enum "Europe/Berlin" {
+        description
+          "";
+      }
+      enum "Europe/Bratislava" {
+        description
+          "";
+      }
+      enum "Europe/Brussels" {
+        description
+          "";
+      }
+      enum "Europe/Bucharest" {
+        description
+          "";
+      }
+      enum "Europe/Budapest" {
+        description
+          "";
+      }
+      enum "Europe/Chisinau" {
+        description
+          "";
+      }
+      enum "Europe/Copenhagen" {
+        description
+          "";
+      }
+      enum "Europe/Dublin" {
+        description
+          "";
+      }
+      enum "Europe/Gibraltar" {
+        description
+          "";
+      }
+      enum "Europe/Guernsey" {
+        description
+          "";
+      }
+      enum "Europe/Helsinki" {
+        description
+          "";
+      }
+      enum "Europe/Isle_of_Man" {
+        description
+          "";
+      }
+      enum "Europe/Istanbul" {
+        description
+          "";
+      }
+      enum "Europe/Jersey" {
+        description
+          "";
+      }
+      enum "Europe/Kaliningrad" {
+        description
+          "";
+      }
+      enum "Europe/Kiev" {
+        description
+          "";
+      }
+      enum "Europe/Lisbon" {
+        description
+          "";
+      }
+      enum "Europe/Ljubljana" {
+        description
+          "";
+      }
+      enum "Europe/London" {
+        description
+          "";
+      }
+      enum "Europe/Luxembourg" {
+        description
+          "";
+      }
+      enum "Europe/Madrid" {
+        description
+          "";
+      }
+      enum "Europe/Malta" {
+        description
+          "";
+      }
+      enum "Europe/Mariehamn" {
+        description
+          "";
+      }
+      enum "Europe/Minsk" {
+        description
+          "";
+      }
+      enum "Europe/Monaco" {
+        description
+          "";
+      }
+      enum "Europe/Moscow" {
+        description
+          "";
+      }
+      enum "Europe/Oslo" {
+        description
+          "";
+      }
+      enum "Europe/Paris" {
+        description
+          "";
+      }
+      enum "Europe/Podgorica" {
+        description
+          "";
+      }
+      enum "Europe/Prague" {
+        description
+          "";
+      }
+      enum "Europe/Riga" {
+        description
+          "";
+      }
+      enum "Europe/Rome" {
+        description
+          "";
+      }
+      enum "Europe/Samara" {
+        description
+          "";
+      }
+      enum "Europe/San_Marino" {
+        description
+          "";
+      }
+      enum "Europe/Sarajevo" {
+        description
+          "";
+      }
+      enum "Europe/Simferopol" {
+        description
+          "";
+      }
+      enum "Europe/Skopje" {
+        description
+          "";
+      }
+      enum "Europe/Sofia" {
+        description
+          "";
+      }
+      enum "Europe/Stockholm" {
+        description
+          "";
+      }
+      enum "Europe/Tallinn" {
+        description
+          "";
+      }
+      enum "Europe/Tirane" {
+        description
+          "";
+      }
+      enum "Europe/Uzhgorod" {
+        description
+          "";
+      }
+      enum "Europe/Vaduz" {
+        description
+          "";
+      }
+      enum "Europe/Vatican" {
+        description
+          "";
+      }
+      enum "Europe/Vilnius" {
+        description
+          "";
+      }
+      enum "Europe/Vienna" {
+        description
+          "";
+      }
+      enum "Europe/Volgograd" {
+        description
+          "";
+      }
+      enum "Europe/Warsaw" {
+        description
+          "";
+      }
+      enum "Europe/Zaporozhye" {
+        description
+          "";
+      }
+      enum "Europe/Zagreb" {
+        description
+          "";
+      }
+      enum "Europe/Zurich" {
+        description
+          "";
+      }
+      enum "Indian/Antananarivo" {
+        description
+          "";
+      }
+      enum "Indian/Chagos" {
+        description
+          "";
+      }
+      enum "Indian/Christmas" {
+        description
+          "";
+      }
+      enum "Indian/Cocos" {
+        description
+          "";
+      }
+      enum "Indian/Comoro" {
+        description
+          "";
+      }
+      enum "Indian/Kerguelen" {
+        description
+          "";
+      }
+      enum "Indian/Mahe" {
+        description
+          "";
+      }
+      enum "Indian/Maldives" {
+        description
+          "";
+      }
+      enum "Indian/Mauritius" {
+        description
+          "";
+      }
+      enum "Indian/Mayotte" {
+        description
+          "";
+      }
+      enum "Indian/Reunion" {
+        description
+          "";
+      }
+      enum "Pacific/Apia" {
+        description
+          "";
+      }
+      enum "Pacific/Auckland" {
+        description
+          "";
+      }
+      enum "Pacific/Chatham" {
+        description
+          "";
+      }
+      enum "Pacific/Easter" {
+        description
+          "";
+      }
+      enum "Pacific/Efate" {
+        description
+          "";
+      }
+      enum "Pacific/Enderbury" {
+        description
+          "";
+      }
+      enum "Pacific/Fakaofo" {
+        description
+          "";
+      }
+      enum "Pacific/Fiji" {
+        description
+          "";
+      }
+      enum "Pacific/Funafuti" {
+        description
+          "";
+      }
+      enum "Pacific/Galapagos" {
+        description
+          "";
+      }
+      enum "Pacific/Gambier" {
+        description
+          "";
+      }
+      enum "Pacific/Guadalcanal" {
+        description
+          "";
+      }
+      enum "Pacific/Guam" {
+        description
+          "";
+      }
+      enum "Pacific/Honolulu" {
+        description
+          "";
+      }
+      enum "Pacific/Johnston" {
+        description
+          "";
+      }
+      enum "Pacific/Kiritimati" {
+        description
+          "";
+      }
+      enum "Pacific/Kosrae" {
+        description
+          "";
+      }
+      enum "Pacific/Kwajalein" {
+        description
+          "";
+      }
+      enum "Pacific/Majuro" {
+        description
+          "";
+      }
+      enum "Pacific/Marquesas" {
+        description
+          "";
+      }
+      enum "Pacific/Midway" {
+        description
+          "";
+      }
+      enum "Pacific/Nauru" {
+        description
+          "";
+      }
+      enum "Pacific/Niue" {
+        description
+          "";
+      }
+      enum "Pacific/Norfolk" {
+        description
+          "";
+      }
+      enum "Pacific/Noumea" {
+        description
+          "";
+      }
+      enum "Pacific/Pago_Pago" {
+        description
+          "";
+      }
+      enum "Pacific/Palau" {
+        description
+          "";
+      }
+      enum "Pacific/Pitcairn" {
+        description
+          "";
+      }
+      enum "Pacific/Ponape" {
+        description
+          "";
+      }
+      enum "Pacific/Port_Moresby" {
+        description
+          "";
+      }
+      enum "Pacific/Rarotonga" {
+        description
+          "";
+      }
+      enum "Pacific/Saipan" {
+        description
+          "";
+      }
+      enum "Pacific/Tahiti" {
+        description
+          "";
+      }
+      enum "Pacific/Tarawa" {
+        description
+          "";
+      }
+      enum "Pacific/Tongatapu" {
+        description
+          "";
+      }
+      enum "Pacific/Truk" {
+        description
+          "";
+      }
+      enum "Pacific/Wake" {
+        description
+          "";
+      }
+      enum "Pacific/Wallis" {
+        description
+          "";
+      }
+    }
+    description
+      "Timezone region and city.";
+  }
+  typedef ts-ntp-type {
+    type union {
+      type inet:host;
+      type string {
+        length "1..32";
+        pattern "LOCL";
+      }
+    }
+    description
+      "Specifying NTP IP address(es)/LOCL.";
+  }
+}
