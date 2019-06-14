@@ -43,7 +43,8 @@ module brocade-interface {
     This module contains a collection of YANG definitions for managing
     brocade-interfaces.
      
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
 
   revision 2019-01-25 {
     description
