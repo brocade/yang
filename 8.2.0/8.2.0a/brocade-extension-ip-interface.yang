@@ -1,0 +1,155 @@
+module brocade-extension-ip-interface {
+  namespace "urn:brocade.com:mgmt:brocade-extension-ip-interface";
+  prefix brocade-extension-ip-interface;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  organization
+    "Brocade Communication Systems, Inc.";
+  contact
+    "
+    Address  :  120 Holger Way
+                San Jose, CA 95134
+                U.S.A
+    Phone    :  +1-408-333-8000
+    E-mail   :  support@brocade.com
+    Website  :  www.brocade.com
+    ";
+  description
+    "
+    This module contains a collection of YANG definitions for managing
+    brocade-extension-ip-interface.
+
+    Copyright (c) 2017-2018 by Brocade Communications Systems, Inc.
+    All rights reserved.
+    ";
+
+  revision 2017-10-30 {
+    description
+      "Initial release.";
+    reference "None";
+  }
+
+  typedef ip-prefix-length {
+    type union {
+      type ipv4-prefix-length;
+      type ipv6-prefix-length;
+    }
+    description
+      "The prefix length operator for the IPv4/IPv6 address.";
+  }
+
+  typedef ipv4-prefix-length {
+    type uint16 {
+      range "1..32";
+    }
+    description
+      "The prefix length operator for the IPv4 address.";
+  }
+
+  typedef ipv6-prefix-length {
+    type uint16 {
+      range "1..128";
+    }
+    description
+      "The prefix length operator for the IPv6 address.";
+  }
+
+  typedef ge-interface-type {
+    type string {
+      pattern "(([1][0-2]|[0-9])/(1[0-7]|[0-9]))";
+    }
+    description
+      "
+      GE interface of an Extension blade or system. The slot and port number of
+      the port (slot/port).
+      ";
+  }
+
+  container brocade-interface {
+    description
+      "Represents the IP interface defined on extension blade or system.";
+    list extension-ip-interface {
+      key "name ip-address dp-id";
+      description
+        "Represents the IP interface defined on extension blade or system.";
+      leaf name {
+        type ge-interface-type;
+        description
+          "The name of the interface.";
+      }
+      leaf ip-address {
+        type inet:ip-address;
+        description
+          "Specifies the source IPv4/IPv6 address of the interface.";
+      }
+      leaf dp-id {
+        type uint16 {
+          range "0..1";
+        }
+        description
+          "
+          Extension Data Path Processor ID associated with the IP interface.
+
+            0 : DP0
+            1 : DP1
+          ";
+      }
+      leaf ip-prefix-length {
+        type ip-prefix-length;
+        mandatory true;
+        description
+          "
+          The prefix length operator for the IP address. Once set, prefix length
+          cannot be changed.
+          ";
+      }
+      leaf mtu-size {
+        type uint16 {
+          range "1|1280..9216";
+        }
+        default "1500";
+        description
+          "
+          Specifies the maximum transmission unit size. The permitted range is
+          1280 Bytes to 9216 Bytes or the special value 1 which is equivalent
+          to 'auto' mode to  enable PMTU discovery. The discovered value of MTU
+          in 'auto' mode can be found as a circuit attribute.
+          ";
+      }
+      leaf vlan-id {
+        type uint16 {
+          range "0|1..4095";
+        }
+        default "0";
+        description
+          "Specifies the VLAN ID. This operand is optional.";
+      }
+      leaf status-flags {
+        type string {
+          pattern "(([UBDLPRINMS]|PR|LU)([ ]([UBDLPRINMS]|PR|LU))+)";
+        }
+        config false;
+        description
+          "
+          IP interface Flags:
+
+            U = Up
+            B = Broadcast
+            D = Debug
+            L = Loopback
+            P = Point2Point
+            R = Running
+            I = InUse
+            N = NoArp
+            PR= Promiscous
+            M = Multicast
+            S = StaticArp
+            LU= LinkUp
+          ";
+      }
+    }
+  }
+}

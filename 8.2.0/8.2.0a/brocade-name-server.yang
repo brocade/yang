@@ -1,0 +1,408 @@
+module brocade-name-server {
+  namespace "urn:brocade.com:mgmt:brocade-name-server";
+  prefix brocade-name-server;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Brocade Communication Systems LLC.";
+
+  contact
+    "
+    Address     :   120 Holger Way
+                    San Jose, CA 95134
+                    U.S.A
+    Phone       :   +1-408-333-8000
+    E-mail      :   support@brocade.com
+    Website     :   www.brocade.com
+    ";
+
+  description
+    "
+    The management module is an instrumentation to manage the
+    Fibre Channel (FC) Name Server, which realizes the FC-GS-6
+    requirements.
+
+    This module provides the means for monitoring the operation
+    of, and configuring some parameters of, one or more instances
+    of Fibre Channel Name Server functionality.
+
+    The Fibre Channel Name Server provides a way for N_Ports and
+    NL_Ports to register and discover Fibre Channel attributes.
+    Such attributes include names, addresses, types, features,
+    etc., at various protocol layers, including upper layer
+    protocols specific to Fibre Channel (which are sometimes
+    called 'FC-4s').
+
+    Physically, Fibre Channel is an interconnection of multiple
+    communication points, called N_Ports, interconnected either by
+    a switching network, called a Fabric, or by a point-to-point
+    link. A Fibre Channel 'node' consists of one or more N_Ports.
+    A Fabric may consist of multiple Interconnect Elements, some
+    of which are switches.  An N_Port connects to the Fabric via a
+    port on a switch called an F_Port.  When multiple FC nodes are
+    connected to a single port on a switch via an 'Arbitrated Loop'
+    topology, the switch port is called an FL_Port, and the nodes'
+    ports are called NL_Ports.  The term Nx_Port is used to refer
+    to either an N_Port or an NL_Port.
+
+    Copyright (c) 2018 by Brocade Communications Systems LLC.
+    All rights reserved.
+    ";
+
+  reference
+    "
+    ANSI INCITS 332-1999, Fibre Channel - Arbitrated Loop - 2 (FC-AL-2).
+
+    ANSI INCITS 433-2006, Fibre Channel - Link Services (FC-LS).
+
+    ANSI INCITS 463-2010, Fibre Channel - Generic Services - 6 (FC-GS-6).
+
+    ANSI INCITS 545-20xx Rev 0.2, Fibre Channel - Framing and Signaling - 5
+    (FC-FS-5)
+    ";
+
+  revision 2018-02-09 {
+    description
+      "Initial release (FOS 8.2.0a).";
+    reference
+      "None";
+  }
+
+  container brocade-name-server {
+    config false;
+    description
+      "
+      Proprietary Name Server directory entry container.
+      ";
+    list fibrechannel-name-server {
+      key "port-id";
+      description
+        "
+        The Port Identifier serves as the unique data base key for the
+        Name Server.
+        ";
+      leaf port-id {
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "
+          The Port Identifier is a Fibre Channel address identifier, assigned
+          to an Nx_Port during implicit or explicit Fabric Login. The format of
+          the Port Identifier object shall be identical to the address
+          identifier format.
+          ";
+      }
+      leaf port-name {
+        type fibrechannel:wwn-type;
+        description
+          "The device port world wide name (WWN).";
+      }
+      leaf port-symbolic-name {
+        type string {
+          length "0..384";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The port-symbolic-name resource is the Name Server Symbolic Port Name
+          object registered with the Name Server and is subject to all the
+          description and constraints of that object.
+
+          The registered value is displayed within double quotes and is preceded
+          by a numeric value indicating the length of the registered data. The
+          latter being encapsulated within brackets.
+          ";
+      }
+      leaf fabric-port-name {
+        type fibrechannel:wwn-type;
+        description
+          "The F_Port WWN to which the N_Port connects.";
+      }
+      leaf permanent-port-name {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The Permanent Port Name is the Name_Identifier associated with a
+          physical Nx_Port. If multiple Name_Identifier are associated with a
+          single Nx_Port via FDISC (see FC-FS) the Permanent Port Name is the
+          original Name_Identifier associated with that Nx_Port at Fabric
+          Login.
+          ";
+      }
+      leaf node-name {
+        type fibrechannel:wwn-type;
+        description
+          "The device port world wide name (WWN).";
+      }
+      leaf node-symbolic-name {
+        type string {
+          length "0..384";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The node-symbolic-name resource is the name registered with the Name
+          Server as a Name Server Symbolic Node Name object and is subject to
+          all the description and constraints of that object. If not all
+          Nx_Ports on the host bus adapter have the same node name, the
+          node-symbolic-name resource will not be returned for the host bus
+          adapter.
+
+          The registered value is displayed within double quotes and is preceded
+          by a numeric value indicating the length of the registered data. The
+          latter being encapsulated within brackets.
+          ";
+      }
+      leaf class-of-service {
+        type fibrechannel:class-of-service-type;
+        description
+          "
+          The Class of Service (CoS) levels supported by the device. A device
+          can support multiple CoS levels.
+          ";
+      }
+      leaf fc4-type {
+        type fibrechannel:fc4-type-type;
+        description
+          "
+          The fc4-type leaf indicates a set of supported data structure type
+          values (i.e., supported values of the type field in frame headers) for
+          Device_Data and FC-4 Link_Data frames. For each possible type value,
+          this leaf has a bit in the fc4-type leaf that indicates whether or not
+          frames with that type value are supported. For each supported type
+          value, the bit is set in the leaf. For each unsupported type value,
+          the bit is not set in the leaf.
+          ";
+      }
+      leaf fc4-features {
+        type fibrechannel:fc4-features-type;
+        description
+          "
+          The fc-4-features leaf indicates the registered FC-4 Features bits for
+          a given FC-4 Type(s).
+          ";
+      }
+      leaf port-type {
+        type fibrechannel:port-type-string-type;
+        description
+          "The port type of the device.";
+      }
+      leaf state-change-registration {
+        type string {
+          length "0..256";
+          pattern "(None|Fabric-Detected|Nx-Port-Detected|Fabric-Name|Peer-Zone|Brocade-Principal-Switch|Brocade-QoS)*";
+        }
+        description
+          "
+          The state change registration (SCR) of the device. Returns an empty
+		  tag if the SCR value is not known.
+
+          None:
+            No registration. Device has not registered for any RSCN function.
+
+          Fabric-Detected:
+            Registered to receive all RSCN for events detected by the fabric.
+
+          Nx-Port-Detected:
+            Registered to receive all RSCN requests issued for events detected
+            by the affected Nx_Port.
+
+          Fabric-Name:
+            Fabric Name change registration (FC Standard variant). Registered
+            to receive an RSCN when the Fabric Principal switch changes.
+
+          Peer-Zone:
+            Registered to receive an RSCN when an associated Peer Zone changes.
+
+          Brocade-Principal-Switch:
+            Principal switch change registration (proprietary).
+
+          Brocade-QoS:
+            Access Gateway Quality-of-Service change registration (proprietary).
+          ";
+      }
+      leaf name-server-device-type {
+        type string {
+          length "0..64";
+          pattern "(Undefined|Unknown(initiator/target)|Physical Unknown(initiator/target)|Physical Initiator|NPIV Initiator|Virtual Initiator|iSCSI Initiator|Physical Target|NPIV Target|Virtual Target|iSCSI Target|Physical Initiator+Target|NPIV Initiator+Target|Virtual Initiator+Target|iSCSI Initiator+Target)*";
+        }
+        description
+          "
+          The definition for the type and role of a device, where the device
+          type is either a Physical, Virtual, NPIV, or iSCSI. And, the role is
+          either Initiator, Target, or Initiator+Target. If the device role is
+          not registered, the display indicates this as 'unknown'. If the device
+          registers a type that is not Physical, Virtual, NPIV, or iSCSI, the
+          type is listed as 'undefined'.
+          ";
+      }
+      leaf port-index {
+        type fibrechannel:user-port-number-type;
+        description
+          "
+          The index number of the physical N_Port to which the device connects.
+          ";
+      }
+      leaf share-area {
+        type string {
+          length "0..4";
+          pattern "yes|no";
+        }
+        description
+          "
+          Indicates whether or not the port utilizes the Brocade Shared Area
+          method of Fibre Channel addressing.
+
+          yes   : The port shares an area.
+          no    : The port does not share an area.
+          ";
+      }
+      leaf frame-redirection {
+        type string {
+          length "0..4";
+          pattern "yes|no";
+        }
+        description
+          "
+          Indicates if the port is involved in Frame Redirection zoning. The
+          device involved in frame redirection is specified as either 'virtual',
+          'host', or 'target'.
+
+          yes   : The device is involved in frame redirection.
+          no    : The device is not involved in frame redirection.
+          ";
+      }
+      leaf partial {
+        type string {
+          length "0..4";
+          pattern "yes|no";
+        }
+        description
+          "
+          Indicates if the device entry is incomplete. Devices that are
+          incomplete have routing established, but are not considered during
+          device discovery (for example, during FC-GS Name Server Queries).
+
+          yes   : The device entry is incomplete.
+          no    : The device entry is complete.
+          ";
+      }
+      leaf lsan {
+        type string {
+          length "0..4";
+          pattern "yes|no";
+        }
+        description
+          "
+          Indicates if the device is part of an active LSAN zone. If LSAN zone
+          status is not known, then an empty tag is returned.
+
+          yes   : The device is a member of an active LSAN zone.
+          no    : The device is not a member of any active LSAN zone.
+          ";
+      }
+      leaf link-speed {
+        type string {
+          length "0..4";
+          pattern "[0-9]{1,3}[G]";
+        }
+        description
+          "
+          Displays the link speed of the device, for example: 4G, 8G, 16G, and
+          so on. Link speed of end devices that log in to the edge fabric
+          through F_Port trunk display the bandwidth of the F_Port trunk. For
+          example, if an 8G host attached to AG login to fabric through a 32G
+          F_Port trunk, the device link speed for the 8G host is displayed as
+          32G.
+          ";
+      }
+      leaf port-properties {
+        type string {
+          length "0..64";
+          pattern "( |SIM Port|Mirror Port|I/O Analytics Port)*";
+        }
+        description
+          "
+          A list of proprietary port properties, for example: 'SIM Port'
+          for Brocade SIM ports.
+          ";
+      }
+      leaf cascaded-ag {
+        type string {
+          length "0..4";
+          pattern "yes|no";
+        }
+        description
+          "
+          Indicates whether the device is connected via a Cascaded Access
+          Gateway (AG) connection.
+
+          yes   : The device is connected via a Cascaded Access Gateway (AG)
+                  connection (i.e., a 2-hop AG connection).
+          no    : The device is not connected to a Cascaded Access Gateway (AG)
+                  connection.
+          ";
+      }
+      leaf connected-through-ag {
+        type string {
+          length "0..4";
+          pattern "yes|no";
+        }
+        description
+          "
+          Indicates whether he device is connected through Access Gateway.
+
+          yes   : The device is connected through Access Gateway.
+          no    : The device is not connected through Access Gateway.
+          ";
+      }
+      leaf real-device-behind-ag {
+        type string {
+          length "0..4";
+          pattern "yes|no";
+        }
+        description
+          "
+          Indicates whether the device is not a virtualized device (NPIV)
+          connected via AG.
+
+          yes   : The device is not a virtualized device (NPIV) connected
+                  via AG.
+          no    : A virtualized device (NPIV) connected via AG.
+          ";
+      }
+      leaf fcoe-device {
+        type string {
+          length "0..4";
+          pattern "yes|no";
+        }
+        description
+          "
+          Indicates whether the device is an FCoE device.
+
+          yes   : The device is an FCoE device.
+          no    : The device is not an FCoE device.
+          ";
+      }
+      leaf slow-drain-device-quarantine {
+        type string {
+          length "0..4";
+          pattern "yes|no";
+        }
+        description
+          "
+          The leaf indicates whether the device has been identified as having
+          symptoms of credit stalling.
+
+          yes   : The device has been identified as having a credit stalled
+                  condition, and has its incoming traffic quarantined to a
+                  Low Priority VC.
+          no    : The device has not been flagged for having a credit stalled
+                  issue.
+          ";
+      }
+    }
+  }
+}
