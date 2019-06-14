@@ -30,7 +30,8 @@ module brocade-logging-types {
     This module defines the YANG module 'brocade-logging-types',
     which has the type definitions for 'brocade-logging' module
 
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
 
   revision 2018-07-06 {
     description
