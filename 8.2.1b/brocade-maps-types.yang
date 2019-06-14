@@ -30,7 +30,7 @@ module brocade-maps-types {
     The module contains switch configuration for maps. Module maps
     configuration can be set or get.
 
-    Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
     ";
 
   revision 2019-01-25 {
