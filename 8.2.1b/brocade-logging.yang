@@ -37,7 +37,8 @@ module brocade-logging {
     This module defines the YANG module 'brocade-logging',
     which helps configure the specified switch or director.
 
-  Copyright 2019 Broadcom. All rights reserved. The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+    Copyright 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
+    ";
 
   revision 2019-01-25 {
     description
