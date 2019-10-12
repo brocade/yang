@@ -1,0 +1,985 @@
+module brocade-maps-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-maps-types";
+  prefix brocade-maps-types;
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    The module contains switch configuration for maps. Module maps
+    configuration can be set or get.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to
+    Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-01-25 {
+    description
+      "
+      Fabric OS 8.2.1b
+      ----------------
+      Refine descriptions.
+      
+      Initial release.
+      ";
+    reference
+      "
+      Brocade Monitoring and Alerting Policy Suite Configuration Guide
+      ";
+  }
+
+  feature chassis-platform {
+    description
+      "Indicates the chassis platform";
+  }
+  typedef maps-data-unit {
+    type enumeration {
+      enum "CRCs" {
+        description
+          "
+          Represents CRC errors.
+          ";
+      }
+      enum "ITWs" {
+        description
+          "
+          Represents ITWs errors.
+          ";
+      }
+      enum "timeouts" {
+        description
+          "
+          Represents Class 3 frames discard due to timeout.
+          ";
+      }
+      enum "milli-ampere" {
+        description
+          "
+          Represents milli ampere current.
+          ";
+      }
+      enum "days" {
+        description
+          "
+          Represents days.
+          ";
+      }
+      enum "errors" {
+        description
+          "
+          Represents errors.
+          ";
+      }
+      enum "loss-of-signals" {
+        description
+          "
+          Represents loss of signals.
+          ";
+      }
+      enum "loss-of-synchronizations" {
+        description
+          "
+          Represents synchronization loss.
+          ";
+      }
+      enum "violations" {
+        description
+          "
+          Represents violations.
+          ";
+      }
+      enum "ports" {
+        description
+          "
+          Represents ports.
+          ";
+      }
+      enum "extension-flows" {
+        description
+          "
+          Represents IP extension flows.
+          ";
+      }
+      enum "it-flows" {
+        description
+          "
+          Represents target to host or vice versa ratio. 
+          ";
+      }
+      enum "certificates" {
+        description
+          "
+          Represents certificates.
+          ";
+      }
+      enum "segmentations" {
+        description
+          "
+          Represents totals times port or fabric got segmented from fabric.
+          ";
+      }
+      enum "changes" {
+        description
+          "
+          Represents the changes.
+          ";
+      }
+      enum "logins" {
+        description
+          "
+          Represents the number of log ins.
+          ";
+      }
+      enum "IOs" {
+        description
+          "
+          Represents IOs.
+          ";
+      }
+      enum "IOPS" {
+        description
+          "
+          Represents IOs per second.
+          ";
+      }
+
+      enum "MBps" {
+        description
+          "
+          Represents bandwidth in Mega bytes per second.
+          ";
+      }
+      enum "%" {
+        description
+          "
+          Represents percentage value.
+          ";
+      }
+      enum "hours" {
+        description
+          "
+          Represents hours.
+          ";
+      }
+      enum "centigrade" {
+        description
+          "
+          Represents centigrade.
+          ";
+      }
+      enum "bytes" {
+        description
+          "
+          Represents bytes.
+          ";
+      }
+      enum "micro-seconds" {
+        description
+          "
+          Represents micro seconds.
+          ";
+      }
+      enum "milli-seconds" {
+        description
+          "
+          Represents milli seconds.
+          ";
+      }
+      enum "milli-volts" {
+        description
+          "
+          Represents milli volts.
+          ";
+      }
+      enum "milli-amps" {
+        description
+          "
+          Represents milli ampere.
+          ";
+      }
+      enum "micro-watts" {
+        description
+          "
+          Represents micro watts.
+          ";
+      }
+    }
+    description
+      "
+      Represents the data unit. 
+      ";
+  }
+  typedef maps-group-type-type {
+    type enumeration {
+      enum "power-supply" {
+        description
+          "
+          Represents power supplies group type. The group manages power
+          supplies. System could have multiple power supplies and could
+          be integrated with fan.
+          ";
+      }
+      enum "fan" {
+        description
+          "
+          Represents fan group type. The group manages fans present in the
+          system. System could have multiple fans could be integrated with
+          power supplies.
+          ";
+      }
+      enum "fc-port" {
+        description
+          "
+          Represents FC port group type. The group manages the FC ports.
+          ";
+      }
+      enum "sfp" {
+        description
+          "
+          Represents FC sfp group type. The group manages the FC SFPs. System
+          can have different sfps based on speed or vendor.
+          ";
+      }
+      enum "blade" {
+        description
+          "
+          Represents blade group type. The group manages all the blades such as
+          core, CP, or switch blade.
+          ";
+      }
+      enum "circuit" {
+        description
+          "
+          Represents circuit group type. The group manages circuits - circuit
+          is a virtual connection between two extension systems.
+          ";
+      }
+      enum "circuit-qos" {
+        description
+          "
+          Represents circuit qos group type. The group manages circuits qos
+          traffic. Each circuit can carry multiple qos traffic.
+          ";
+      }
+      enum "temperature-sensor" {
+        description
+          "
+          Represents temperature sensor group type. The group manages
+          temperature sensors.
+          ";
+      }
+      enum "flash" {
+        description
+          "
+          Represents flash memory group type.
+          ";
+      }
+      enum "switch" {
+        description
+          "
+          Represents switch group type.
+          ";
+      }
+      enum "chassis" {
+        description
+          "
+          Represents chassis group type.
+          ";
+      }
+      enum "cpu" {
+        description
+          "
+          Represents cpu group type.
+          ";
+      }
+      enum "wwn" {
+        description
+          "
+          Represents wwn group type. The group manages the wwn cards.
+          ";
+      }
+      enum "flow" {
+        description
+          "
+          Represents flow group type.
+          ";
+      }
+      enum "tunnel" {
+        description
+          "
+          Represents tunnel group type. The group manages the tunnels - A
+          tunnel is group of circuits.
+          ";
+      }
+      enum "tunnel-qos" {
+        description
+          "
+          Represents tunnel qos group type. The group manages tunnels qos.
+          ";
+      }
+      enum "backend-port" {
+        description
+          "
+          Represents back end group type. The group manages the backend ports.
+          ";
+      }
+      enum "ge-port" {
+        description
+          "
+          Represents giga bit ethernet port group type.
+          ";
+      }
+      enum "certificate" {
+        description
+          "
+          Represents security certificate group type.
+          ";
+      }
+      enum "dp" {
+        description
+          "
+          Represents data process group type.
+          ";
+      }
+      enum "device-pid" {
+        description
+          "
+          Represents device pid group type.
+          ";
+      }
+      enum "ethernet-port" {
+        description
+          "
+          Represents ethernet port group type.
+          ";
+      }
+      enum "vtap-port" {
+        description
+          "
+          Represents vtap port group type.
+          ";
+      }
+      enum "asic" {
+        description
+          "
+          Represents asic group type.
+          ";
+      }
+    }
+    description
+      "
+      Represents the type of the elements present in the group.
+      ";
+  }
+
+
+  typedef maps-generic-action-type {
+    type enumeration {
+      enum "port-fence" {
+        description
+          "
+          Represents port fencing action. MAPS takes the fence action to
+          disable the port.
+          ";
+      }
+      enum "snmp-trap" {
+        description
+          "
+          Represents snmp-trap action. MAPS sends a SNMP alert to application.
+          ";
+      }
+      enum "raslog" {
+        description
+          "
+          Represents raslog action. MAPS logs the message on the console and
+          sys log server.
+        ";
+      }
+      enum "sddq" {
+        description
+          "
+          Represents sddq action. MAPS quarantine the port to mitigate the
+          congestion.
+          ";
+      }
+      enum "un-quarantine" {
+        description
+          "
+          Represents un-quarantine action. MAPS un-un-quarantine the port if
+          the congestion issue has been fixed.
+          ";
+      }
+      enum "decomission" {
+        description
+          "
+          Represents decomission action. MAPS disable the port without traffic
+          interruption.
+          ";
+      }
+      enum "port-toggle" {
+        description
+          "
+          Represents port toggle action. MAPS toggles the port to fix
+          congestion issue.
+          ";
+      }
+      enum "e-mail"{
+        description
+          "
+          Represents e-mail action.
+          ";
+      }
+      enum "fms"{
+        description
+          "
+          Represents fms action. MAPS notifies ficon host.
+          ";
+      }
+      enum "vtap-uninstall"{
+        description
+          "
+          Represents vtap action.
+          ";
+      }
+      enum "re-balance" {
+        description
+          "
+          Represents re-balance action. MAPS takes the action to balance the
+          port group state.
+          ";
+      }
+      enum "sw-marginal" {
+        description
+          "
+          Represents switch marginal action. MAPS takes the action to put the 
+          switch into marginal operating state. The state is logical state.
+          ";
+      }
+      enum "sw-critical" {
+        description
+          "
+          Represents switch critical action. MAPS takes the action to put the 
+          switch into down operating state. The state is logical state.
+          ";
+      }
+      enum "sfp-marginal" {
+        description
+          "
+          Represents sfp marginal action. MAPS takes the action to put the 
+          sfp into marginal operating state. The state is logical state.
+          ";
+      }
+    }
+    description
+      "
+      Represents the MAPS actions . User can enable one or more action at
+      switch level or per rule
+      ";
+  }
+  typedef maps-port-monitoring-state {
+    type enumeration {
+      enum "offline" {
+        description
+          "
+          Represents offline state.
+          ";
+      }
+      enum "online"  {
+        description
+          "
+          Represents on state.
+          ";
+      }
+
+      enum "faulty" {
+        description
+          "
+          Represents faulty state.
+          ";
+      }
+      enum "marginal" {
+        description
+          "
+          Represents marginal state. Port could be in marginal state if the
+          port does not enough credits to operate.
+          ";
+      }
+      enum "error" {
+        description
+          "
+          Represents error state. Port could be set error state if the port is
+          not in operation due to hardward mulfunctioning or security.
+          ";
+      }
+      enum "un-monitored" {
+        description
+          "
+          Represents un-monitored state.
+          ";
+      }
+    }
+    description
+      "
+      MAPS monitors each port and based on its operating condition it sets the
+      state.
+      ";
+  }
+
+  typedef maps-time-base-type {
+    type enumeration {
+      enum "none" {
+        description
+          "
+          None timebase represent real time monitoring.
+          ";
+      }
+      enum "second" {
+        description
+          "
+          Represents that the rule gets evaluated every second.
+          ";
+      }
+      enum  "minute" {
+        description
+          "
+          Represents that the rule gets evaluated every minute.
+          ";
+      }
+      enum "five-minute" {
+        description
+          "
+          Represents that the rule gets evaluated every five minute.
+          ";
+      }
+      enum "hour" {
+        description
+          "
+          Represents that the rule gets evaluated every hour.
+          ";
+      }
+      enum "day" {
+        description
+          "
+          Represents that the rule gets evaluated every day.
+          ";
+      }
+      enum "week" {
+        description
+          "
+          Represents that the rule gets evaluated every week.
+          ";
+      }
+    }
+    description
+      "
+      Timebase specifies the time interval between two samples to be compared.
+      ";
+  }
+
+
+  typedef maps-event-severity-type {
+    type enumeration {
+      enum "warning" {
+        description
+          "
+          Represents the event warning severity.
+          ";
+      }
+      enum "error" {
+        description
+          "
+          Represents the event error severity.
+          ";
+      }
+      enum "critical" {
+        description
+          "
+          Represents the event critical severity.
+          ";
+      }
+      enum "info" {
+        description
+          "
+          Represents the event info severity.
+          ";
+      }
+      enum "default" {
+        description
+          "
+          Represents the factory default event severity.
+          ";
+      }
+    }
+    description
+      "
+      Specifies the severity level of the event. Each event has it own severity
+      and user can change it.
+      ";
+  }
+
+
+  typedef maps-quiet-time-unit-type {
+    type enumeration {
+      enum "minute" {
+        description
+          "
+          Represents QT unit as minute.
+          ";
+      }
+      enum "hour" {
+        description
+          "
+          Represents QT unit as hour.
+          ";
+      }
+      enum "day" {
+        description
+          "
+          Represents QT unit as day.
+          ";
+      }
+    }
+    description
+      "
+      Represents the unit of the quiet time.
+      ";
+  }
+
+  typedef maps-logical-operator-type {
+    type enumeration {
+      enum "l" {
+        description
+          "
+          Represents less than logical operator.
+          ";
+      }
+      enum "le"  {
+        description
+          "
+          Represents less than or equal to logical operator.
+          ";
+      }
+      enum "g" {
+        description
+          "
+          Represents greater than logical operator.
+          ";
+      }
+      enum "ge" {
+        description
+          "
+          Represents greater than or equal to logical operator.
+          ";
+      }
+      enum "eq"  {
+        description
+          "
+          Represents equal to logical operator.
+          ";
+      }
+      enum "ne" {
+        description
+          "
+          Represents not equal to logical operator.
+          ";
+      }
+    }
+    description
+      "
+      Specifies the rational operator to be used in eveluation in the
+      condition.
+      ";
+  }
+
+
+  typedef monitoring-type-type {
+    type enumeration {
+      enum "event-based" {
+        description
+          "
+          Represents event based monitoring.
+          ";
+      }
+      enum "poll-based" {
+        description
+          "
+          Represents poll based monitoring.
+          ";
+      }
+    }
+    description
+      "
+      Represents the monitoring type. Typically, all the stats monitoring are
+      of poll-based and change in stats could trigger the rule. Whereas, state
+      based monitoring rule gets trigger due to certain event such as Blade out
+      ";
+  }
+
+  typedef maps-monitoring-system-type {
+    type string {
+      length "3..72";
+      pattern "[0-9a-zA-Z_]*";
+    }
+    description
+      "
+      Represents the monitoring system (MS). MAPS uses monitoring system to
+      monitor stats, performance, or faulty. Example - CRC, BLADE_STATE etc.
+      ";
+  }
+
+  typedef maps-rule-type {
+    type boolean;
+    description
+    "
+    Represents rule name. Rule can be of type base or rule on rule.
+    Base rule monitors the stats or FRU whereas rule on rule monitors
+    the base rule.
+    ";
+  }
+
+  typedef maps-rule-name-type {
+    type string {
+      length "1..72";
+      pattern "[0-9a-zA-Z_]*";
+    }
+    description
+      "Represents rule name";
+  }
+  /*
+  typedef maps-condition-type {
+    type string {
+      length 512;
+      pattern "[0-9a-zA-Z_/]*";
+    }
+    description
+      "
+      Represents the rule condition. MAPS uses condition to evaluate the rule -
+      for example CRC > 10/MIN
+      ";
+  }
+  */
+  typedef maps-group-name-type {
+    type string {
+      length "1..32";
+      pattern "[0-9a-zA-Z_]*";
+    }
+    description
+      "
+      Represents the name of the group to be configured. The name for the
+      group must be unique; it is not case sensitive and can contain up to
+      32 characters.
+      ";
+  }
+  typedef maps-policy-name-type {
+    type string {
+      length "1..32";
+      pattern "[0-9a-zA-Z_]*";
+    }
+    description
+      "
+      Represents the name of the policy to be created. The name for the
+      policy must be unique; it is case-sensitive and can contain up to 32
+      characters.
+      ";
+  }
+
+  typedef maps-dashboard-category-type {
+    type enumeration {
+      enum "port-health" {
+        description
+          "
+          The Port Health category monitors port statistics and takes action
+          based on the configuration thresholds and actions. You can configure
+          thresholds per port type and apply the configuration to all ports of
+          the specified type. Ports whose thresholds can be monitored include
+          physical ports, D_Ports, E_Ports, and F_Ports. The Port Health
+          category also monitors the physical aspects of a small form-factor
+          pluggable (SFP) transceiver, such as voltage, current, receive power
+          (RXP), and transmit power (TXP) in physical ports, D_Ports, E_Ports,
+          and F_Ports.
+          ";
+      }
+      enum "backend-port-health" {
+        description
+          "
+          The FRU Health category enables you to define rules for field
+          replaceable units (FRUs).
+          ";
+      }
+      enum "extension-ge-port-health" {
+        description
+          "
+          The Gigabit Ethernet (GE) ports category monitors statistics for GE
+          ports and takes action based on the configuration thresholds and
+          actions. You can configure thresholds and apply the configure to all
+          ports.
+          ";
+      }
+      enum "security-violations" {
+        description
+          "
+          The security Health category monitors security violations on the
+          switch and takes action based on the configure thresholds and their
+          actions.
+          ";
+      }
+      enum "fabric-state-changes" {
+        description
+          "
+          The Fabric State Changes category contains areas of potential fabric
+          related or switch related problems, such as zone changes, fabric
+          segmentation, E_Port down, fabric reconfiguration, domain ID changes,
+          and fabric logins.
+          ";
+      }
+      enum "fru-health" {
+        description
+          "
+          The FRU Health category enables you to define rules for field
+          replacable units (FRUs).
+          ";
+      }
+      enum "extension-health" {
+        description
+          "
+          The Extension Health category enables you to define rules for
+          Extension health, including circuit state changes, circuit state
+          utilization, and packet loss.
+          ";
+      }
+      enum "switch-resources" {
+        description
+          "
+          Switch Resource monitoring enables you to monitor your system's
+          temerature, flash usage, memory usage, and CPU.
+          ";
+      }
+      enum "fabric-performance-impact" {
+        description
+          "
+          ";
+      }
+      enum "traffic-performance" {
+        description
+          "
+          The Traffic Performance category monitors the flows.
+          ";
+      }
+    }
+    description
+      "
+      Represents the dashboard category. Typically, each rule belongs one
+      dashboard catgeory.
+      ";
+  }
+
+  typedef fru-state-type {
+    type enumeration {
+      enum "faulty" {
+        description
+          "
+          Represents faulty state.
+          ";
+      }
+      enum "in" {
+        description
+          "
+          Represents plug in state.
+          ";
+      }
+      enum "out" {
+        description
+          "
+          Represents plug out state.
+          ";
+      }
+      enum "off" {
+        description
+          "
+          Represents power off state.
+          ";
+      }
+      enum "on" {
+        description
+          "
+          Represents power on state.
+          ";
+      }
+    }
+    description
+      "
+      Represents FRU states.
+      ";
+  }
+  typedef data-type-type {
+    type enumeration {
+      enum "unsigned-int32" {
+        description
+          "
+          Represents unsigned integer 32 bits.
+          ";
+      }
+      enum "int32" {
+        description
+          "
+          Represents integer 32 bits data type.
+          ";
+      }
+      enum "float" {
+        description
+          "
+          Represents float data type.
+          ";
+      }
+      enum "unsigned-int64" {
+        description
+          "
+          Represents unsigned int 64 bits type.
+          ";
+      }
+      enum "enum" {
+        description
+          "
+          Represents enums type.
+          ";
+      }
+    }
+    description
+      "
+      Represents the data type support. Each monitoring system supports
+      different data type for thresholds.
+      ";
+  }
+
+  typedef threshold-value-type {
+    type string {
+      length "1..15";
+      pattern "[0-9a-zA-Z,_]*";
+    }
+    description
+      "
+      Represents the threshold to be used in the condition.
+      ";
+  }
+}
