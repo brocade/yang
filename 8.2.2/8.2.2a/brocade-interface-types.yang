@@ -1,0 +1,146 @@
+module brocade-interface-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-interface-types";
+  prefix brocade-interface-types;
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for managing
+    brocade-interface types.
+     
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to
+    Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-11-05 {
+    description
+      "
+      Fabric OS 8.2.1b
+      ---------------
+        Formatting
+        Organization information
+      ";
+    reference
+      "None";
+  }
+
+  typedef ip-prefix-length {
+    type union {
+      type ipv4-prefix-length;
+      type ipv6-prefix-length;
+    }
+    description
+      "The prefix length operator for the IPv4/IPv6 address.";
+  }
+
+  typedef ipv4-prefix-length {
+    type uint16 {
+      range "1..32";
+    }
+    description
+      "The prefix length operator for the IPv4 address.";
+  }
+
+  typedef ipv6-prefix-length {
+    type uint16 {
+      range "1..128";
+    }
+    description
+      "The prefix length operator for the IPv6 address.";
+  }
+
+  typedef ge-interface-type {
+    type string {
+      pattern "(([1][0-2]|[0-9])/(1[0-7]|[0-9]))";
+    }
+    description
+      "
+      GE interface of an Extension blade or system. The slot and port number of
+      the port (slot/port).
+      ";
+  }
+
+  typedef speed-type {
+    type uint64 {
+      range "1000000000|10000000000|40000000000";
+    }
+    units "byte";
+    description
+      "
+      The bandwidth of the Port.
+
+      1000000000  :    1 GbE
+      10000000000 :   10 GbE
+      40000000000 :   40 GbE
+      ";
+  }
+  typedef port-type-type {
+    type uint16 {
+      range "0|7|10|11|15|16|17|19|20|21|22|23|25|26|32768";
+    }
+    description
+      "
+      Fibre Channel port types:
+
+      0     : Unknown
+      7     : E Port
+      10    : G Port
+      11    : U Port
+      15    : F Port
+      16    : L Port
+      17    : FCoE Port
+      19    : EX Port
+      20    : D Port
+      21    : SIM Port
+      22    : AF Port
+      23    : AE Port
+      25    : VE Port
+      26    : Ethernet Flex Port
+      29    : Flex Port
+      30    : N Port
+      32768 : LB Port
+      ";
+  }
+
+  typedef fc-speed-type {
+    type uint64 {
+      range "0|1000000000|2000000000|4000000000|8000000000|10000000000|" +
+            "16000000000|32000000000";
+    }
+    description
+      "
+      The current bandwidth of the port.
+
+      0             : Auto negotiated.
+      1000000000    : 1 GFC
+      2000000000    : 2 GFC
+      4000000000    : 4 GFC
+      8000000000    : 8 GFC
+      10000000000   : 10 GFC
+      16000000000   : 16 GFC
+      32000000000   : 32 GFC
+      ";
+  }
+}
