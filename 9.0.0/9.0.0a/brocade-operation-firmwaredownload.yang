@@ -1,0 +1,167 @@
+module brocade-operation-firmwaredownload {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-firmwaredownload";
+  prefix firmwaredownload-operation;
+
+  import "ietf-inet-types" {
+    prefix inet;
+  }
+
+  import "brocade-operation-types" {
+    prefix operation-types;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This yang module defines firmwaredownload operation definitions. 
+          
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-10-04 {
+    description
+      "
+      FOS 9.0.0
+      -----
+      Initial release for firmwaredownload operation. 
+      Refine descriptions.
+      ";
+    reference
+      "None";
+  }
+
+  rpc firmwaredownload {
+    description 
+      "
+      The RPC command definition to trigger the firmwaredownload operation.
+      ";
+
+    input {
+      container firmwaredownload-parameters {
+      description
+        "
+        The firmwaredownload operation input container.
+        ";
+
+      leaf eula-action {
+        type operation-types:eula-action-type;
+	default "decline-eula";
+        description
+          "
+          Eula actions for firmwaredownload.
+          .
+          ";
+      }
+      leaf host {
+        type inet:host;
+        description 
+          "
+          The IPv4 or IPv6 address or host name for the remote server.
+          ";
+      }
+      leaf user-name {
+        type string {
+          length "1..128";
+          pattern "[ -~]+";
+        }
+        description 
+          "
+          The user name of the remote server that is used to copy
+          the firmwaredownload files. 
+          ";
+      }
+      leaf password {
+        type string {
+          length "0..128";
+          pattern "[ -~]*";
+        }
+        description 
+          "
+          The password for the remote server used to copy 
+          the firmwaredownload files.The password should be
+          base64 encoded. Refer to RFC 3414.
+          ";
+      }
+      leaf remote-directory {
+        type string {
+          length "1..1023";
+          pattern "[ -~]+";
+        }
+        description
+          "
+          The remote server directory from which the firmware are 
+          to be transferred. 
+          ";
+      }
+      leaf protocol {
+        type operation-types:protocol;
+        description
+	  "
+           The transfer protocol. The values are ftp (File Transfer Protocol),
+           scp (Secure Copy Protocol), sftp (Secure FTP) or
+           http (HyperText Transfer Protocol).
+           ";
+      }
+      leaf port {
+        when "../protocol = scp or ../protocol = sftp or ../protocol = http";
+        type uint32 {
+          range "1..65535";
+        }
+        description
+          "
+	  User defined port number for scp (Secure Copy Protocol), 
+          sftp (Secure FTP) or http (HyperText Transfer Protocol). 
+          ";
+      }
+      leaf stage {
+	when "../eula-action != display-eula";
+        type boolean;
+        description
+           "
+           Option to download firmware only on mount partitions.
+           ";
+      }
+      leaf activate {
+	when "../stage = false and ../eula-action != display-eula";
+        type boolean;
+        description
+           "
+           Option to activate firmware if not already activated.
+           ";
+      }
+     }		
+   }
+
+   output {
+     uses operation-types:show-status-group {
+       description
+         "
+         The firmwaredownload operation status container.
+         ";
+     }
+   }
+  }
+}

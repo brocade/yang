@@ -1,0 +1,506 @@
+module brocade-fabric-traffic-controller {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fabric-traffic-controller";
+  prefix brocade-fabric-traffic-controller;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    Fabric Traffic Controller (FTC) acts as a central point of processing to
+    translate Fabric Performance Impacts (FPI) into notifications and
+    signaling to end devices throughout the Fabric. Signals and notifications
+    are used to communicate the type and relative severity of impacting
+    behaviors to the affected members of the Fabric. FTC records information
+    regarding diagnostic ELS registration, FPI conditions, and related
+    statistics; storing the information per device (per N_Port).
+    
+    -----
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  reference
+    "
+    ANSI INCITS 545-20xx Rev 1.x, Fibre Channel - Link Services - 5
+    (FC-LS-5).
+
+    ANSI INCITS xxx-20xx Rev 0.x, Fibre Channel - Framing and Signaling - 6
+    (FC-FS-6).
+
+    ANSI INCITS 548-201x Rev 11.03, Fibre Channel - Generic Services - 8
+    (FC-GS-8).
+
+    ANSI INCITS xxx-20xx Rev 0.x, Fibre Channel - Switch Fabric - 8
+    (FC-SW-8).
+    ";
+
+  revision 2019-08-23 {
+    description
+      "
+      Fabric OS 9.0.0:  Initial release
+      ";
+    reference
+      "None";
+  }
+
+  typedef els-descriptor-type {
+    type enumeration {
+      enum "none" {
+        description
+          "No registered diagnostic ELS functions or descriptors.";
+      }
+      enum "fpin-peer-congestion" {
+        description
+          "FPIN ELS + Peer-Congestion descriptor registered.";
+      }
+      enum "fpin-link-integrity" {
+        description
+          "FPIN ELS + Link Integrity descriptor descriptor registered.";
+      }
+      enum "fpin-congestion" {
+        description
+          " FPIN ELS + Congestion descriptor descriptor registered.";
+      }
+      enum "fpin-delivery" {
+        description
+          "FPIN ELS + Delivery descriptor descriptor registered.";
+      }
+    }
+    description
+      "
+      ELS + ELS-descriptor pairs that are exchanged via the
+      Register Diagnostic Functions (RDF) ELS.
+      ";
+  }
+
+  typedef congestion-state-type {
+    type enumeration {
+      enum "none" {
+        description
+          "No congestion conditions reported";
+      }
+      enum "credit-stalled" {
+        description
+          "Device is exhibiting symptoms of BB credit stall";
+      }
+      enum "lost-credit" {
+        description
+          "Device is exhibiting symptoms of lost BB credit";
+      }
+      enum "oversubscribed" {
+        description
+          "Device is exhibiting symptoms of oversubscription";
+      }
+    }
+    description
+      "
+      Congestion status.
+      ";
+  }
+
+  typedef congestion-detection-signal-type {
+    type enumeration {
+      enum "none" {
+        description
+          "Congestion detection signals are not supported.";
+      }
+      enum "warning" {
+        description
+          "Warning congestion detection signal is supported.";
+      }
+      enum "warning-and-alarm" {
+        description
+          "Warning and Alarm congestion detection signals are supported.";
+      }
+    }
+    description 
+      "
+      Congestion detection signal capability.
+      ";
+  }
+
+  typedef congestion-detection-signal-cycles-type {
+      type uint16 {
+        range "0|1..999";
+      }
+      description
+        "
+        Signal threshold - congestion detection cycle count:
+
+          0        : Not Supported.
+          1 to 999 : Number of cycles at the indicated signaling scale used to
+                     detect Congestion Signals.
+
+            see also 'congestion-detection-signal-scale-type'
+        ";
+  }
+
+  typedef congestion-detection-signal-scale-type {
+    type enumeration {
+      enum "none" {
+        description
+          "Congestion detection signals are not supported.";
+      }
+      enum "seconds" {
+        description
+          "Congestion Detection Signal Cycles in Seconds.";
+      }
+      enum "milliseconds" {
+        description
+          "Congestion Detection Signal Cycles in Milliseconds.";
+      }
+      enum "microseconds" {
+        description
+          "Congestion Detection Signal Cycles in Microseconds.";
+      }
+      enum "nanoseconds" {
+        description
+          "Congestion Detection Signal Cycles in Nanoseconds.";
+      }
+    }
+    description
+      "
+      Signal threshold - congestion detection scale (unit of time).
+
+        see also 'congestion-detection-signal-cycles-type'
+      ";
+  }
+
+  grouping congestion-detection-descriptor-group {
+    
+    description
+      "
+      Congestion Detection Capabilities descriptor group:
+
+      The Congestion Detection Capabilities descriptor is used by the Fabric
+      Notifications feature to determine the supported congestion diagnostic
+      functions of a device or switch.
+      ";
+
+    leaf tx-signal-capability {
+      type congestion-detection-signal-type;
+      description
+        "
+        The transmit congestion detection signal capabilities of the port.
+        ";
+    }
+
+    leaf tx-signal-cycle {
+      type congestion-detection-signal-cycles-type;
+      description
+        "
+        The transmit congestion detection cycle applicable to the port.
+        ";
+    }
+
+    leaf tx-signal-scale {
+      type congestion-detection-signal-scale-type;
+      description
+        "
+        The transmit congestion detection scale applicable to the port.
+        ";
+    }
+
+    leaf rx-signal-capability {
+      type congestion-detection-signal-type;
+      description
+        "
+        The receive congestion detection signal capabilities of the port.
+        ";
+    }
+
+    leaf rx-signal-cycle {
+      type congestion-detection-signal-cycles-type;
+      description
+        "
+        The receive congestion detection cycle applicable to the port.
+        ";
+    }
+
+    leaf rx-signal-scale {
+      type congestion-detection-signal-scale-type;
+      description
+        "
+        The receive congestion detection scale applicable to the port.
+        ";
+    }
+  }
+
+  grouping link-fault-descriptor-group {
+    
+    description
+      "
+      Link Fault Capabilities descriptor group:
+
+      The Link Fault Capabilities descriptor represents the Link Degrade
+      Signaling parameters for a given N_Port or F_Port. See FC-FS-5
+      (Reed-Solomon decoder) for more information.
+      ";
+
+    leaf degrade-activate-threshold {
+      type uint32 {
+        range "0..max";
+      }
+      description
+        "
+        The value of a 32-bit register that specifies a symbol error count.
+        The value here controls the threshold used to activate the Remote
+        Degrade Bit being sent in the Alignment Marker field.
+        ";
+    }
+
+    leaf degrade-deactivate-threshold {
+      type uint32 {
+        range "0..max";
+      }
+      description
+        "
+        The value of a 32-bit register that specifies a symbol error count.
+        The value here controls the threshold used to deactivate the Remote
+        Degrade Bit being sent in the Alignment Marker field.
+        ";
+    }
+
+    leaf fec-degrade-interval {
+      type uint32 {
+        range "0..max";
+      }
+      description
+        "
+        The value of a 32-bit register that specifies the number of RS-FEC code
+        words that make up a Degrade Interval.
+        ";
+    }
+  }
+
+  grouping fpin-descriptor-statistics-group {
+  
+    description
+      "
+      A group of counters that provide quantitative data pertaining to Fabric
+      Performance Impact Notifications (FPIN) ELS exchange. Each applicable
+      ELS descriptor has a dedicated counter.
+      ";
+
+    leaf peer-congestion-count {
+      type yang:counter32;
+      description
+        "
+        FPIN Peer-Congestion descriptor count.
+        ";
+    }
+
+    leaf congestion-count {
+      type yang:counter32;
+      description
+        "
+        FPIN Congestion descriptor count.
+        ";
+    }
+
+    leaf link-integrity-count {
+      type yang:counter32;
+      description
+        "
+        FPIN Link Integrity descriptor count.
+        ";
+    }
+
+    leaf delivery-count {
+      type yang:counter32;
+      description
+        "
+        FPIN Delivery descriptor count.
+        ";
+    }
+  }
+
+  grouping fabric-traffic-controller-device-group {
+
+    description
+      "
+      Common (non-key) device entry data model for device-centric information
+      stored by the Fabric Traffic Controller.
+      ";
+
+    leaf f-port-wwn {
+      type fibrechannel:wwn-type;
+      description
+        "
+        F_Port Worldwide Name of the F_Port to which the N_Port is attached.
+        ";
+    }
+
+    leaf port-index {
+      type fibrechannel:user-port-number-type;
+      description
+        "
+        User Port Index.
+        ";
+    }
+
+    container rdf-registrations {
+      description
+        "
+        A list of ELS-to-ELS-descriptor pairs that have been registered
+        via the RDF ELS exchange.
+        ";
+      leaf-list rdf-registration {
+        type els-descriptor-type;
+        description
+          "
+          A list entry for an RDF-registered ELS-to-ELS-descriptor pair.
+          ";
+      }
+    }
+
+    container congestion-states {
+      description
+        "
+        A list of congestion symptoms, or 'states', exhibited on the port.
+        ";
+      leaf-list congestion-state {
+        type congestion-state-type;
+        description
+          "
+          A congestion state entry.
+          ";
+      }
+    }
+
+    leaf edc-owner {
+      type fibrechannel:fcid-hex-string-type;
+      description
+        "
+        N_Port ID of the device that owns the EDC (diagnostic capabilities)
+        information that applies to this N_Port. The value may or may not
+        match the value of the associated 'port-id' leaf of a given list
+        entry.
+
+        If the N_Port has not initiated an EDC ELS exchange, then the value
+        returned is '0x000000'.
+        ";
+    }
+
+    container fpin-send-statistics {
+      description
+        "
+        Quantitative data pertaining to FPIN ELS exchanges originated by the
+        switch.
+        ";
+      uses fpin-descriptor-statistics-group;
+    }
+
+    container fpin-receive-statistics {
+      description
+        "
+        Quantitative data pertaining to FPIN ELS exchanges received by the
+        switch.
+        ";
+      uses fpin-descriptor-statistics-group;
+    }
+    
+    container n-port-diagnostic-capabilities {
+      when "../edc-owner != '0x000000'";
+      description
+        "
+        The Diagnostic Capabilities of the N_Port (device).
+        ";
+      uses congestion-detection-descriptor-group;
+      uses link-fault-descriptor-group;
+    }
+
+    container f-port-diagnostic-capabilities {
+      when "../edc-owner != '0x000000'";
+      description
+        "
+        The Diagnostic Capabilities of the F_Port (switch).
+        ";
+      uses congestion-detection-descriptor-group;
+      uses link-fault-descriptor-group;
+    }
+
+    container applied-signaling-capabilities {
+      when "../edc-owner != '0x000000'";
+      description
+        "
+        The congestion detection signal capabilities that are common between
+        the N_Port (device) and F_Port (switch). The values are presented from
+        the perspective of the switch, and represent the set of values that are
+        actually programmed in hardware.
+        ";
+      uses congestion-detection-descriptor-group;
+    }
+  }
+
+
+  container brocade-fabric-traffic-controller {
+    description
+      "
+      Top-level container for Fabric Traffic Controller. The data model
+      contains information regarding diagnostic capabilities, Extended
+      Link Service (ELS) registration status, Fabric Performance Impact
+      (FPI) notification and signaling, and any relevant statistics.
+      ";
+      
+    list fabric-traffic-controller-device {
+
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      key "n-port-id";
+      config false;
+      description
+        "
+        A list of device entries applicable to Fabric Traffic Controller.
+        ";
+
+      leaf n-port-id {
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "
+          N_Port ID (Fibre Channel Address) of the device.
+          ";
+      }
+
+      leaf n-port-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "
+          N_Port Worldwide Name of the device.
+          ";
+      }
+
+      uses fabric-traffic-controller-device-group;
+
+    }
+  }
+}

@@ -1,0 +1,1363 @@
+module brocade-extension {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-extension";
+  prefix brocade-extension;
+
+  import brocade-extension-types {
+    prefix extension;
+  }
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import brocade-interface-types {
+    prefix brocade-interface-types;
+  }
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for reporting
+    the brocade-extension objects and their management.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2020-01-28 {
+    description
+      "
+      Fabric OS 9.0.0
+      ---------------
+        Initial version of brocade-extension.
+        Organization information
+      ";
+    reference
+      "None";
+  }
+    
+  container brocade-extension {
+    description 
+      "
+      The container for management and statistics for brocade extension.
+      ";
+      list dp-hcl-status {
+        if-feature fibrechannel:fibrechannel_extension_platform;
+        key "slot dp-id";
+        config false;
+        description
+        "Represents the HCL status on extension datapath process.";
+        leaf slot {
+          type uint16 {
+            range "0..12";
+          }
+          description
+            "
+            The slot number of for the datapath processor.
+            ";
+        }
+        leaf dp-id {
+          type extension:dp-id-type;
+          description
+            "
+            Extension Data Path Processor ID. Based on platform
+            either it will have a single DP or dual DP. In case of
+            single DP only DP0 is supported, and in case of
+            dual DP both DP0 and DP1 are supported
+
+            0 : DP0
+            1 : DP1.
+            ";
+        }
+        leaf state {
+          type extension:dp-state-type;
+          config false;
+          description
+            "The current DP HCL state ";
+        }
+        leaf status {
+          type extension:dp-actstate-type;
+          description
+            "The current DP status. ";
+        }
+        leaf fc-hcl-stage {
+          type extension:dp-hcl-stage-type;
+          description
+            "The current DP HCL stage for FC protocol.";
+        }
+        leaf ip-hcl-stage {
+          type extension:dp-hcl-stage-type;
+          description
+            "The current DP HCL stage for IP protocol.";
+        }
+        leaf svi-swapped {
+          type boolean;
+          description
+            "Is the SVI swapped for HCL processing";
+        }
+        leaf dp-communication-status {
+          type extension:dp-dp-communication-type;
+          description
+            "The current state of DP-DP communication";
+        }   
+        leaf firmware-version {
+          type string {
+            length "0..256";
+          }
+          description
+            "
+            A human readable string identifying the firmware version running
+            on the datapath process of the switch/blade.
+            "; 
+        }
+      }
+      list traffic-control-list {
+        if-feature fibrechannel:fibrechannel_extension_platform;
+        key "traffic-control-list-name";
+        description
+          "
+          Represents traffic control lists in order to manage IP Extension
+          LAN flows.
+          ";
+        leaf traffic-control-list-name {
+          type extension:extension-name-type;
+          description
+            "Name of the Traffic-Control-List.";
+        }
+        leaf priority {
+          type uint32 {
+            range "0..65535";
+          }
+          default 0;
+          description
+            "
+            TCL priority provides an order of precedence to the TCL rule
+            within the overall TCL list.
+            The priority 65535 is a special priority associated or applicable
+            to only the default TCL rule and no other user configured TCL
+            is allowed this value.
+            The priority 0 is a also treated as a special priority and is
+            only to indicate that the priority is not set.
+            A valid user configured TCL priority must use a value from
+            1 to 65534 only.
+            ";
+        }
+        leaf admin-state-enabled {
+          type boolean;
+          default false;
+          description
+            "
+            Is TCL admin status enabled. Default: false,
+            Values supported are true/false.
+
+            false - Disabled
+            true - Enabled
+            ";
+        }
+        leaf cp-dp-synchronized {
+          when "../admin-state-enabled = true";
+          type boolean;
+          config false;
+          description
+            "
+            Indicates whether an admin-statatus-enabled TCL is synchronized 
+            between the CP->DP. In case of error the value will be set to false
+
+            false - CP-DP synchronizing failed.
+            true - CP-DP is synchronized.
+            ";
+        }
+        leaf action {
+          type extension:tcl-action-type;
+          description
+            "
+             Set the action for this TCL. The TCL can be programmed
+             to allow a traffic or deny the traffic.
+            ";
+        }
+        leaf target-ve-port {
+          when "../action = allow";
+          type extension:ve-interface-type;
+          description
+            "
+            The VE port of the extension-tunnel used for allowing
+            a LAN ingress traffic to be sent over the WAN.
+            ";
+        }
+        leaf target-qos {
+          when "../action = allow";
+          type extension:ip-qos-type;
+          default "IP-priority-medium";
+          description
+            "
+             QoS priority associated with an extension-tunnel to be used
+             to allow a LAN ingress traffic over WAN.
+            ";
+        }
+        leaf target-slot {
+          when "../action = deny-dp";
+          type uint16 {
+            range "0..12";
+          }
+          description
+            "
+            In case of non-chassis system, the slot number is always 0.
+            In case of chassis system, it is the slot number of chassis in
+            which the extension blade is inserted in. In case of chassis,
+            slot number is non-zero value.
+            ";
+        }
+        leaf target-dp-id {
+          when "../action = deny-dp";
+          type extension:dp-id-type;
+          description
+            "
+            Extension Data Path Processor ID.
+            Based on platform either it will have a single DP or dual DP.
+            In case of single DP only DP0 is supported, and in case of
+            dual DP both DP0 and DP1 are supported
+
+            0 : DP0
+            1 : DP1.
+            ";
+        }
+        leaf source-address {
+          type union {
+            type inet:ip-address;
+            type string {
+              pattern "any";
+            }
+          }
+          default "any";
+          description
+            "Source IP address input filter for this TCL.";
+        }
+        leaf source-address-prefix-length {
+          when "../source-address != any";
+          type brocade-interface-types:ip-prefix-length;
+          description
+            "
+            The prefix length operator for source IP address input filter.
+            ";
+        }
+        leaf destination-address {
+          type union {
+            type inet:ip-address;
+            type string {
+              pattern "any";
+            }
+          }
+          default "any";
+          description
+            "Destination IP address input filter for this TCL.";
+        }
+        leaf destination-address-prefix-length {
+          when "../destination-address != any";
+          type brocade-interface-types:ip-prefix-length;
+          description
+            "
+            The prefix length operator for destination IP address input filter.
+            ";
+        }
+        leaf port {
+          type string {
+            length "1..80";
+            pattern "any|"
+                  + "([1-9]([0-9]{0,3})(([-][1-9]([0-9]){0,3})){0,1})"
+                  + "(,([1-9]([0-9]){0,3})(([-][1-9]([0-9]){0,3}){0,1}))*";
+          }
+          description
+            "
+            The protocol port input filter for this TCL.
+            The port arguments can be specified as a single port or in case
+            of multiple ports a comma separated list of ports or else a range
+            of ports can be specified or a combination.
+            example : 22 or 600-603 or 300,302,305
+            ";
+        }
+        leaf application {
+          type extension:extension-name-type;
+          description
+            "
+            The application input filter for this TCL. This includes
+            a list of known apps already present or a user
+            defined app-type name. The 'any' application type name
+            is a special value to identify any application.
+            
+            Below are few examples of system defined known application types:
+              CIFS
+              Data-Domain
+              FCIP
+              FTP
+              HTTP
+              HTTPS
+            ";
+        }
+        leaf dscp {
+          type string {
+            pattern "any|([0-9]|[1-5][0-9]|6[0-3])";
+          }
+          default "any";
+          description
+            "
+            The DSCP input filter for this TCL.
+            The values supported are from 0-63.
+            The value 'any' is default value and is meant
+            to match any dscp value specified.
+            
+            ";
+        }
+        leaf vlan {
+          type string {
+            pattern "any|"
+                  + "([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-3][0-9][0-9][0-9]|"
+                  + "40([0-8][0-9]|9[0-5]))";
+          }
+          default "any";
+          description
+            "
+            The VLAN input filter for this TCL.
+            The values supported are from 1-4095.
+            The value 'any' is the default value and is meant
+            to match any vlan-id value specified.
+            ";
+        }
+        leaf l2cos {
+          type string {
+            pattern "any|([0-7])";
+          }
+          default "any";
+          description
+            "
+            The L2CoS input filter for this TCL.
+            The valid values are from 0-7. 
+            The value 'any' is the default value and is meant
+            to match any value of l2CoS.
+            ";
+        }
+        leaf l4-protocol {
+          type extension:l4-protocol-type;
+          default "any";
+          description
+            "
+            The Layer 4 protocol input filter for this TCL.
+            
+            The value can be a well known protocol string value
+            or otherwise a L4 protocol number.
+            
+            The 'any' protocol string is the default value and is
+            meant to match any L4 protocol value.
+            
+            The valid range for L4 protocol is from 0-255.
+            
+            The list of known protocol string values from system are
+            as below:
+              ICMP
+              ICMP6
+              TCP
+              UDP
+              VRRP
+            ";
+        }
+        leaf reset-propagation-enabled {
+          type boolean;
+          default false;
+          description
+            "
+            Is End to End reset propagation for this TCL enabled.
+            Default: false,
+            Values supported are true/false.
+
+            false - Disabled
+            true - Enabled
+            ";
+        }
+        leaf segment-preservation-enabled {
+          type boolean;
+          default false;
+          description
+            "
+            Is segment preservation for this TCL enabled. Default: false,
+            Values supported are true/false.
+
+            false - Disabled
+            true - Enabled
+            ";
+        }
+        leaf non-terminated-enabled {
+          type boolean;
+          default false;
+          description
+            "
+            Is non terminated traffic for this TCL enabled. Default: false,
+            Values supported are true/false.
+
+            false - Disabled
+            true - Enabled
+            ";
+        }
+        leaf hit-count {
+          type yang:zero-based-counter64;
+          config false;
+          description
+            "Total number of times this TCL rule was hit.";
+
+        }
+      }
+      list lan-flow-statistics {
+        if-feature fibrechannel:fibrechannel_extension_platform;
+        key "flow-index slot dp-id";
+        config false;
+        description
+          "
+          The LAN per-flow statistics. 
+          ";
+        
+        leaf flow-index {
+          type uint32;
+          description
+            "
+            flow index associated with the LAN flow.
+            This is a dynamic index associated with the LAN flow.
+            Depending on the LAN flow behavior the index may change and
+            also can get reused after some time but at any given time they
+            will be unique.
+            ";
+        }
+        leaf slot {
+          type uint16 {
+            range "0..12";
+          }
+          description
+            "
+            In case of non-chassis system, the slot number is always 0.
+            In case of chassis system, it is the slot number of chassis in
+            which the extension blade is inserted in. In case of chassis,
+            slot number is non-zero value.
+            ";
+        }
+        leaf dp-id {
+          type extension:dp-id-type;
+          description
+            "
+            Extension Data Path Processor ID associated with flow.
+            Based on platform either it will have a single DP or dual DP.
+            In case of single DP only DP0 is supported, and in case of
+            dual DP both DP0 and DP1 are supported
+
+            0 : DP0
+            1 : DP1.
+            ";
+        }
+        leaf protocol {
+          type extension:l4-protocol-type;
+          description
+            "
+            Describes that the Layer 4 protocol of the flow.
+            ";
+        }
+        leaf source-port {
+          type inet:port-number;
+          description
+            "
+            Source port number of the LAN flow.
+            ";
+        }
+        leaf destination-port {
+          type inet:port-number;
+          description
+            "
+            Remote destination port number of the LAN flow.
+            ";
+        }
+        leaf source-ip-address {
+          type inet:ip-address;
+          description
+            "Source IP address corresponding to the LAN flow.";
+        }
+        leaf destination-ip-address {
+          type inet:ip-address;
+          description
+            "Destination IP address corresponding to the LAN flow.";
+        }
+        leaf traffic-control-list-name {
+          type extension:extension-name-type;
+          description
+            "
+            The traffic-control-list name matching the flow
+            filter to allow the traffic.
+            ";
+        }
+        leaf lan-interface {
+          type extension:extension-lan-interface-type;
+          description
+            "
+            The interface corresponding to the traffic. This could
+            be either a GE port or a LAG name associated with the
+            LAN flow.
+            ";
+        }
+        container mapped-tunnel {
+          leaf ve-port {
+            type extension:ve-interface-type;
+            description
+              "The VE port of the extension-tunnel interface.";
+          }
+          leaf qos {
+            type extension:ip-qos-type;
+            description
+              "
+              The IP priority QOS associated with the flow.
+              
+              ";
+          }
+          description
+            "
+            The interface used for extension-tunnel.
+            ";
+        }
+        leaf vlan-id {
+          type uint32 {
+            range "0..4095";
+          }
+          description
+            "
+            Specifies the VLAN ID associated with the flow.
+            When not set, this value will show up as 0.
+            ";
+        }
+        leaf vlan-priority {
+          type uint32 {
+            range "0..7";
+          }
+          description
+            "
+            Specifies the VLAN priority associated with the flow.
+            ";
+        }
+        leaf dscp {
+          type uint32 {
+            range "0..7";
+          }
+          description
+            "
+            DSCP value for the LAN flow.
+            ";
+        }
+        leaf hcl-flow {
+          type boolean;
+          description
+            "
+            Indicates that LAN flow is in HCL.
+            
+            true: The flow is in HCL.
+            false: The flow is not in HCL.
+            ";
+        }
+        leaf active-flow {
+          type boolean;
+          description
+            "
+            Indicates that LAN flow is currently active.
+            
+            true: The flow is active.
+            false: The flow is not active.
+            ";
+        }
+        leaf start-time {
+          type yang:date-and-time;
+          description
+            "
+            Indicates the LAN flow start time.
+            ";
+        }
+        leaf end-time {
+          when "../active-flow = false";
+          type yang:date-and-time;
+          description
+            "
+            Indicates the LAN flow end time.
+            ";
+        }
+        leaf rtt {
+          type yang:gauge32;
+          units "milliseconds";
+          description
+            "
+            round trip time.
+            ";
+        }
+        leaf in-tcp-bytes {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "Total bytes received.";
+        }
+        leaf in-tcp-packets {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Total TCP packets received.";
+        }
+        leaf out-tcp-bytes {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "Total bytes sent.";
+        }
+        leaf out-tcp-packets {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Total TCP packets sent.";
+        }
+        leaf tcp-out-of-order-packets {
+          type yang:zero-based-counter64;
+          description
+            "TCP total out of order packets.";
+        }
+        leaf tcp-retransmits {
+          type  yang:zero-based-counter64;
+          description
+            "TCP retransmits /lost packets.";
+        }
+        leaf fast-retransmits {
+          type yang:zero-based-counter64;
+          description
+            "
+            TCP fast retransmits count.
+            ";
+        }
+        leaf slow-retransmits {
+          type yang:zero-based-counter64;
+          description
+            "
+            TCP slow retransmits count.
+            ";
+        }
+        leaf duplicate-acknowledgement {
+          type yang:zero-based-counter64;
+          description
+            "
+            TCP duplicate ACK received.
+            ";
+        }
+        leaf zero-window-count {
+          type yang:zero-based-counter64;
+          description
+            "
+            The count of TCP zero window encountered.
+            ";
+        }
+        leaf zero-window-maximum-duration {
+          type yang:zero-based-counter64;
+          units "ticks";
+          description
+            "
+            The maximum of zero window duration encountered.
+            ";
+        }
+        leaf out-bytes-average {
+          type yang:gauge64;
+          units "Bps";
+          description
+            "
+            The throughput in bps for packets sent over the
+            extension tunnel on WAN per 30s average.
+            ";
+        }
+        leaf in-bytes-average {
+          type yang:gauge64;
+          units "Bps";
+          description
+            "
+            The throughput in bps for packets received via an
+            extension tunnel over WAN per 30s average.
+            ";
+        }
+        leaf in-drops-lan-session-manager {
+          type yang:zero-based-counter64;
+          description
+            "
+            The number of drops at the ingress from
+            LAN session manager.
+            ";
+        }
+        leaf out-drops-lan-session-manager {
+          type yang:zero-based-counter64;
+          description
+            "
+            The number of drops at the egress from
+            LAN session manager.
+            ";
+        }
+        leaf crc-errors {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of CRC errors encountered.";
+        }
+        leaf in-bytes-lan-session-manager {
+          type yang:zero-based-counter64;
+          description
+            "Total bytes received by LAN session manager.";
+        }
+        leaf in-packets-lan-session-manager {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Total packets received by LAN session manager.";
+        }
+        leaf out-bytes-lan-session-manager {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "Total bytes sent by LAN session manager.";
+        }
+        leaf out-packets-lan-session-manager {
+          type yang:zero-based-counter64;
+          description
+            "Total packets sent by LAN session manager.";
+        }
+        leaf in-bytes-lan-compression {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "Total bytes received by compression engine from LAN.";
+        }
+        leaf in-bytes-wan-compression {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "Total bytes received by compression engine from WAN.";
+        }
+        leaf out-bytes-lan-compression {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "Total bytes sent by compression engine on LAN.";
+        }
+        leaf out-bytes-wan-compression {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "Total bytes sent compression engine on WAN.";
+        }
+        leaf local-host-mss {
+          type yang:zero-based-counter32;
+          units "bytes";
+          description
+            "
+            The local-host-mss is the MSS of the TCP connection
+            at the LAN ingress side connected host.
+            ";
+        }
+        leaf remote-host-mss {
+          type yang:zero-based-counter32;
+          units "bytes";
+          description
+            "
+            The remote-host-mss is the MSS of the TCP connection at
+            peer extension tunnel endpoint connected host to its the LAN
+            ingress side.
+            ";
+        }
+      }
+      list global-lan-statistics {
+        if-feature fibrechannel:fibrechannel_extension_platform;
+        key "slot dp-id";
+        config false;
+        description
+          "Represents global LAN DP statistics for extension blade or system.";
+        leaf slot {
+          type uint16 {
+            range "0..12";
+          }
+          description
+            "
+            In case of non-chassis system, the slot number is always 0.
+            In case of chassis system, it is the slot number of chassis in which
+            the extension blade is inserted in. In case of chassis, slot number
+            is non-zero value.
+            ";
+        }
+        leaf dp-id {
+          type extension:dp-id-type;
+          description
+            "
+            Extension Data Path Processor ID.
+            Based on platform either it will have a single DP or dual DP.
+            In case of single DP only DP0 is supported, and in case of
+            dual DP both DP0 and DP1 are supported
+
+            0 : DP0
+            1 : DP1.
+            ";
+        }
+        leaf active-tcp-connections {
+          type yang:gauge32;
+          description
+            "Active TCP connection count.";
+        }
+        leaf active-tcp-connections-on-local-backup {
+          type yang:gauge32;
+          description
+            "Active clone HCL TCP connection count on Local Backup tunnel.";
+        }
+        leaf active-tcp-connections-on-remote-backup {
+          type yang:gauge32;
+          description
+            "Active clone HCL TCP connection count on Remote Backup tunnel.";
+        }
+        leaf established-tcp-connections {
+          type yang:gauge32;
+          description
+            "Total LAN TCP connections established.";
+        }
+        leaf closed-tcp-connections {
+          type yang:gauge32;
+          config false;
+          description
+            "Total LAN TCP connections closed.";
+        }
+        leaf out-tcp-bytes {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "Total number of TCP bytes transmitted.";
+        }
+        leaf in-tcp-bytes {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "Total number of TCP bytes received.";
+        }
+        leaf tcp-tcl-deny-connections {
+          type yang:zero-based-counter64;
+          description
+            "Number of TCP connection denied based on TCL deny rule.";
+        }
+        leaf tcp-tcl-lookup-fail {
+          type yang:zero-based-counter64;
+          description
+            "Number of TCP connection denied based on TCL lookup failure.";
+        }
+        leaf syn-received {
+          type yang:zero-based-counter64;
+          description
+            "Number of SYN packets received.";
+        }
+        leaf syn-fail {
+          type yang:zero-based-counter64;
+          description
+            "Number of SYN packets dropped due to error.";
+        }
+        leaf drop-bytes {
+          type yang:zero-based-counter64;
+          units "bytes";
+          description
+            "LSM Tx TCP drop bytes.";
+        }
+        leaf drop-packets {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of LSM packet dropped in egress.";
+        }
+        leaf stale-reset-from-host {
+          type yang:zero-based-counter64;
+          description
+            "Stale reset from host.";
+        }
+        leaf maximum-tcp-connection-exceeded-as-client {
+          type yang:zero-based-counter64;
+          description
+            "
+            Maximum connection exceeded on listen connection
+            allocation.
+            ";
+        }
+        leaf maximum-tcp-connection-exceeded-as-server {
+          type yang:zero-based-counter64;
+          description
+            "
+            Maximum connection exceeded during active connection
+            allocation.
+            ";
+        }
+        leaf maximum-tcp-connection-per-second-exceeded-as-client {
+          type yang:zero-based-counter64;
+          description
+            "
+            Maximum connection per second exceeded on listen connection
+            allocation.
+            ";
+        }
+        leaf maximum-tcp-connection-per-second-exceeded-as-server {
+          type yang:zero-based-counter64;
+          description
+            "
+            Maximum connection per second exceeded on listen connection
+            allocation.
+            ";
+        }
+        leaf maximum-udp-connection-exceeded {
+          type yang:zero-based-counter64;
+          config false;
+          description
+            "
+            Total UDP flows failed due to Maximum context on ingress
+            and egress.
+            ";
+        }
+        leaf maximum-udp-connection-exceeded-on-egress {
+          type yang:zero-based-counter64;
+          description
+            "
+            Total UDP flows failed due to Maximum context on egress.
+            ";
+        }
+        leaf udp-packets-sent-as-is {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Total UDP packets sent as-is.";
+        }
+        leaf out-pdu-preserve-on {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of times transmit with PDU preserve ON.";
+        }
+        leaf in-pdu-preserve-on {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of packets received with PDU preserve ON.";
+        }
+        leaf total-ipv6-packets {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Total IPv6 packets received - IPv6 WQEs received by IP API layer.";
+        }
+        leaf flow-control-on {
+          type yang:zero-based-counter64;
+          description
+            "Flow control on from FTNL.";
+        }
+        leaf flow-control-off {
+          type yang:zero-based-counter64;
+          description
+            "Flow control off from FTNL.";
+        }
+        leaf active-udp-connections {
+          type yang:zero-based-counter64;
+          description
+            "Number of active NT UDP flows.";
+        }
+        leaf established-udp-connections {
+          type yang:zero-based-counter64;
+          description
+            "Number of UDP connections opened since bootup.";
+        }
+        leaf closed-udp-connections {
+          type yang:zero-based-counter64;
+          description
+            "Number of UDP connections closed since bootup.";
+        }
+        leaf udp-route-lookup-fail {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Drop of NT PDUs on egress due to route lookup failure.";
+        }
+        leaf udp-pdu-drops-due-to-pko-flow-control {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Drop of NT PDUs on egress due to PKO flow control.";
+        }
+        leaf out-udp-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of Tx UDP PDU.";
+        }
+        leaf out-udp-pdu-drops {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of Tx UDP PDUs dropped due to different reasons.";
+        }
+        leaf in-udp-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of UDP PDUs received from host.";
+        }
+        leaf in-udp-tcl-lookup-fail-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of UDP PDUs dropped due to TCL lookup.";
+        }
+        leaf in-udp-tcl-deny-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of UDP PDUs dropped due to TCL deny.";
+        }
+        leaf in-total-udp-pdu-drops {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Total UDP PDUs dropped due to multiple reasons.";
+        }
+        leaf in-udp-pdu-drops-due-to-stream-flow-control {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of UDP PDUs dropped due to stream flow control.";
+        }
+        leaf out-icmp-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of Tx ICMP PDUs.";
+        }
+        leaf out-icmp-pdu-drops {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of Tx ICMP PDU dropped.";
+        }
+        leaf in-icmp-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of ICMP PDUs received.";
+        }
+        leaf in-icmp-tcl-lookup-fail-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of ICMP PDUs dropped due to TCL lookup failure.";
+        }
+        leaf in-icmp-tcl-deny-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of ICMP PDUs dropped due to TCL returning deny status.";
+        }
+        leaf in-total-icmp-pdu-drops {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of ICMP PDU drops.";
+        }
+        leaf in-icmp-pdu-drops-due-to-stream-flow-control {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of ICMP PDU drop due to stream flow control.";
+        }
+        leaf out-as-is-ip-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of as-is Tx IP PDUs.";
+        }
+        leaf out-as-is-ip-pdu-drops {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "Number of as-is Tx IP PDUs dropped.";
+        }
+        leaf in-as-is-ip-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "non-terminated TCP, non-batched UDP, Non-ICMP PDU received.";
+        }
+        leaf in-as-is-ip-tcl-lookup-fail-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "
+            non-terminated TCP, non-batched UDP, Non-ICMP PDU dropped
+            due to TCL lookup failure.
+            ";
+        }
+        leaf in-as-is-ip-tcl-deny-pdus {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "
+            non-terminated TCP, non-batched UDP, Non-ICMP PDU dropped due to
+            TCL deny status.
+            ";
+        }
+        leaf in-total-as-is-ip-pdu-drops {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "
+            Total non-terminated TCP, non-batched UDP, Non-ICMP PDU
+            dropped in ingress.
+            ";
+        }
+        leaf in-as-is-ip-pdu-drops-due-to-stream-flow-control {
+          type yang:zero-based-counter64;
+          units "pdus";
+          description
+            "
+            non-terminated TCP, non-batched UDP, Non-ICMP PDU dropped due to
+            stream flow control.
+            ";
+        }
+        leaf in-error-ip-checksum {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of IP checksum errors detected on Rx packets.";
+        }
+        leaf in-error-tcp-checksum {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of TCP checksum errors detected on Rx packets.";
+        }
+        leaf in-error-mac {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of MAC errors detected on Rx packets.";
+        }
+        leaf in-error-crc {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of CRC errors detected on Rx packets.";
+        }
+        leaf in-error-parity {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of Parity errors detected on Rx packets.";
+        }
+        leaf in-error-length {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "Number of Length errors detected on Rx packets.";
+        }
+        leaf out-udp-packets-64-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            less than 64 bytes.
+            ";
+        }
+        leaf out-udp-packets-128-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            equal to & greater than 64 bytes but less than 128 bytes.
+            ";
+        }
+        leaf out-udp-packets-256-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            equal to & greater than 128 bytes but less than 256 bytes.
+            ";
+        }
+        leaf out-udp-packets-512-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            equal to & greater than 256 bytes but less than 512 bytes.
+            ";
+        }
+        leaf out-udp-packets-1024-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            equal to & greater than 512 bytes but less than 1024 bytes.
+            ";
+        }
+        leaf out-udp-packets-1500-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            equal to & greater than 1024 bytes but less than 1500 bytes.
+            ";
+        }
+        leaf out-udp-packets-3000-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            equal to & greater than 1500 bytes but less than 3000 bytes.
+            ";
+        }
+        leaf out-udp-packets-4500-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            equal to & greater than 3000 bytes but less than 4500 bytes.
+            ";
+        }
+        leaf out-udp-packets-6000-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            equal to & greater than 4500 bytes but less than 6000 bytes.
+            ";
+        }
+        leaf out-udp-packets-9000-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets transmitted of size
+            equal to & greater than 6000 bytes but less than 9000 bytes.
+            ";
+        }
+        leaf in-udp-packets-64-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            less than 64 bytes.
+            ";
+        }
+        leaf in-udp-packets-128-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            equal to & greater than 64 bytes but less than 128 bytes.
+            ";
+        }
+        leaf in-udp-packets-256-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            equal to & greater than 128 bytes but less than 256 bytes.
+            ";
+        }
+        leaf in-udp-packets-512-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            equal to & greater than 256 bytes but less than 512 bytes.
+            ";
+        }
+        leaf in-udp-packets-1024-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            equal to & greater than 512 bytes but less than 1024 bytes.
+            ";
+        }
+        leaf in-udp-packets-1500-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            equal to & greater than 1024 bytes but less than 1500 bytes.
+            ";
+        }
+        leaf in-udp-packets-3000-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            equal to & greater than 1500 bytes but less than 3000 bytes.
+            ";
+        }
+        leaf in-udp-packets-4500-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            equal to & greater than 3000 bytes but less than 4500 bytes.
+            ";
+        }
+        leaf in-udp-packets-6000-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            equal to & greater than 4500 bytes but less than 6000 bytes.
+            ";
+        }
+        leaf in-udp-packets-9000-bytes {
+          type yang:zero-based-counter64;
+          units "packets";
+          description
+            "
+            Number of UDP packets received of size
+            equal to & greater than 6000 bytes but less than 9000 bytes.
+            ";
+        }
+      }
+    }
+}

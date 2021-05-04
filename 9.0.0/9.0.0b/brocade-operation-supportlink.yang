@@ -1,0 +1,81 @@
+module brocade-operation-supportlink {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-supportlink";
+  prefix supportlink-operation;
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This yang module defines supportLink operation definitions.
+          
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-09-23 {
+    description
+      "
+      FOS 9.0.0
+      -----
+      Initial release for supportLink operation.
+      Refine descriptions.
+      ";
+    reference
+      "None";
+  }
+
+  rpc supportlink {
+    description
+      "
+      The RPC command definition to trigger the supportLinkProfile operation.
+      ";
+
+    input {
+      container supportlink {
+      description
+        "
+        The supportLinkProfile operation input container.
+        ";
+
+       leaf action {
+         type enumeration {
+            enum "default" {
+              description "Default parameters";
+            }
+            enum "collect" {
+              description "Collect data in the local switch";
+            }
+            enum "send" {
+              description "Upload data to ASC Gateway";
+            }
+         }
+         description
+           "
+           The action like default, collect, or send to be performed.
+           ";
+       }
+     }
+   }
+  }
+}

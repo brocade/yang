@@ -1,0 +1,367 @@
+module brocade-lldp {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-lldp";
+  prefix lldp;
+
+  import ietf-yang-types {
+    prefix ietf;
+  }
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    Link Level Discovery Protocol (LLDP) is a Layer-2 protocol used by devices
+    to advertise their identities, capabilities and configurations to directly 
+    connected peers, and to learn and store information about the peers. It is
+    a vendor neutral protocol and formally referred to as IEEE standard 
+    802.1AB-2009. The basic format for exchanging information in LLDP is the 
+    format of TLV (Type/Length/Value). A sequence of TLVs form a LLDP PDU which 
+    is sent over an ethernet interface periodically.
+
+    The 'brocade-lldp' YANG module provides the means for monitoring the
+    operation, and configuring the parameters for Brocade LLDP functionality.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-10-31 {
+    description
+      "
+      Fabric OS 9.0.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  typedef lldp-mandatory-tlv-name-type {
+    type enumeration {
+      enum "chassis-id" {
+        description
+          "Chassis ID TLV";
+      }
+      enum "port-id" {
+        description
+          "Port ID TLV";
+      }
+      enum "time-to-live" {
+        description
+          "Time To Live TLV";
+      }
+    }
+    description
+      "LLDP Mandatory TLV names";
+  }
+
+  typedef lldp-optional-tlv-name-type {
+    type enumeration {
+      enum "dcbx" {
+        description
+          "IEEE Data Center Bridging eXchange TLV";
+      }
+      enum "fcoe-app" {
+        description
+          "IEEE DCBx FCoE Application TLV";
+      }
+      enum "fcoe-lls" {
+        description
+          "IEEE DCBx FCoE Logical Link TLV";
+      }
+      enum "dot1" {
+        description
+          "IEEE 802.1 Organizationally Specific TLV";
+      }
+      enum "dot3" {
+        description
+          "IEEE 802.1 Organizationally Specific TLV";
+      }
+      enum "mgmt-addr" {
+        description
+          "Management Address TLV";
+      }
+      enum "port-desc" {
+        description
+          "Port Description TLV";
+      }
+      enum "sys-cap" {
+        description
+          "System Capabilities TLV";
+      }
+      enum "sys-desc" {
+        description
+          "System Description TLV";
+      }
+      enum "sys-name" {
+        description
+          "System Name TLV";
+      }
+    }
+    description
+      "LLDP Optional TLV names";
+  }
+
+  container brocade-lldp {
+    description
+      "
+      Proprietary Link Level Discovery Protocol (LLDP) entry container.
+      This container contains LLDP configuration, operational state and
+      statistics.
+      ";
+    container lldp-global {
+      if-feature "fibrechannel:fibrechannel_chassis_platform or " +
+                 "fibrechannel:fibrechannel_extension_platform";
+      description
+        "The LLDP switch level configuration and operational parameters.";
+      leaf multiplier {
+        type uint32 {
+          range "2..10";
+        }
+        description
+          "The LLDP timeout multiplier value.
+           Default value is 4";
+      }
+      leaf tx-interval {
+        type uint32 {
+          range "4..180";
+        }
+        units "seconds"; 
+        description
+          "The LLDP Tx interval of the switch.
+           Default value is 30 seconds";
+      }
+      leaf system-name {
+        type string {
+          length 1..31;
+          pattern "[0-9a-zA-Z_]+";
+        }
+        description
+          "The LLDP system name of the switch.";
+      }
+      leaf system-description {
+        type string {
+          length 1..255;
+          pattern "[0-9a-zA-Z_]+";
+        }
+        description
+          "The LLDP system description of the switch.";
+      }
+      leaf enabled-state {
+        type boolean;
+        description
+          "
+          The LLDP protocol state of the switch.
+          The possible values are:
+            true : LLDP is enabled on the switch
+            false : LLDP is disabled on the switch
+          Default value is true.
+          ";
+      }
+      container mandatory-tlvs {
+        config false;
+        description
+          "The mandatory LLDP TLVs supported by the switch.";
+        leaf-list tlv {
+          type lldp-mandatory-tlv-name-type;
+          description
+            "
+            The list of mandatory LLDP TLVs (chassis-id, port-id
+            and time-to-live) which cannot be modified.
+            ";
+        }
+      }
+      container optional-tlvs {
+        description
+          "The optional LLDP TLVs supported by the switch.";
+        leaf-list tlv {
+          type lldp-optional-tlv-name-type;
+          description
+            "
+            The list of optional TLVs enabled on the switch.
+            The dcbx, fcoe-app, fcoe-lls, sys-name and port-desc
+            TLVs are enabled by default and user can disable them
+            if required. The dcbx TLV should be enabled beforehand
+            to enable fcoe-app and fcoe-lls TLVs.
+            ";
+        }
+      }
+    }
+
+    list lldp-profile {
+      if-feature "fibrechannel:fibrechannel_chassis_platform or " +
+                 "fibrechannel:fibrechannel_extension_platform";
+      key "name";
+      description
+        "The LLDP profile.";
+      leaf name {
+        type string {
+          length "1..31";
+          pattern "[0-9a-zA-Z_]+";
+        }
+        description
+          "The LLDP profile name.";
+      }
+      leaf multiplier {
+        type int32 {
+          range "-1|2..10";
+        }
+        description
+          "
+          The LLDP timeout multiplier value of the LLDP profile.
+          Multiplier value -1 indicates that it will be derived
+          from lldp global multiplier value.
+          ";
+      }
+      leaf tx-interval {
+        type int32 {
+          range "-1|4..180";
+        }
+        units "seconds";
+        description
+          "
+          The Transmit interval value of the LLDP profile.
+          Tx-interval value -1 indicates that it will be derived
+          from lldp global tx-interval value.
+          ";
+      }
+      container enabled-tlvs {
+        description
+          "The enabled TLVs for the LLDP profile.";
+        leaf-list tlv {
+          type lldp-optional-tlv-name-type;
+          description
+            "
+            List of enabled TLVs for the LLDP profile.
+            Empty enabled-tlvs indicates that the tlvs will be
+            derived from lldp global optional-tlvs.
+            ";
+        }
+      }
+    }
+
+    list lldp-neighbor {
+      if-feature "fibrechannel:fibrechannel_chassis_platform or " +
+                 "fibrechannel:fibrechannel_extension_platform";
+      key "slot-port";
+      config false;
+      description
+        "The list of LLDP neighbor devices connected to the switch.";
+      leaf slot-port {
+        type fibrechannel:slot-port-name-type; 
+        description
+          "The local interface name.";
+      }
+      leaf dead-interval {
+        type uint32 {
+          range "0..max";
+        }
+        units "seconds";      
+        description
+          "The dead interval of the the LLDP neighbor.";
+      }
+      leaf remaining-life {
+        type uint32 {
+          range "0..max";
+        }
+        units "seconds";      
+        description
+          "The remaining life of the LLDP neighbor.";
+      }
+      leaf remote-interface-name {
+        type string;
+        description
+          "
+          The remote interface name of the LLDP neighbor device connected 
+          to local switch ethernet interface.
+          ";
+      }
+      leaf chassis-id {
+        type string;
+        description
+          "The chassis ID of the LLDP neighbor.";
+      }
+      leaf system-name {
+        type string;
+        description
+          "The system name of the LLDP neighbor.";
+      }
+    }
+
+    list lldp-statistics {
+      if-feature "fibrechannel:fibrechannel_chassis_platform or " +
+                 "fibrechannel:fibrechannel_extension_platform";
+      key "slot-port";
+      config false;
+      description
+        "
+        The LLDP protocol specific Tx, Rx and Error statistics
+        of the port/s.
+        ";
+      leaf slot-port {
+        type fibrechannel:slot-port-name-type; 
+        description
+          "Port name.";
+      }
+      leaf out-frames {
+        type ietf:zero-based-counter64;
+        description
+          "The number of LLDP out frames.";
+      }
+      leaf in-frames {
+        type ietf:zero-based-counter64;
+        description
+          "The number of LLDP In frames.";
+      }
+      leaf frames-aged-out {
+        type ietf:zero-based-counter64;
+        description
+          "The number of LLDP aged out frames.";
+      }
+      leaf frames-discarded {
+        type ietf:zero-based-counter64;
+        description
+          "The number of LLDP discarded frames.";
+      }
+      leaf error-frames {
+        type ietf:zero-based-counter64;
+        description
+          "The number of LLDP error frames"; 
+      }
+      leaf tlv-discarded {
+        type ietf:zero-based-counter64;
+        description
+          "The number of discarded LLDP TLVs.";
+      }
+      leaf tlv-unrecognized {
+        type ietf:zero-based-counter64;
+        description
+          "The number of unrecognized LLDP TLVs.";
+      }
+    }
+  }
+}

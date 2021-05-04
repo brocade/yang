@@ -1,0 +1,342 @@
+module brocade-fibrechannel-switch {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fibrechannel-switch";
+  prefix switch;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+  import brocade-fru-types {
+    prefix fru;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'switch', which provides a detailed
+    view of all of the switches in the fabric that are operational.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to
+    Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-01-11 {
+    description
+      "
+      Fabric OS 8.2.0a
+      ----------------
+        Deprecated 'fcid' (replaced by 'fcid-hex')
+
+      Fabric OS 8.2.1
+      ---------------
+        Refine 'user-friendly-name' regular expression
+        Formatting
+        Organization information
+        Refine descriptions
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-fibrechannel-switch {
+    description
+      "
+      Switch state parameters. Currently, requests are made using QUERY
+      specifying the vf-id of the specific fabric which will provide the
+      switch state parameters.
+      ";
+    list fibrechannel-switch {
+      key "name";
+      description
+        "
+        Switch state parameters. Requests can also be made using a query that
+        specifies the vf-id of the fabric. This request also provides the
+        switch state parameters.
+        ";
+      leaf name {
+        type fibrechannel:wwn-type;
+        description
+          "The switch world wide name (WWN).";
+      }
+      leaf domain-id {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type fibrechannel:domain-id-type;
+        description
+          "
+          The highest level in a three-level addressing hierarchy used in the
+          Fibre Channel address identifier. A domain typically is associated
+          with a single Fibre Channel switch.
+          ";
+      }
+      leaf user-friendly-name {
+        type string {
+          length "30";
+          pattern "([0-9a-zA-Z][0-9a-zA-Z-._]{2,30})|" +
+                  "([0-9][0-9a-zA-Z-._]{2,30})";
+        }
+        description
+          "The ASCII name assigned to the switch by the administrator.";
+      }
+      leaf fcid {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type fibrechannel:fcid-type;
+        config false;
+        status deprecated;
+        description
+          "
+          The destination ID (D_ID) of the switch (decimal format).
+
+          Deprecated: Please use 'fcid-hex' leaf instead.
+          ";
+      }
+      leaf fcid-hex {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type fibrechannel:fcid-hex-string-type;
+        config false;
+        description
+          "The destination id (D_ID) of the switch (hexadecimal format).";
+      }
+      leaf vf-id {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type int16 {
+          range "-1|1..128";
+        }
+        config false;
+        description
+          "
+          This is the virtual fabric identification (VFID) of the logical
+          switch.
+
+          -1 : Indicates that the Virtual Fabric feature is unsupported or 
+               disabled.
+          ";
+      }
+      leaf principal {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type uint8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          Indicates the principal switch in the fabric. The possible
+          values are:
+
+          0 : This switch is not the principal switch in the fabric.
+          1 : This switch is the principal switch in the fabric.
+          ";
+      }
+      leaf enabled-state {
+        type uint32 {
+          range "0|2|3|7";
+        }
+        status deprecated;
+        description
+          "
+          The current state of the switch. The possible values are:
+
+          0 : Undefined.
+          2 : Switch is enabled.
+          3 : Switch is disabled.
+          7 : Switch is being tested.
+
+          Note that the enabled-state can be set to 'Enable' and 'Disable' only; 
+          it cannot be set to 'Testing' or 'Undefined'.
+          Deprecated: Please use 'is-enabled-state' leaf to configure switch state
+          and 'operational-status' leaf to get switch status.
+          ";
+      }
+      leaf is-enabled-state {
+	type boolean; 
+	description
+          "
+          The current configuration of the switch.
+
+          true  : Enabled.
+          false : Disabled.
+          ";
+      }
+      leaf operational-status {
+        type uint32 {
+          range "0|2|3|7";
+        }
+	config false;
+        description
+          "
+          The current state of the switch. The possible values are:
+
+          0 : Undefined.
+          2 : Switch is enabled.
+          3 : Switch is disabled.
+          7 : Switch is being tested.
+
+          ";
+      }
+      leaf up-time {
+        type yang:timeticks;
+        config false;
+        description
+          "
+          The period of time elapsed since last reboot of the specified switch.
+          This value represents an absolute time interval for which the switch 
+          has been up, not the time measured between the last reboot and 
+          midnight, January 1, 1970 UTC, and the most recent reboot of the 
+          switch.
+          ";
+      }
+      leaf model {
+        type string {
+          length "5";
+        }
+        config false;
+        description
+          "The model name of the switch.";
+      }
+      leaf firmware-version {
+        type string {
+          length "0..256";
+        }
+        config false;
+        description
+          "
+          A human readable string identifying the firmware version running
+          on the switch.
+          ";
+      }
+      container ip-address {
+        description
+          "
+          List of out-of-band IP addresses assigned to the Ethernet port on the
+          switch. This container is needed by underlying infrastructure.
+          ";
+        leaf-list ip-address {
+          type inet:ip-address;
+          description
+            "
+            List of out-of-band IP addresses assigned to the Ethernet port of
+            the switch.
+            ";
+        }
+      }
+
+      container ip-static-gateway-list {
+        description
+          "
+          List of IPv4 and IPv6 static gateway addresses for the switch 
+          IP address.
+          ";
+        leaf-list ip-static-gateway {
+          type fru:ip-gateway-type;
+          description
+            "
+            List of static gateway IP addresses of an IP router that can route
+            packets to the destination IP address. The gateway address must be 
+            on the same IP subnet as one of the port IP addresses. Only one 
+            IPv4 static gateway and one IPv6 static gateway are allowed. 
+            ";
+        }   
+      }
+
+      leaf subnet-mask {
+        type inet:ipv4-address;
+        description
+          "The IPv4 subnet mask of the switch IP network.";
+      }
+      leaf domain-name {
+        type string {
+          length "4..63";
+          pattern '([a-zA-Z][!-~]{3,62})';
+        }
+        description
+          "
+          The DNS domain name of the switch.
+
+          The DNS domain name can be 4 to 63 alphanumeric characters. This 
+          DNS domain name must start with an alphabetic character, and cannot 
+          contain blank spaces and control characters. 
+          
+          Passing a null string clears the domain name.
+          ";
+      }
+      container dns-servers {
+        description
+          "List of DNS server addresses.";
+        leaf-list dns-server {
+          type inet:ip-address;
+          description
+          "
+          List of DNS server addresses which can handle the mapping of the 
+          domain names to IP address of an internet resources which is needed
+          by various networking protocols.
+          Brocade FC switches support maximum of two DNS servers.
+          ";
+	}
+      }
+      leaf fabric-user-friendly-name {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type string {
+          length "0..128";
+          pattern "[ -~]*";
+        }
+        description
+          "An printable ASCII name for the fabric.";
+      }
+      leaf ag-mode {
+        type uint8 {
+          range "0|1|3";
+        }
+        description
+          "
+          Indicates the Access Gateway (AG) mode capability and state. A
+          switch is capable of AG mode support when this value is non-zero.
+
+          0 : AG mode is not supported by this device.
+          1 : AG mode is supported and is currently disabled.
+          3 : AG mode is supported and is currently enabled.
+          ";
+      }
+      
+      leaf banner {
+        type string {
+          length "1..1022";
+          pattern "([ -~]*)";
+        }
+        description
+          "
+          The banner is a string of alphanumeric characters.
+          The banner displays during the log on process.
+          Specify a text string to be displayed upon login.
+          The banner text can be 1 to 1022 characters. If the banner text
+          exceeds the maximum limit, the software truncates the input.
+          ";
+      }
+    }
+  }
+}

@@ -1,0 +1,365 @@
+module brocade-chassis {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-chassis";
+  prefix brocade-chassis;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import brocade-fru-types {
+    prefix fru;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-chassis', which
+    provides a detailed view of configuration and runtime
+    information of the chassis.
+     
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-01-11 {
+    description
+      "
+      Initial release (FOS 8.2.1).
+      Refine descriptions.
+      ";
+    reference "None";
+  }
+
+  container brocade-chassis {
+    description
+      "
+      A detailed view of configuration and runtime information of the chassis, 
+      including HA status information.
+      ";
+    container chassis {
+      description
+        "
+        The complete details of the chassis.
+        ";
+      leaf chassis-user-friendly-name {
+        type string {
+          length "1..31";
+          pattern "([a-zA-Z][0-9a-zA-Z_-]{0,30})";
+        }
+        description
+          "
+          An ASCII name assigned to the switch chassis by the administrator.
+          A chassis name must begin with a letter and can consist of letters,
+          numbers, underscores (_) or hyphens (-) and is not case-sensitive.
+          In FICON mode, the name is limited to a maximum of 24 characters 
+          plus hyphens (-) and underscores (_).
+          ";
+      }
+      leaf chassis-wwn {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "
+          The WWN of the chassis.
+          ";
+      }
+      leaf license-id {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "
+          The WWN which is used for generating the license.
+          ";
+      }
+      leaf manufacturer {
+        type fru:manufacturer-type;
+        config false;
+        description
+          "
+          The manufacturer of the chassis.
+          ";
+      }
+      leaf part-number {
+        type fru:part-number-type;
+        config false;
+        status deprecated;
+        description
+          "
+          The part number for the physical element assigned by
+          the manufacturer.
+
+          Deprecated: Please refer 'brocade-fru.yang' 'list wwn'
+          'part-number' leaf instead.
+          ";
+      }
+      leaf serial-number {
+        type fru:serial-number-type;
+        config false;
+        description
+          "
+          A printable ASCII string that specifies the factory serial
+          number of the chassis.
+          ";
+      }
+      leaf max-blades-supported {
+        type uint16 {
+          range "1|8|12";
+        }
+        config false;
+        description
+          "
+          The maximum number of blades that can fit in the physical chassis. 
+          This number includes switch, control processor, application, 
+          and core routing blades.
+          ";
+      }
+      leaf vendor-serial-number {
+        type string {
+          length "0..20";
+          pattern "[ -~]{0,20}";
+        }
+        config false;
+        status deprecated;
+        description
+          "
+          The serial number of the chassis assigned by the vendor.
+
+          Deprecated: Please refer 'brocade-fru.yang' 'list wwn'
+          'vendor-serial-number' leaf instead.
+          ";
+      }
+      leaf vendor-part-number {
+        type string {
+          length "0..20";
+          pattern "[ -~]{0,20}";
+        }
+        config false;
+        status deprecated;
+        description
+          "
+          The part number of the chassis assigned by the vendor.
+
+          Deprecated: Please refer 'brocade-fru.yang' 'list wwn'
+          'vendor-part-number' leaf instead.
+          ";
+      }
+      leaf vendor-revision-number {
+        type string {
+          length "0..4";
+          pattern "[ -~]{0,4}";
+        }
+        config false;
+        status deprecated;
+        description
+          "
+          The revision number of the chassis assigned by the vendor.
+
+          Deprecated: Please refer 'brocade-fru.yang' 'list wwn'
+          'vendor-revision-number' leaf instead.
+          ";
+      }
+      leaf product-name {
+        type string {
+          length "1..255";
+          pattern "[ -~]{1,255}";
+        }
+        config false;
+        description
+          "
+          The product name of the chassis.
+          ";
+      }
+      leaf vf-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+          Whether Virtual Fabrics is enabled on the chassis.
+          Enabling Virtual Fabrics is a disruptive operation that
+          requires a reboot to take effect.
+
+             true  : Virtual Fabrics is enabled on the chassis.
+             false : Virtual Fabrics is not enabled on the chassis.
+          ";
+      }
+      leaf vf-supported {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        config false;
+        description
+          "
+          Whether Virtual Fabrics is supported on the chassis.
+
+             true  : Virtual Fabrics is supported on the chassis. 
+             false : Virtual Fabrics is not supported on the chassis. 
+          ";
+      }
+      leaf fcr-enabled {
+        when "../fcr-supported = true";
+        type boolean;
+        description
+          "
+          Indicates whether FCR is enabled or not.
+
+                true  : enabled
+                false : disabled
+          ";
+      }
+      leaf fcr-supported {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        config false;
+        description
+          "
+          Indicates whether FCR is supported on
+          the chassis or not.
+
+             true  : FCR is supported
+             false : FCR is not supported
+          ";
+      }
+      leaf date {
+        type string {
+          length "1..100";
+          pattern "[ -~]{1,100}";
+        }
+        config false;
+        description
+          "
+          The current date of the switch.
+          ";
+      }
+    }
+    container ha-status {
+      config false;
+      description
+        "
+        The control processor (CP) status, which includes the following 
+        information:
+        - Local CP state (slot number and CP ID) and warm or cold
+        - Remote CP state (slot number and CP ID)
+        - High Availability (enabled or disabled)
+        - Heartbeat (up or down)
+        - Health of the standby CP
+        - HA synchronization status
+        ";
+      leaf active-cp {
+        type string {
+          length "1..4";
+          pattern "cp0|cp1";
+        }
+        description
+          "The ID of the active CP.";
+      }
+      leaf standby-cp {
+        type string {
+          length "1..4";
+          pattern "cp0|cp1";
+        }
+        description
+          "The ID of the standby CP.";
+      }
+      leaf active-slot {
+        type uint16 {
+          range "0..12";
+        }
+        description
+          "The slot number of the active CP.";
+      }
+      leaf standby-slot {
+        type uint16 {
+          range "0..12";
+        }
+        description
+          "The slot number of the standby CP.";
+      }
+      leaf recovery-type {
+        type string {
+          length "1..7";
+          pattern "cold|warm";
+        }
+        description
+          "The recovery status of the switch.";
+      }
+      leaf standby-health {
+        type string {
+          length "1..20";
+          pattern "(healthy|faulted|unknown|non-redundant|not-available)";
+        }
+        description
+          "
+          The health status of the standby CP.
+          healthy :
+            The standby CP is running, and the background health
+            diagnostic has not detected any errors.
+          faulted :
+            The standby CP is running, but the background health
+            diagnostic has discovered a problem with the blade.
+            Check the logs to determine the appropriate action.
+            Failover is disabled until the standby CP is repaired.
+          unknown :
+            The standby CP health state is unknown because of one
+            of the following reasons: the standby CP does not
+            exist, the heartbeat is down, or the Health Monitor has
+            detected a configuration file error.
+          non-redundant : 
+            There is no standby CP.
+          not-available :
+            The standby CP health status is not available.
+          ";
+      }
+      leaf ha-enabled {
+        type boolean;
+        description
+          "
+          Whether the Availability (HA) is enabled or disabled.
+
+            true  : HA is enabled.
+            false : HA is disabled.
+          ";
+      }
+      leaf heartbeat-up {
+        type boolean;
+        description
+          "
+          Whether the heartbeat to standby CP is up or down.
+            true  : The heartbeat to standby CP is up.
+            false : The heartbeat to standby CP is down.
+          ";
+      }
+      leaf ha-synchronized {
+        type boolean;
+        description
+          "
+          Whether HA is in a synchronized state. When HA is in a synchronized 
+          state and a failover becomes necessary, it is nondisruptive.
+
+            true  : HA is synchronized. 
+            false : HA is not synchronized. 
+          ";
+      }
+    }
+  }
+}

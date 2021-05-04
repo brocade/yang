@@ -1,0 +1,267 @@
+module brocade-fibrechannel-trunk {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fibrechannel-trunk";
+  prefix trunk;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+   
+  organization
+    "Broadcom Inc.";
+  
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-fibrechannel-trunk',
+    which provides a view of all of trunks in the switch in native mode
+    as well as the members of the individual trunk. It can optionally
+    give traffic performance and bandwidth information. For F-port
+    trunking, for static trunks it allows configuration of a trunk
+    index which is persistent & has same value across all members of
+    the trunk. Even if the master port changes, the trunk area will be
+    derived from the target index.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to
+    Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-01-11 {
+    description
+      "
+      Initial release (FOS 8.2.1)
+      Refine descriptions
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-fibrechannel-trunk {
+    description
+      "
+      This container displays information about the native mode Trunk state and 
+      performance and also allows you to configure an F_Port static trunk from a
+      native switch to an Access Gateway switch.
+      ";
+
+  list trunk {
+    key "group source-port";
+    config false;
+    description 
+      "The list of configured members in the trunk.";
+  
+    leaf  group {
+      type fibrechannel:user-port-number-type;
+      description
+        "
+        The unique number on the switch for identifying a Fibre Channel trunk.
+        ";
+    }
+
+    leaf source-port {
+      type fibrechannel:user-port-number-type;
+      description 
+        "The user port number of the trunk member of the local switch.";
+    }
+
+    leaf master {
+      type boolean;
+      description 
+        "
+        Indicates whether this link is the Trunk Master.
+
+        true: This link is the trunk master.
+        false: This link is a slave.
+
+        ";
+    }
+
+    leaf destination-port {
+      type fibrechannel:user-port-number-type;
+      description 
+        "The user port number of the trunk member of the adjacent switch.";
+    }
+
+    leaf neighbor-wwn {
+      type fibrechannel:wwn-type;
+      description 
+        "The Fibre Channel WWN of the adjacent switch.";
+    }  
+
+    leaf neighbor-switch-name {
+       type string {
+         length  "1..64";
+       }
+       description 
+         "The Fibre Channel user-friendly name of the adjacent switch.";
+    }
+
+    leaf neighbor-domain-id {
+      type fibrechannel:domain-id-type;
+      description 
+        "
+        The highest level in a three-level addressing hierarchy used in the
+        Fibre Channel address identifier. A domain typically is associated
+        with a single Fibre Channel switch.
+        ";
+    }
+
+    leaf deskew {
+      type fibrechannel:deskew-type;
+      description 
+        "
+        This parameters determines if ports can be trunked if the variation
+        between different links in a trunk is within range.
+        ";
+    }
+  }
+
+  list performance {
+    key "group";
+    config false;
+    description
+      "The performance statistics for each trunk in the switch.";
+
+    leaf  group {
+      type fibrechannel:user-port-number-type;
+        description
+          "
+          A positive number that uniquely identifies a trunk starting from 1 to 
+          the maximum number of trunks in the switch. 
+          ";
+    }
+
+    leaf tx-bandwidth {
+      type uint32;
+      units "Gbps";
+      description 
+        "The transmit bandwidth.";
+    }
+
+    leaf tx-throughput {
+      type uint64;
+      units "bps";
+      description 
+        "The transmit side frame transmission rate.";
+    }
+
+    leaf tx-percentage {
+      type fibrechannel:percentage-type;
+      description 
+        "The transmit bandwidth as a percentage of the maximum bandwidth.";
+    }
+
+    leaf rx-bandwidth {
+      type uint32;
+      units "Gbps";
+      description 
+        "The receive bandwidth.";
+    }
+
+    leaf rx-throughput {
+      type uint64;
+      units "bps";
+      description 
+        "The receive side frame reception rate.";
+    }
+
+    leaf rx-percentage {
+      type fibrechannel:percentage-type;
+      description 
+        "The receive bandwidth as a percentage of the maximum bandwidth.";
+    }
+
+    leaf txrx-bandwidth {
+      type uint32;
+      units "Gbps";
+      description 
+        "The combined (transmit and receive) frame bandwidth.";
+    }
+
+    leaf txrx-throughput {
+      type uint64;
+      units "bps";
+      description 
+        "The combined (transmit and receive) side frame rate.";
+    }
+
+    leaf txrx-percentage {
+      type fibrechannel:percentage-type;
+      description 
+        "
+        The combined (transmit and receive) bandwidth as a percentage of the 
+        maximum bandwidth.
+        ";
+    }
+
+   }
+
+   list trunk-area {
+     key "trunk-index";
+     description
+       "
+       A list of trunk area groups for a switch. You can configure the trunk 
+       index for ports in the same octet for F_Ports. Note that this operation 
+       is persistent and disruptive.
+       ";
+
+     leaf trunk-index {
+       type fibrechannel:user-port-number-type;
+       description
+         "The persistent trunk area for range of ports in the F_Port trunk.";
+     }
+
+     container trunk-members {
+       description
+         "The trunk members of the F_Port trunk group.";
+
+       leaf-list trunk-member {
+          type fibrechannel:slot-port-name-type;
+          min-elements 1;
+          description
+             "
+             The individual trunk member of an F_Port trunk in the format 
+             slot/port.
+             ";
+    }
+     }
+
+     leaf master-port {
+        type fibrechannel:slot-port-name-type;
+        config false;
+        description
+          "The master port in a trunk in the format slot/port.";
+     }
+
+     leaf trunk-active {
+       type boolean;
+       config false;
+       description 
+         "
+         Whether trunking is active on the port.
+         true : Trunking is active on the port. 
+         false: Trunking is not active on the port.
+         ";
+     }
+
+   }
+ }
+}

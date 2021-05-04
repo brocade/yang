@@ -1,0 +1,153 @@
+module brocade-operation-supportsave {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-supportsave";
+  prefix supportsave-operation;
+
+  import "ietf-inet-types" {
+    prefix inet;
+  }
+
+  import brocade-operation-types {
+    prefix operation;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This yang module defines supportSave operation definitions. 
+          
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2018-08-03 {
+    description
+      "
+      FOS 8.2.1
+      -----
+      Initial release for supportSave operation. 
+      Refine descriptions.
+      ";
+    reference
+      "None";
+  }
+
+  rpc supportsave {
+    description 
+      "
+      The RPC command definition to trigger the supportSave operation.
+      ";
+
+    input {
+      container connection {
+      description
+        "
+        The supportSave operation input container.
+        ";
+
+      leaf host {
+        type inet:host;
+        description 
+          "
+          The IPv4 or IPv6 address or host name for the remote server.
+          ";
+      }
+      leaf user-name {
+        type string {
+          length "1..128";
+          pattern "[ -~]*";
+        }
+        description 
+          "
+          The user name of the remote server that is used to copy
+          the supportSave files. 
+          ";
+       }
+       leaf password {
+         type string {
+           length "1..128";
+           pattern "[ -~]*";
+         }
+         description 
+           "
+           The password for the remote server used to copy 
+           the supportSave files.
+           ";
+       }
+       leaf remote-directory {
+         type string {
+           length "1..1023";
+           pattern "[ -~]*";
+         }
+         description
+           "
+           The remote server directory to which the files are 
+           to be transferred. 
+           ";
+       }
+       leaf protocol {
+         type string {
+           length "1..10";
+           pattern "scp|ftp|sftp";
+         }
+         description 
+           "
+           The transfer protocol. The values are ftp (File Transfer Protocol),
+           scp (Secure Copy Protocol), or sftp (Secure FTP). 
+           ";
+       }
+       leaf serial-mode {
+         type boolean;
+         description
+           "
+           Legacy serial-mode module supportsave collection.
+           true  : Supportsave process will be done serialize module by module.
+           false : Supportsave process will be done in parallel for multiple
+           modules.
+           ";
+       }
+       leaf port {
+		 when "../protocol = scp or ../protocol = sftp";
+         type uint32 {
+           range "1..65535";
+         }
+         description
+           "
+           User defined port number can be configured only for scp/sftp
+           protocol
+           ";
+       }
+     }
+   }
+
+   output {
+     uses operation:show-status-group {
+       description
+         "
+         The supportSave operation status container.
+         ";
+     }
+   }
+  }
+}

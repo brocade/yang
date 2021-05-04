@@ -1,0 +1,407 @@
+module brocade-snmp-types {
+
+  yang-version 1.1;
+	namespace "urn:brocade.com:mgmt:brocade-snmp-types";
+	prefix brocade-snmp-types;
+		
+	organization 
+		"Broadcom Inc.";
+
+	contact
+	  "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+	description 
+		"
+		This module contains the typedef data model used 
+		in brocade SNMP yang.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+		";
+		
+	revision 2020-03-30 {
+	  description 
+        "
+		FOS 9.0.0
+      	---------
+        Added new enums read-only and read-write in group-name
+        and mibcapability in default-control-type.
+
+        Fabric OS 8.2.1b
+        ----------------
+          Initial release
+          Refined descriptions.
+        ";
+	  reference
+      "None";
+  	}
+	typedef group-name {
+	  type enumeration {
+		enum "ro" {
+		  description "Indicates the SNMP read only group name.";
+		}
+		enum "rw" {
+		  description "Indicates the SNMP read write group name.";
+		}
+		enum "read-only" {
+		  description "Indicates the SNMP read only group name.";
+		}
+		enum "read-write" {
+		  description "Indicates the SNMP read write group name.";
+		}
+	  }
+	  description "It indicates the SNMP group name";
+	}
+	typedef security-level {
+	  type uint16 {
+		range "0..3";
+	  }
+	  status deprecated;
+	  description
+		" 
+		The security access level for SNMP get / set
+		operation. The range values represent the
+		security level as follows.
+
+		  0 : No Security
+		  1 : Authentication only
+		  2 : Authentication and privacy
+	          3 : No Access
+	  deprecated: Please use 'security-level-string-type' instead.
+		";
+	}
+	typedef severity-level {
+	  type enumeration {
+		enum "none" {
+		  description 	
+			"
+			This severity is set none of the log messages
+			are displayed.
+			";
+		}
+		enum "critical" {
+		  description 
+		    "
+			if this severity is set, the critical and below level
+			log messages are displayed.
+			";
+		}
+		enum "error" {
+		  description 
+		    "
+            If this severity is set, the error and below level
+			log messages are displayed.
+			";
+		}
+		enum "warning" {
+		  description 
+		    "
+            If this severity is set, the warning and below level
+			log messages are displayed.
+			";
+		}
+		enum "informational" {
+		  description
+		    "
+            If this severity is set, the informational and below level
+			log messages are displayed.
+			";
+		}
+		enum "debug" {
+		  description
+		    "
+            If this severity is set, the debug and below level
+			log messages are displayed.
+			";
+		}
+	  }
+	  description 
+		"The severity level of event notifications.";
+	}
+	typedef authentication-protocol-type {
+	  type enumeration {
+		enum "md5" {
+		  description "Indicates the authorization protocol as md5.";
+		}
+		enum "sha" {
+		  description "Indicates the authorization protocol as sha.";
+		}
+		enum "noauth" {
+		  description "Indicates the authorization protocol as none.";
+		}
+	  }
+	  description "It indicates the SNMPV3 authorization protocols";
+	}
+
+	typedef security-level-string-type {
+	  type enumeration {
+		enum "no-security" {
+		  description "Indicates the security level as NO Security";
+		}
+		enum "authentication-only" {
+		  description "Indicates the security level as Authentication only";
+		}
+		enum "authentication-and-privacy" {
+		  description "Indicates the security level as Auth and Priv.";
+		}
+		enum "no-access" {
+		  description "Indicates the secuirity level as No access.";
+		}
+	  }
+	  description "It indicates the SNMP security level in string format";
+	}
+
+	typedef privacy-protocol-type {
+	  type enumeration {
+		enum "des" {
+		  description "Indicates the privacy protocol as DES.";
+		}  
+		enum "aes128" {
+		  description "Indicates the privacy protocol as AES128.";
+		}
+		enum "aes256" {
+		  description "Indicates the privacy protocol as AES256.";
+		}
+		enum "nopriv" {
+		  description "Indicates the privacy protocol as none.";
+		}
+	  }
+	  description "It indicates the SNMPV3 privacy protocols";
+	}
+	typedef access-permission {
+	  type enumeration {
+		enum "ro" {
+		  description "The access level is read only.";
+		}
+		enum "rw" {
+		  description "The access level is read write.";
+		}
+	  }
+	  description "The SNMP access control permission.";
+	}
+	typedef default-control-type {
+	  type enumeration {
+		enum "snmpv1" {
+		  description "Defaulting the snmpv1 configurations.";
+		} 
+		enum "snmpv3" {
+		  description "Defaulting the snmpv3 configurations.";
+		} 
+		enum "accesscontrol" {
+		  status deprecated;
+		  description 
+			"Defaulting the access control configurations.
+			 deprecated: Please use ipfilter-policy list instead.
+			";
+		} 
+		enum "system" {
+		  description "Defaulting the system configurations.";
+		} 
+		enum "mibcap" {
+		  description 
+			"
+			Defaulting the snmp mib capability configurations.
+			";
+		}
+		enum "auditinterval" {
+		  description "Defaulting the snmp audit interval.";
+		}
+		enum "mibcapability" {
+		  description
+			"
+			Defaulting the snmp mib capability configurations.
+			";
+		}
+	  }
+	  description "The SNMP default configuration options.";
+	}
+	typedef mibs-name {
+	  type enumeration {
+		enum "FE-MIB" {
+		  description
+		    "It indicates FE-MIB.";
+		} 
+		enum "SW-MIB" {
+		  description
+		    "It indicates SW-MIB.";
+		} 
+		enum "FA-MIB" {
+		  description
+		    "It indicates FA-MIB.";
+		} 
+		enum "FICON-MIB" {
+		  description
+		    "It indicates FICON-MIB.";
+		} 
+		enum "HA-MIB" {
+		  description
+		    "It indicates HA-MIB.";
+		} 
+		enum "FCIP-MIB" {
+		  description
+		    "It indicates FCIP-MIB.";
+		} 
+		enum "IF-MIB" {
+		  description
+		    "It indicates IF-MIB.";
+		} 
+		enum "BROCADE-MAPS-MIB" {
+		  description
+		    "It indicates BROCADE-MAPS-MIB.";
+		} 
+		enum "T11-FC-ZONE-SERVER-MIB" {
+		  description
+		    "It indicates T11-FC-ZONE-SERVER-MIB.";
+		}
+	 }
+	 description "The list of supported snmp mibs.";
+   }
+   typedef traps-name {
+	 type enumeration {
+	   enum "swFCPortScn" {
+		 description
+		   "It indicates swFCPortScn trap.";
+	   }
+	   enum "swEventTrap" {
+		 description
+		   "It indicates swEventTrap trap.";
+	   }
+	   enum "swIPv6ChangeTrap" {
+		 description
+		   "It indicates swIPv6ChangeTrap.";
+	   }
+	   enum "swPmgrEventTrap" {
+		 description
+		   "It indicates swPmgrEventTrap.";
+	   }
+	   enum "swFabricReconfigTrap" {
+		 description
+		   "It indicates swFabricReconfigTrap.";
+	   }
+	   enum "swFabricSegmentTrap" {
+		 description
+		   "It indicates swFabricSegmentTrap.";
+	   }
+	   enum "swExtTrap" {
+		 description
+		   "It indicates swExtTrap.";
+	   }
+	   enum "swStateChangeTrap" {
+		 description
+		   "It indicates swStateChangeTrap.";
+	   }
+	   enum "swPortMoveTrap" {
+		 description
+		   "It indicates swPortMoveTrap.";
+	   }
+	   enum "swBrcdGenericTrap" {
+		 description
+		   "It indicates swBrcdGenericTrap.";
+	   }
+	   enum "swDeviceStatusTrap" {
+		 description
+		   "It indicates swDeviceStatusTrap.";
+	   }
+	   enum "swZoneConfigChangeTrap" {
+		 description
+		   "It indicates swZoneConfigChangeTrap.";
+	   }
+	   enum "connUnitStatusChange" {
+		 description
+		   "It indicates connUnitStatusChange.";
+	   }
+	   enum "connUnitEventTrap" {
+		 description
+		   "It indicates connUnitEventTrap.";
+	   }
+	   enum "connUnitPortStatusChange" {
+		 description
+		   "It indicates connUnitPortStatusChange trap.";
+	   }
+	   enum "linkRNIDDeviceRegistration" {
+		 description
+		   "It indicates linkRNIDDeviceRegistration trap.";
+	   }
+	   enum "linkRNIDDeviceDeRegistration" {
+		 description
+		   "It indicates linkRNIDDeviceDeRegistration trap.";
+	   }
+	   enum "linkLIRRListenerAdded" {
+		 description
+		   "It indicates linkLIRRListenerAdded trap.";
+	   }
+	   enum "linkLIRRListenerRemoved" {
+		 description
+		   "It indicates linkLIRRListenerRemoved trap.";
+	   }
+	   enum "linkRLIRFailureIncident" {
+		 description
+		   "It indicates linkRLIRFailureIncident trap.";
+	   }
+	   enum "fruStatusChanged" {
+		 description
+		   "It indicates fruStatusChanged trap.";
+	   }
+	   enum "cpStatusChanged" {
+		 description
+		   "It indicates cpStatusChanged trap.";
+	   }
+	   enum "fruHistoryTrap" {
+		 description
+		   "It indicates fruHistoryTrap.";
+	   }
+	   enum "linkDown" {
+		 description
+		   "It indicates linkDown trap.";
+	   }
+	   enum "linkUp" {
+		 description
+		   "It indicates linkUp trap.";
+	   }
+	   enum "mapsTrapAM" {
+		 description
+		   "It indicates mapsTrapAM trap.";
+	   }
+	   enum "mapsQuietTimeExpirationTrap" {
+		 description
+		   "It indicates mapsQuietTimeExpirationTrap.";
+	   }
+	   enum "t11ZsRequestRejectNotify" {
+		 description
+		   "It indicates t11ZsRequestRejectNotify trap.";
+	   }
+	   enum "t11ZsMergeFailureNotify" {
+		 description
+		   "It indicates t11ZsMergeFailureNotify trap.";
+	   }
+	   enum "t11ZsMergeSuccessNotify" {
+		 description
+		   "It indicates t11ZsMergeSuccessNotify trap.";
+	   }
+	   enum "t11ZsDefZoneChangeNotify" {
+		 description
+		   "It indicates t11ZsDefZoneChangeNotify trap.";
+	   }
+	   enum "t11ZsActivateNotify" {
+		 description
+		   "It indicates t11ZsActivateNotify trap.";
+	   }
+	 }	
+	 description "The list of supported SNMP traps.";
+   }
+}

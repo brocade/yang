@@ -1,0 +1,183 @@
+module brocade-fibrechannel-logical-switch {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fibrechannel-logical-switch";
+  prefix logical-switch;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'logicalswitch', which provides
+    details of all logical switches in a operational chassis.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-10-14 {
+    description
+      "
+      Fabric OS 8.2.0a
+      ----------------
+        Initial release
+      
+      Fabric OS 8.2.1
+      ---------------
+        Formatting
+        Organization information
+        Naming standard update
+
+      Fabric OS 9.0.0
+      ---------------
+        Added 'fibrechannel_virtual_fabric_platform' feature check
+      ";
+
+    reference
+      "None";
+  }
+
+  container brocade-fibrechannel-logical-switch {
+    description
+      "
+      Logical Switch state parameters. Currently, requests are responded with
+      logical switch state parameters of all configured logical switches.
+      ";
+    list fibrechannel-logical-switch {
+      if-feature fibrechannel:fibrechannel_virtual_fabric_platform;
+      key "fabric-id";
+      description
+        "
+        The logical switch configuration.
+        ";
+      leaf fabric-id {
+        type uint32 {
+          range "1..128";
+        }
+        description
+          "The virtual fabric identification (VFID) of the logical switch.";
+      }
+      leaf switch-wwn {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "
+          The switch WWN, which is a unique numeric identifier for the switch
+          assigned by the chassis.
+          ";
+      }
+      leaf base-switch-enabled {
+        when "../logical-isl-enabled = 0 and ../ficon-mode-enabled = 0";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          The logical switch is the base switch in the chassis.
+          This can be specified during creation of logical switch.
+          This cannot be specified during deletion of logical switch.
+
+            0 : disabled
+            1 : enabled
+          ";
+      }
+      leaf default-switch-status {
+        type uint8 {
+          range "0..1";
+        }
+        config false;
+        description
+          "
+          The logical switch is the default switch in the chassis.
+
+            0 : disabled
+            1 : enabled
+          ";
+      }
+      leaf logical-isl-enabled {
+        when "../base-switch-enabled = 0";
+        type uint8 {
+          range "0..1";
+        }
+        default "1";
+        description
+          "
+          Enables logical ISLs (LISLs).
+          Disabling LISLs is allowed only during logical switch creation.
+          Enabling LISLs is not allowed on a base switch.
+
+            0 : disabled
+            1 : enabled
+          ";
+      }
+      leaf ficon-mode-enabled {
+        when "../base-switch-enabled = 0 and ../default-switch-status = 0";
+        type uint8 {
+          range "0..1";
+        }
+        default "0";
+        description
+          "
+          Indicates the FICON mode. The values are:
+
+            0 : disabled
+            1 : enabled
+
+          Disabling FICON mode in a logical switch is not allowed.
+          ";
+      }
+      container port-member-list {
+        description
+          "Contains list of Logical Switch port interface names.";
+        leaf-list port-member {
+          type fibrechannel:slot-port-name-type;
+          description
+            "
+            The name of the fibre channel interface. The slot and port number of
+            the port (slot/port).
+
+            This list only contains fibre channel ports and flex ports.
+            ";
+        }
+      }
+      container ge-port-member-list {
+        description
+          "Contains list of Logical Switch port interface names.";
+        leaf-list port-member {
+          type fibrechannel:slot-port-name-type;
+          description
+            "
+            The name of the Gigabit Ethernet (GE) interface. The slot and port
+            number of the port (slot/port).
+
+            This list only contains Gigabit Ethernet ports.
+            ";
+        }
+      }
+    }
+  }
+}

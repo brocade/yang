@@ -1,0 +1,129 @@
+module brocade-license {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-license";
+  prefix brocade-license;
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module brocade-license.
+    The 'brocade-license' YANG module provides a detailed
+    view of the licenses installed on the switch.
+    It provides the means for monitoring and managing the
+    licenses on the switch.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to
+    Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-01-25 {
+    description
+      "
+      Fabric OS 8.2.1b
+      ---------------
+        Initial release
+        Refined descriptions.
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-license {
+    config false;
+    description
+      "The container for the licenses installed on the switch.";
+    list license {
+      key "name";
+      description
+        "A list of licenses installed on the switch.";
+      leaf name {
+        type string {
+          length "24..128";
+          pattern "([a-zA-Z0-9]{24,128})";
+        }
+        description
+          "The license key for one or more features installed on the switch.";
+      }
+      container features {
+        description
+          "A list of features that are integrated in a single license key";
+          leaf-list feature {
+            type string {
+              length "1..128";
+              pattern "[ -~]{1,128}";
+            }
+            description
+              "The name of the feature.";
+          }
+      }
+      leaf capacity {
+        type uint32 {
+          range "0..max";
+        }
+        description
+          "
+          The capacity for the license installed on the switch. Note that this 
+          parameter is valid only for a capacity-based license.
+          ";
+      }
+      leaf consumed {
+        type uint32 {
+          range "1..32";
+        }
+        description
+          "
+          The number of slots configured to use the license installed on the 
+          switch.  Note that this parameter is valid only for a capacity-based 
+          license.
+          "; 
+      }
+      container configured-blade-slots {
+        description
+          "
+          A list of slot numbers of the configured blade slots for the license 
+          installed on the switch.
+          ";
+          leaf-list configured-blade-slot {
+            type uint32 {
+              range "1..32";
+            }
+            description
+              "The configured blade slot details.";
+          }
+      }
+      leaf expiration-date {
+        type string {
+          length "10";
+          pattern "(([0][1-9]|[1][0-2])[/]([0][1-9]|[1|2][0-9]|[3][0|1])[/]" +
+                  "([0-9]{4}))";
+        }
+        description
+          "
+          The expiration date for the license installed on the switch.
+          The expiration date for the license in 'MM/DD/YYYY' format.
+          ";
+      }
+    }
+  }
+}

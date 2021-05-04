@@ -1,0 +1,82 @@
+module brocade-operation-fabric {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-fabric";
+  prefix fabric-operation;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines YANG module for fabric configuration
+    related operation.
+          
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-10-31 {
+    description
+      "
+      FOS 9.0.0
+      -----
+      Initial release for fabric configuration related operation.
+      Refine descriptions.
+      ";
+    reference
+      "None";
+  }
+
+  rpc fibrechannel-fabric {
+    description
+      "
+      The RPC command definition for fabric operation.
+      ";
+
+    input {
+      container fabric-operation-parameters {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "
+        Input container to perform fabric related operation.
+        ";
+
+        leaf build-fabric {
+          type boolean;
+          description 
+            "
+            The input which is required to initiate the build
+            fabric operation. This operation requires switch 
+            to be enabled state. And only 'true' should be used
+            as input.
+            To verify the build fabric status please infer 
+            brocade-fibrechannel-fabric?
+            ";
+        }
+      }
+    }
+  }
+}

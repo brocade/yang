@@ -1,0 +1,1226 @@
+module brocade-extension-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-extension-types";
+  prefix brocade-extension-types;
+
+  import brocade-interface-types {
+    prefix brocade-interface-types;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for managing
+    brocade-extension types.
+     
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2020-02-03 {
+    description
+      "
+      Fabric OS 9.0.0
+      ---------------
+        Formatting
+        Organization information
+      ";
+    reference
+      "None";
+  }
+  typedef ve-interface-type {
+    type string {
+      pattern "((([1][0-2]|[1-9])/(1[6-9]|2[0-9]|3[0-5]))|" +
+              "((0)/(2[4-9]|3[0-9]|4[0-3]))|((0)/(1[2-5])))";
+    }
+    description
+      "
+      VE interface of an Extension blade or system. The slot and port number of
+      the port (slot/port).
+      ";
+  }
+
+  typedef dp-id-type {
+    type uint16 {
+      range "0..1";
+    }
+    description
+      "
+      Extension Data Path Processor ID. Based on platform
+      either it will have a single DP or dual DP. In case of
+      single DP only DP0 is supported, and in case of
+      dual DP both DP0 and DP1 are supported
+
+      0 : DP0
+      1 : DP1.
+      ";
+  }
+
+  typedef operational-type {
+    type uint16 {
+      range "0..40";
+    }
+    description
+      "
+      Tunnel/Circuit operational status:
+
+        0  = NULL,
+        1  = Offline,
+        2  = Online,
+        3  = Online Warning,
+        4  = Disabled,
+        5  = Degraded,
+        6  = Initializing,
+        7  = Delete Pending,
+        8  = HA Online,
+        9  = HA Offline,
+        10 = HA Ready,
+        11 = Empty,
+        12 = In Progress,
+        13 = MisConfig,
+        14 = Failover,
+        15 = Down Pending,
+        16 = Circuit Disabled/Fenced/Testing,
+        17 = Internal Error,
+        18 = IPSec Error,
+        19 = Network Error,
+        20 = Authentication Error,
+        21 = Timeout,
+        22 = TCP-Timeout,
+        23 = Remote Close Timeout,
+        24 = Remote Close,
+        25 = Rejected,
+        26 = No Port,
+        27 = No Route,
+        28 = DP Offline,
+        29 = HCL Inprogress,
+        30 = Internal Error,
+        31 = Configuration Incomplete,
+        32 = Circuit Fenced,
+        33 = Child Delete Complete,
+        34 = Delete Failure,
+        35 = Spill Over,
+        36 = Running,
+        37 = Testing,
+        38 = Aborted,
+        39 = Passed,
+        40 = Failed
+      ";
+  }
+
+  typedef tunnel-load-level {
+    type enumeration {
+      enum "default" {
+        description
+          "
+          Specifies the 'default' method for load balancing method for the
+          extension tunnel.
+          ";
+      }
+      enum "failover" {
+        description
+          "
+          Specifies the 'failover' method for load balancing method for the
+          extension tunnel.
+          ";
+      }
+      enum "spillover" {
+        description
+          "
+          Specifies the 'spillover' method for load balancing method for the
+          extension tunnel.
+          ";
+      }
+    }
+    description
+      "Load balancing method for the extension tunnel.";
+  }
+  typedef hcl-status-type {
+    type enumeration {
+      enum "unavailable" {
+        description
+          "
+          The DP HCL status is 'unavailable'.
+          ";
+      }
+      enum "ready" {
+        description
+          "
+          The DP HCL status is 'ready'.
+          ";
+      }
+      enum "HCL-notification-received" {
+        description
+          "
+          The DP HCL status is in HCL notification received.
+          ";
+      }
+      enum "HCL-pending" {
+        description
+          "
+          The DP HCL status is in 'HCL-pending' state. The CP-DP
+          version is not same and DP HCL is not started.
+          ";
+      }
+      enum "HCL-in-progress" {
+        description
+          "
+          The DP HCL status is in 'HCL-in-progress' state.
+          ";
+      }
+      enum "firmwaredownload-in-progress" {
+        description
+          "
+          The DP HCL status is in 'firmwaredownload-in-progress' state.
+          ";
+      }
+      enum "booting" {
+        description
+          "
+          The DP HCL status is in 'booting' state.
+          ";
+      }
+      enum "faulty" {
+        description
+          "
+          The DP HCL status is in 'faulty' state.
+          ";
+      }
+      enum "dp-communication-down" {
+        description
+          "
+          The DP HCL status is 'dp-communication-down' state.
+          ";
+      }
+      enum "HCL-unsupported" {
+        description
+          "
+          The DP HCL status is 'HCL-unsupported' state.
+          ";
+      }
+      enum "invalid" {
+        description
+          "
+          The DP HCL status is in 'invalid' state.
+          ";
+      }
+    }
+    description
+      "The different hot code Load status";
+  }
+  typedef dp-state-type {
+    type enumeration {
+      enum "uninitialized"{
+        description
+          "
+          The DP state is 'uninitialized'. This is initial state
+          and may be seen during bootup sequence of a DP.
+          ";
+      }
+      enum "initializing" {
+        description
+          "
+          The DP state is 'initializing'. This is initial state
+          and may be seen during bootup sequence of a DP.
+          ";
+      }
+      enum "pre-connecting" {
+        description
+          "
+          The DP state is in 'pre-connecting' stage of CP-DP
+          communication.
+          ";
+      }
+      enum "connecting" {
+        description
+          "
+          The DP state is in 'connecting' state and connection handshake
+          of CP-DP communication in in progress.
+          ";
+      }
+      enum "established" {
+        description
+          "
+          The DP state is in 'established' state i.e. connection handshake
+          stage of CP-DP communication is completed.
+          ";
+      }
+      enum "ready" {
+        description
+          "
+          The DP state is in 'ready' state.
+          ";
+      }
+      enum "offline" {
+        description
+          "
+          The DP state is in 'offline' state i.e CP-DP connection
+          is down.
+          ";
+      }
+      enum "deferred-online" {
+        description
+          "
+          The DP state is in 'deferred-online' state.
+          ";
+      }
+      enum "online" {
+        description 
+          "
+          The DP state is in 'online' state. The config replay
+          syncing of configuration from CP is complete.
+          ";
+      }
+      enum "connection-close" {
+        description
+          "
+          The DP state is in 'connection-close' state. The CP-DP
+          connection is going down.
+          ";
+      }
+      enum "sync-failure" {
+        description
+          "
+          The DP state is in CP-DP config 'sync-failure' state.
+          ";
+      }
+      enum "sync-in-progress" {
+        description
+          "
+          The DP state is in configuration 'sync-in-progress' state from CP.
+          ";
+      }
+      enum "sync-complete" {
+        description
+          "
+          The DP state is in configuration 'sync-complete' state.
+          ";
+      }
+      enum "reset" {
+        description
+          "
+          The DP is in 'reset' state. The DP is going for a reboot
+          sequence.
+          ";
+      }
+      enum "discovery" {
+        description
+          "
+          The DP is in 'discovery' state from CP.
+          ";
+      }
+      enum "disconnecting" {
+        description
+          "
+          The DP is in 'disconnecting' state.
+          ";
+      }
+      enum "faulty" {
+        description
+          "
+          The DP state is in faulty state.
+          ";
+      }
+      enum "invalid" {
+        description
+          "
+          The DP state is in 'invalid' state.
+          ";
+      }
+    }
+    description
+      "The Different DP related state.";
+  }
+  typedef dp-actstate-type {
+    type enumeration {
+      enum "unavilable" {
+        description
+          "
+          The DP active state is unavailable. This is initial state
+          and may be seen during bootup sequence of a DP.
+          ";
+      }
+      enum "inactive" {
+        description
+          "
+          The DP state is inactive. This state indicates
+          no active operations on the DP in progress.
+          ";
+      }
+      enum "active" {
+        description
+          "
+          The DP state is active.
+          ";
+      }
+      enum "all-complete" {
+        description
+          "
+          The DP state is all-complete.
+          ";
+      }
+      enum "faulty" {
+        description
+          "
+          The DP state is faulty.
+          ";
+      }
+      enum "invalid" {
+        description
+          "
+          The DP state is invalid.
+          ";
+      }
+    }
+    description
+      "The current active state of DP.";
+  }     
+  typedef dp-hcl-stage-type {
+    type enumeration {
+      enum "idle" {
+      description
+        "
+        The DP HA stage is idle.
+        ";
+      }
+      enum "initializing" {
+      description
+        "
+        The DP HA stage is in initializing stage.
+        ";
+      }
+      enum "preparing" {
+      description
+        "
+        The DP HCL stage is in preparing stage.
+        ";
+      }
+      enum "FC-failover" {
+      description
+        "
+        The DP HCL stage is in FC failover stage.
+        ";
+      }
+      enum "IP-failover" {
+      description
+        "
+        The DP HCL stage is in IP failover stage.
+        ";
+      }
+      enum "reset" {
+      description
+        "
+        The DP HCL stage is in DP reset stage.
+        ";
+      }
+      enum "wait" {
+      description
+        "
+        The DP HCL stage is in wait stage.
+        ";
+      }
+      enum "FC-failback" {
+      description
+        "
+        The DP HCL stage is in FC failback stage.
+        ";
+      }
+      enum "IP-failback" {
+      description
+        "
+        The DP HCL stage is in IP failback stage.
+        ";
+      }
+      enum "DP-complete" {
+      description
+        "
+        The DP HCL stage is in DP complete stage.
+        ";
+      }
+      enum "slot-complete" {
+      description
+        "
+        The DP HCL stage is in HCL complete stage.
+        ";
+      }
+      enum "DP-done" {
+      description
+        "
+        The DP HCL stage is in DP done stage.
+        ";
+      }
+      enum "VE-recovery" {
+      description
+        "
+        The DP HCL stage is in VE recovery stage. The
+        VE recovery is done for VE which have encountered
+        issues during HCL.
+        ";
+      }
+      enum "simulator" {
+      description
+        "
+        The DP HCL stage is in simulator. This is an internal
+        state for DP.
+        ";
+      }
+      enum "invalid" {
+      description
+        "
+        The DP HCL stage is invalid stage and may be seen in
+        error scenarios.
+        ";
+      }
+    }
+    description
+      "The different DP HCL related stage"; 
+  }
+  typedef dp-dp-communication-type {
+    type enumeration {
+      enum "unknown" {
+      description
+        "
+        The DP-DP communication status in not known at this moment.
+        This is could be seen in initial bootup scenario when CP-DP
+        connection itself is not established or up.
+        ";
+      }
+      enum "not-configured" {
+      description
+        "
+        The DP-DP communication status in not programmed/configured.
+        This could be seen in initial switch bootup scenario or slot
+        poweroff/poweron sequence or HCL when CP-DP connection is 
+        established but programming of DP from CP is still pending
+        or could be seen in some error scenarios. Also, in case of
+        7810 there is only one DP and hence not configured.
+        ";
+      }
+      enum "up" {
+      description
+        "
+        The DP-DP communication status is established like applicable
+        for SX6.
+        ";
+      }
+      enum "down" {
+      description
+        "
+        The DP-DP communication status is not established, like
+        applicable  for SX6 blade in hybrid app-mode.
+        ";
+      }
+      enum "not-applicable" {
+      description
+        "
+        The DP-DP communication status is not applicable. This can be
+        seen in case of FCIP app-mode for example in SX6. 
+        ";
+      }
+    }
+    description
+      "The DP to DP communication status.";
+  }
+  typedef ge-protocol-type {
+    type enumeration {
+      enum "LAN" {
+        description
+        "
+        The gigabitethernet is used for LAN side connections.
+        ";
+      }
+      enum "WAN" {
+        description
+        "
+        The gigabitethernet is used for WAN side connections.
+        ";
+      }
+    }
+    description
+      "The different GE protocol settings.";
+  }
+  typedef control-qos-type {
+    type enumeration {
+        enum "priority-control" {
+          description
+            "
+            The 'control' qos represent the logical or virtual 
+            segregation of an extension tunnel to provide specific
+            qos for control messaging and communication, including
+            F-CLass traffic. This is also called as control tunnel
+            as well and is common for both FC/IP protocols in case
+            of hybrid tunnels. The control tunnel is a higher priority
+            qos and has no guaranteed minimum bandwidth. As needed,
+            it can use all available bandwidth up to the maximum
+            configured bandwidth rate although this traffic utilizes
+            very little bandwidth.
+            ";
+        }
+    }
+    description
+      "The control priority QoS support for extension-tunnel";
+  }
+  typedef fc-qos-type {
+    type enumeration {
+        enum "FC-priority-high" {
+          description
+            "
+            The 'FC-high' qos represent the logical or virtual
+            segregation of an extension tunnel to provide highest
+            priority QoS for FC data traffic. This WAN optimized
+            TCP traffic class is via per priority TCP QoS.
+            ";
+        }
+        enum "FC-priority-medium" {
+          description
+            "
+            The 'FC-medium' qos represent the logical or virtual
+            segregation of an extension tunnel to provide medium
+            priority QoS for FC data traffic. This WAN optimized
+            TCP traffic class is via per priority TCP QoS.
+            ";
+        }
+        enum "FC-priority-low" {
+          description
+            "
+            The 'FC-low' qos represent the logical or virtual
+            segregation of an extension tunnel to provide low
+            priority QoS for FC data traffic. This WAN optimized
+            TCP traffic class is via per priority TCP QoS.
+            ";
+        }
+    }
+    description
+      "The FC priority QoS support for extension-tunnel";
+  }
+  typedef ip-qos-type {
+    type enumeration {
+        enum "IP-priority-high" {
+          description
+            "
+            The 'IP-high' qos represent the logical or virtual
+            segregation of an extension tunnel to provide highest
+            priority QoS for IP LAN data traffic. This WAN optimized
+            TCP traffic class is via per priority TCP QoS. This is
+            present only when the tunnel is a hybrid tunnel.
+            ";
+        }
+        enum "IP-priority-medium" {
+          description
+            "
+            The 'IP-medium' qos represent the logical and or physical
+            segregation of an extension tunnel to provide medium
+            priority QoS for IP LAN data traffic. This WAN optimized
+            TCP traffic class is via per priority TCP QoS. This is
+            present only when the tunnel is a hybrid tunnel.
+            ";
+        }
+        enum "IP-priority-low" {
+          description
+            "
+            The 'IP-low' qos represent the logical or virtual
+            segregation of an extension tunnel to provide low
+            priority QoS for IP LAN data traffic. This WAN optimized
+            TCP traffic class is via per priority TCP QoS. This is
+            present only when the tunnel is a hybrid tunnel.
+            ";
+        }
+    }
+    description
+      "The IP priority QoS support for extension-tunnel";   
+  }
+  typedef extension-qos-type {
+    type union {
+      type control-qos-type;
+      type fc-qos-type;
+      type ip-qos-type;
+    }
+    description
+      "The control/FC/IP priority QoS support for extension-tunnel";
+  }
+  typedef l4-common-protocol {
+    type enumeration {
+        enum "any" {
+          description
+            "
+            The L4 Protocol is any, in case of filtering
+            any L4 protocol value would be matched.
+            ";
+        }
+        enum "TCP" {
+          description
+            "
+            The L4 Protocol is TCP.
+            ";
+        }
+        enum "UDP" {
+          description
+            "
+            The L4 Protocol is UDP.
+            ";
+        }
+        enum "ICMP" {
+          description
+            "
+            The L4 Protocol is ICMP.
+            ";
+        }
+        enum "ICMP6" {
+          description
+            "
+            The L4 Protocol is ICMP6.
+            ";
+        }
+        enum "VRRP" {
+          description
+            "
+            The L4 Protocol is VRRP.
+            ";
+        }
+    }
+    description
+      "The common L4 protocol strings";
+  }
+  typedef tunnel-ha-type{
+    type enumeration {
+        enum "main" {
+          description
+            "
+            The 'main' tunnel is the primary tunnel of the extension-tunnel
+            configured between local source-ip-address and destination
+            remote-ip-address of the circuit[s]. The main tunnel is
+            used to carry traffic over the WAN in standard operating
+            conditions. The traffic may failover to either 'local-backup'
+            or 'remote-backup' during the window when HCL is in progress.
+            The failover traffic on either of 'local-backup' and 
+            'remote-backup' and subsequent failback is determined by
+            the fact as to which switch is under HCL i.e local or remote.
+            ";
+        }
+        enum "local-backup" {
+          description
+            "
+            The 'local-backup' tunnel is the backup for the main
+            tunnel for local HCL and uses the local-ha-ip-address
+            and remote-ip-address of the circuit as the endpoint.
+            
+            Note the local-ha-ip-address and local-ip-address
+            must be configured on the different DP's. This is to
+            ensure that the traffic can sequentially failover to
+            other DP during HCL sequence.
+            
+            The 'local-backup' tunnel will be seen as 'remote-backup'
+            tunnel on the remote switch because of symmetric
+            configuration.
+            ";
+        }
+        enum "remote-backup" {
+          description
+            "
+            The 'remote-backup' tunnel is the backup for the main
+            tunnel for remote HCL and uses the source-ip-address
+            and remote-ha-ip-address of the circuit as the endpoint.
+            
+            Note the remote-ip-address and remote-ha-ip-address
+            must be configured on the different DP's on the remote
+            switch.This is to ensure that the traffic can sequentially
+            failover to other DP of remote switch during HCL.
+            
+            The 'remote-backup' tunnel will be seen as 'local-backup'
+            tunnel on the remote switch because of symmetric
+            configuration.
+            ";
+        }
+    }
+    description
+      "The different HA support for extension-tunnel for HCL";
+  }
+  typedef arl-algo-type {
+    type enumeration {
+        enum "auto" {
+          description
+            "
+            The 'auto' ARL to auto select either of the 'static-reset'
+            'step-down' or 'timed-step-down' algorithm. This is used 
+            only in configuration.   
+            ";
+        }
+        enum "static-reset" {
+          description
+            "
+            The ARL 'static-reset' algorithm resets to the minimum configured
+            bandwidth for the circuit when congestion is detected at the
+            current bandwidth, and restarts the climb toward maximum bandwidth.
+            ";
+        }
+        enum "step-down" {
+          description
+            "
+            The ARL 'step-down' algorithm is used to reduce the configured
+            bandwidth when RTT < 200ms. 
+            ";
+        }
+        enum "timed-step-down" {
+          description
+            "
+            The 'timed-step-down' ARL reduces rate when RTT >= 200ms.
+            ";
+        }
+    }
+    description
+      "The different adaptive rate limiting support.";
+  }
+  typedef l4-protocol-number {
+    type uint32 {
+      range "0..255";
+    }
+    description
+      "
+      The L4 protocol number which uniquely identifies the
+      L4 protocol. The valid value for L4 protocol number is
+      from 0-255.
+      example 
+      ";
+  }
+  typedef l4-protocol-type {
+    type union {
+      type l4-protocol-number;
+      type l4-common-protocol;
+    }
+    description
+      "
+      The different L4 protocol values supported either its a protocol
+      number from 0-255 or a known protocol string.
+      ";
+  }
+  typedef tcl-action-type {
+    type enumeration {
+        enum "allow" {
+          description
+            "
+            The  action 'allow' is to allow a LAN traffic based
+            on the traffic-control-list input filters and should not
+            be dropped and sent over the extension tunnel using a
+            specific priority qos as per target details.
+            ";
+        }
+        enum "deny" {
+          description
+            "
+            The action 'deny' is to deny the LAN traffic based on the
+            traffic-control-list input filters and drop them at the
+            ingress.
+            ";
+        }
+        enum "deny-dp" {
+          description
+            "
+            The 'deny-dp' is to deny a LAN ingress traffic to be dropped
+            only when its sent to a specific DP.
+            ";
+        }
+      
+    }
+    description
+      "The different action support for TCL configurations.";
+  }
+  typedef tcp-operation-mode {
+    type enumeration {
+        enum "slow-start" {
+          description
+            "
+            The TCP connection is operating in slow-starts.
+            Pease refer RFC 2001 for more details. 
+            ";
+        }
+        enum "congestion-avoidance" {
+          description
+            "
+            The TCP connection is in congestion avoidance algorithm.
+            Pease refer RFC 2001 for more details.
+            ";
+        }
+        enum "fast-retransmits" {
+          description
+            "
+            The TCP connection is in fast-retransmits.
+            Pease refer RFC 2001 for more details.          
+            ";
+        }
+        enum "fast-recovery" {
+          description
+            "
+            The TCP connection is in fast-recovery.
+            Pease refer RFC 2001 for more details.          
+            ";
+        }
+      
+    }
+    description
+      "The different action support for TCL configurations.";
+  }
+  typedef extension-name-type {
+    type string {
+      length "1..31";
+      pattern '([a-zA-Z0-9~@%_+:\[\]]' +
+                '[a-zA-Z0-9~@%_+:\[\]\-]{0,30})';
+    }
+    description
+      "The extension user defined name type definition.";
+  }
+  typedef operational-status-type {
+    type enumeration {
+      enum "invalid-unknown" {
+        description
+          "
+          The operational state is invalid-unknown. Should never be seen.
+          Could indicate software failure.
+          ";
+      }
+      enum "null" {
+        description
+          "
+          The operational state is in invalid state. Should never be seen.
+          Could indicate software failure.
+          ";
+      }
+      enum "offline" {
+        description
+          "
+          The operational state is offline. No connections are established.
+          ";
+      }
+      enum "online" {
+        description
+          "
+          The operational state is online. The tunnel / circuit is fully
+          online with no connection issues.
+          ";
+      }
+      enum "online-warning" {
+        description
+          "
+          The operational state is in online-warning. The tunnel / circuit
+          is online and capable of running traffic at a limited capacity due
+          to a configuration warning from end-to-end.
+          ";
+      }
+      enum "disabled" {
+        description
+          "
+          The operational state is disabled. The tunnel / circuit is in
+          an administratively disabled state
+          ";
+      }
+      enum "degraded" {
+        description
+          "
+          The operational state is degraded. The tunnel / circuit is in a
+          degraded state as some of the connections are up and capable of
+          running traffic, but not all of them are up so some traffic may
+          not run.
+          ";
+      }
+      enum "initializing" {
+        description
+          "
+          The operational state is initializing. The tunnel / circuit is
+          still initializing internal components. Please wait and the
+          tunnel / circuit will attempt to come up.
+          ";
+      }
+      enum "delete-pending" {
+        description
+          "
+          The operational state is delete pending. A delete request has been
+          received for the tunnel / circuit and it is attempting to cleanup
+          internal components and close out all connections.
+          ";
+      }
+      enum "HA-online" {
+        description
+          "
+          The operational state is HA online. The tunnel is fully online
+          and all backup tunnel groups are online. The tunnel is capable
+          of performing extension HCL operations without a disruption in
+          traffic.
+          ";
+      }
+      enum "HA-offline" {
+        description
+          "
+          The operational state is HA offline. The tunnel is not fully
+          configured for HA operations, and therefore not capable of
+          performing extension HCL. Traffic will be disrupted should
+          an extension HCL be performed.
+          ";
+      }
+      enum "HA-ready" {
+        description
+          "
+          The operational state is HA ready. The tunnel is configured
+          for HA operations, however not all tunnel groups are online.
+          Traffic will be disrupted should an extension HCL be performed.
+          ";
+      }
+      enum "empty" {
+        description
+          "
+          The operational state is empty. There are no circuits configured
+          for this tunnel and so no way for connections to the remote can
+          come up.
+          ";
+      }
+      enum "in-progress" {
+        description
+          "
+          The operational state is in-progress. The tunnel / circuit is
+          attempting to establish a connection with the peer.
+          ";
+      }
+      enum "misconfiguration" {
+        description
+          "
+          The operational state is in misconfiguration. The tunnel / circuit
+          has a configuration incompatiblity with the peer preventing the
+          tunnel from coming online. Please examine the configuration on both
+          sides and correct any mismatched configurations.
+          ";
+      }
+      enum "failover" {
+        description
+          "
+          The operational state is in failover. All primary circuits for this
+          tunnel are offline and the tunnel is running on the failover
+          circuits only.
+          ";
+      }
+      enum "down-pending" {
+        description
+          "
+          The operational state is in down-pending. The tunnel / circuit
+          is closing the connections with the peer.
+          ";
+      }
+      enum "child-disabled" {
+        description
+          "
+          The operational state is in child disabled. The tunnel is offline
+          due to all circuits being in an administratively disabled state.
+          ";
+      }
+      enum "internal-error" {
+        description
+          "
+          The operational state is in internal error. The tunnel / circuit
+          is reporting an internal error condition. This could indicate an
+          internal software failure.
+          ";
+      }
+      enum "IPSec-error" {
+        description
+          "
+          The operational state in in ipsec error. The tunnel / circuit is
+          unable to connect due to an error attempting to initialize IPSec
+          parameters.
+          ";
+      }
+      enum "network-error" {
+        description
+          "
+          The operational state is in network error. The tunnel / circuit
+          is unable to connect due to an internal network error.
+          ";
+      }
+      enum "authentication-error" {
+        description
+          "
+          The operational state is in authentication error.
+          The tunnel / circuit is unable to connect due to a peer WWN
+          authentication mismatch. Please check the configured remote-WWN
+          value against the peer switch WWN.
+          ";
+      }
+      enum "timeout" {
+        description
+          "
+          The operational state is in timeout. The tunnel / circuit is
+          unable to connect due to a timeout during connection
+          establishment. Please wait for the system to retry and check
+          the status again.
+          ";
+      }
+      enum "TCP-timeout" {
+        description
+          "
+          The operational state is in TCP timeout. The tunnel / circuit is
+          unable to connect due to a timeout while opening the TCP connection.
+          Please wait for the system to retry and check the status again.
+          ";
+      }
+      enum "remote-close-timeout" {
+        description
+          "
+          The operational state is in remote close timeout. The
+          tunnel / circuit is offline and attempting to close the
+          connections to the peer and has timed out attempting to
+          do so. Please wait for the system to retry and check the
+          status again.
+          ";
+      }
+      enum "remote-close" {
+        description
+          "
+          The operational state is in remote close. The tunnel / circuit
+          is offline due to the peer closing the connection. Please check
+          the status on the peer to determine the cause of the offline event.
+          ";
+      }
+      enum "rejected" {
+        description
+          "
+          The operational state is in rejected. This is unused state as of now.
+          ";
+      }
+      enum "no-port" {
+        description
+          "
+          The operational state is in no-port. This is unused state as of now.
+          ";
+      }
+      enum "no-route" {
+        description
+          "
+          The operational state is in no-route. This is unused state as of now.
+          ";
+      }
+      enum "dp-offline" {
+        description
+          "
+          The operational state is in DP offline. The tunnel / circuit is
+          offline due to the corresponding DP being offline. This is possibly
+          due to an HCL operation, or some other DP event.
+          ";
+      }
+      enum "HCL-in-progress" {
+        description
+          "
+          The operational state is in HCL in-progress. The tunnel / circuit is
+          currently performing an HCL operation.
+          ";
+      }
+      enum "configuration-incomplete" {
+        description
+          "
+          The operational state is in configuration in-complete. The
+          tunnel / circuit configuration is incomplete. Not enough
+          configuration parameters have been specified to attempt
+          to establish connection with the peer.
+          ";
+      }
+      enum "fenced" {
+        description
+          "
+          The operational state is in circuit fenced. The circuit has
+          been internally disabled due to an error condition causing
+          the circuit to exceed the configured MAPS rule threshholds.
+          ";
+      }
+      enum "child-delete-complete" {
+        description
+          "
+          The operational state is in child delete complete. The
+          tunnel / circuit is finalizing the cleanup of an internal
+          deletion of child objects.
+          ";
+      }
+      enum "delete-failure" {
+        description
+          "
+          The operational state is in delete failure. The
+          tunnel / circuit was attempting to cleanup a child
+          component and failed due to an internal cleanup error.
+          ";
+      }
+      enum "spillover" {
+        description
+          "
+          The operational state is in spill-over. The tunnel is
+          currently running over the primary and spillover circuit connections.
+          ";
+      }
+      enum "running" {
+        description
+          "
+          The operational state is in running. The circuit is currently
+          running an automated WTOOL test session to evaluate the
+          quality of the WAN connection.
+          ";
+      }
+      enum "testing" {
+        description
+          "
+          The operational state is in testing.  The circuit is attempting
+          to establish an automated WTOOL test session with the peer to
+          begin the test session.
+          ";
+      }
+      enum "aborted" {
+        description
+          "
+          The operational state is in aborted. The circuit has aborted
+          the automated WTOOL test session and will attempt to trasition
+          to a normal operational state.
+          ";
+      }
+      enum "passed" {
+        description
+          "
+          The operational state is passed. The circuit automated WTOOL
+          test session has passed. It will now attempt to transition to
+          a normal operational state.
+          ";
+      }
+      enum "failed" {
+        description
+          "
+          The operational state is fail. The circuit automated WTOOL
+          test session has failed. It will now attempt to transition
+          to a normal operational state.
+          ";
+      }
+    }
+    description
+      "The extension tunnel/circuit operational status.";
+  }
+  typedef extension-lan-interface-type {
+    type union {
+      type extension-name-type;
+      type brocade-interface-types:ge-interface-type;
+    }
+    description
+      "The Extension LAN interface type can be either a LAG name
+       or else a GE port.";
+  }
+}

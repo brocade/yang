@@ -1,0 +1,209 @@
+module brocade-operation-license {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-license";
+  prefix brocade-license;
+  
+  import "brocade-operation-types" {
+    prefix operation-types;
+  }
+  import "ietf-inet-types" {
+    prefix inet;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for installing
+    a license on a switch.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2020-05-18 {
+    description
+      "
+      Fabric OS 9.0.0a
+      ---------------
+        Changes to group server parameters 
+        Added license-payload leaf 
+      
+      Fabric OS 9.0.0
+      ---------------
+        Initial release
+      
+      ";
+    reference
+      "None";
+  }
+  grouping server-parameters {
+    description
+      "
+      Describes about remote server details from which the license certificate 
+      to be copied onto a local switch.
+      ";
+    leaf host {
+      type inet:host;
+      description
+        "The ip address or host name of the remote server.";
+    }
+    leaf user-name {
+      type string {
+        length "1..64";
+          pattern "[ -~]+";
+        }
+        description
+          "
+          The user name of the remote server that is used to copy
+          the license certificates.
+          ";
+    }
+    leaf password {
+      type string {
+        length "1..64";
+          pattern "[ -~]+";
+        }
+      description
+        "
+        The password for the remote server used to copy
+        the license certificate. The password must be
+        base64 encoded. Refer to RFC 3414.
+        ";
+    }
+    leaf remote-directory {
+      type string {
+        length "1..256";
+        pattern "[ -~]+";
+      }
+      description
+        "
+        The remote server file path from which the license certificate 
+        to be transferred.
+        ";
+    }
+    leaf protocol {
+      type operation-types:protocol;
+      description
+        "The transport protocol.";
+    }
+    leaf port {
+      type uint32 {
+        range "1..65535";
+      }
+      description
+        "
+        User defined port number for scp (Secure Copy Protocol) and
+        sftp (Secure FTP).
+        ";
+    }
+  }
+
+  rpc license {
+    description
+      "
+      The RPC command definition for license operation on a Brocade
+      switch.
+      ";
+    input {
+      container license-parameters {
+        description
+          "The license operation input container.";
+        leaf name {
+          type string {
+            length "24..128";
+            pattern "([a-zA-Z0-9-])+";
+          }
+          description
+            "
+            The representation of the license would be either license key or 
+            serial number. The license key is a string with alpha numeric 
+            characters and the License serial number is a string with the 
+            format of 'FOS-XX-X-XX-XXXXXXXX'. Example of a license key and 
+            serial number mentioned below.
+            License key: 'HP9ttZNSgmB4MCD3NmNWgQDWtAKBFtXtBSFJF'
+            Serial number: 'FOS-00-0-02-11201234'
+            This leaf is not included when installing the licenses with 
+            serial number from a file. 
+            ";
+        }
+        leaf action {
+          type enumeration {
+            enum "install" {
+              description
+                "
+                License install type and this can be used to install the 
+                specified license.  
+                ";
+            }
+            enum "remove" {
+              description
+                "
+                License remove type and this can be used to remove the 
+                specified license. 
+                ";
+            }
+          }
+          description
+            "Action against specified license";
+        }
+        leaf license-payload {
+          when "not(../name) and not(../host) and (action = ../install)";
+          type string {
+            length "1..max";
+              pattern "[ -~]+";
+            }
+          description
+            "
+            This leaf allows user to send entire license certificate 
+            content as a input. The license certificate payload must be 
+            base64 encoded to avoid the nested xml tag issue during input.
+            Refer to RFC 3414 for more details about base64 encode method.
+            ";
+        }
+        uses server-parameters {
+          when "not(../name) and not(../license-payload) 
+                and  action = ../install";
+        }
+      }
+    }
+    output {
+      container license-operation-status {
+        description
+          "license operation status";
+        leaf  status-message {
+          type string {
+            length "1..1024";
+            pattern "[ -~]+";
+          }
+          description 
+            "
+            The status message. This message is an information for the user 
+            to perform additional action such as reboot, port/switch/chassis 
+            disable or enable for the license to take effect.
+            ";
+        }
+      }
+    }
+  }
+}

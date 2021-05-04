@@ -1,0 +1,611 @@
+module brocade-zone {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-zone";
+  prefix brocade-zone;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import brocade-security-yang-types {
+    prefix brocade-security-type;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+    ";
+
+  description
+    "
+    The module for managing Fibre Channel zoning.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-11-11 {
+    description
+      "
+      Fabric OS 8.2.0a
+      ----------------
+        Fix 'domain-index-type' regular expression
+
+      Fabric OS 8.2.1
+      ---------------
+        Formatting
+        Organization information
+
+      Fabric OS 8.2.1b patch
+      ---------------
+        Changed top level container name from 'zoning' to 'brocade-zone'
+        Refined descriptions
+        
+      Fabric OS 9.0.0
+      ---------------
+        Added fabric-lock container
+        Updated ranges for increased zone scale support.
+        Add 'fibrechannel_switch_platform' check.
+        Deprecated the 'zone-type-type' typedef and 'zone-type' leafs.
+        Add 'zone-type-string-type' typedef and 'zone-type-string' leafs.
+      ";
+    reference
+      "None";
+  }
+
+  typedef zone-type-type {
+    type uint8 {
+      range "0|1|2";
+    }
+    status deprecated;
+    description
+      "
+      The zone type. This field must be supplied for any peer zone operation.
+      The values are:
+
+        zone                     : 0
+        user-created peer zone   : 1
+        target-created peer zone : 2
+
+      Deprecated: Please use 'zone-type-string-type' instead.
+      ";
+  }
+
+  typedef zone-type-string-type {
+    type enumeration {
+      enum "zone" {
+        description
+          "A zone that is not a peer zone.";
+      }
+      enum "user-created-peer-zone" {
+        description
+          "A peer zone that was created by a non-target device.";
+      }
+      enum "target-created-peer-zone" {
+        description
+          "A peer zone that was created by a target device.";
+      }
+    }
+    description
+      "
+      The zone type. This field must be supplied for any peer zone operation.
+      ";
+  }
+
+  typedef zoning-name-type {
+    type string {
+      length "1..64";
+      pattern "([0-9a-zA-Z_\\-^$]{1,64})";
+    }
+    description
+      "
+      Fibre channel zoning names can consist of alphanumeric, '$', '^', '-',
+      and '_' characters of max length of 64 characters and are case sensitive.
+      The pattern checking verifies that the specified name consists or
+      alphanumeric characters and underline characters only.
+      ";
+  }
+
+  typedef domain-index-type {
+    type string {
+      pattern "([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0123][0-9]),(([0-9])|" +
+              "([1-9][0-9])|([1-9][0-9][0-9])|([1-9][0-9][0-9][0-9])|" +
+              "([1-5][0-9][0-9][0-9][0-9])|(6[0-4][0-9][0-9][0-9])|" +
+              "(65[0-4][0-9][0-9])|(655[0-2][0-9])|(6553[0-5])|(-1))";
+    }
+    description
+      "
+      Domain (D) and Index (I) zone members appear as 'D,I'. Domain is between
+      1 and 239; Index is between -1 and 65535.
+      ";
+  }
+
+  typedef zone-member-type {
+    type union {
+      type zoning-name-type;
+      type fibrechannel:wwn-type;
+      type domain-index-type;
+    }
+    description
+      "
+      The zone member typedef defines as a union the three different zone member
+      types (WWN, domain,index, or zone alias).
+      ";
+  }
+
+  container brocade-zone {
+    description
+      "The defined zoning configuration and the effective configuration.";
+    container defined-configuration {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "The defined zoning configuration.";
+      list cfg {
+        key "cfg-name";
+        description
+          "The name of the zone configuration.";
+        leaf cfg-name {
+          type zoning-name-type;
+          description
+            "The zone configuration name.";
+        }
+        container member-zone {
+          description
+            "A list of zone members in the configuration.";
+          leaf-list zone-name {
+            type zoning-name-type;
+            min-elements 1;
+            description
+              "The zone name.";
+          }
+        }
+      }
+      list zone {
+        key "zone-name";
+        description
+          "
+          A list of the members in the zone. The members can only be identified
+          as a WWN, domain,index, or a zone alias.
+          ";
+        leaf zone-name {
+          type zoning-name-type;
+          description
+            "The zone name.";
+        }
+        leaf zone-type {
+          type zone-type-type;
+          status deprecated;
+          description
+            "
+            The zone type.
+
+            Note that target-created peer zone (TDZ) types cannot be
+            created or modified (only deleted). Also note that
+            this field must be supplied for any user-created peer zone
+            operation.
+
+            Deprecated: For write operations, please use the 'zone-type-string'
+            leaf instead.  For read operations, this leaf will be returned
+            in responses with valid data comparable to the 'zone-type-string'
+            leaf.
+            ";
+        }
+        leaf zone-type-string {
+          type zone-type-string-type;
+          description
+            "
+            The zone type.
+
+            Note that target-created peer zone (TDZ) types cannot be
+            created or modified (only deleted). Also note that
+            this field must be supplied for any user-created peer zone
+            operation.
+
+            In the event of a write operation containing both the deprecated
+            'zone-type' leaf as well as the 'zone-type-string' leaf, both
+            leafs must convey the same type. If they do not convey the same
+            type, then the write operation will result in an error.
+            ";
+        }
+        container member-entry {
+          description
+            "The zone member.";
+          leaf-list entry-name {
+            type zone-member-type;
+            min-elements 1;
+            description
+              "
+              A list of the members in the zone. The members can only be
+              identified as a WWN, domain,index, or zone alias.
+              ";
+          }
+          leaf-list principal-entry-name {
+            when "../../zone-type = 1 or ../../zone-type = 2 or " +
+                 "../../zone-type-string = 'user-created-peer-zone' or " +
+                 "../../zone-type-string = 'target-created-peer-zone'";
+            type zone-member-type;
+            min-elements 1;
+            description
+              "
+              A list of the principal members in the peer zone. The members can
+              only be identified as a WWN, domain,index, or zone alias.
+              ";
+          }
+        }
+      }
+      list alias {
+        key "alias-name";
+        description
+          "A list of zone aliases.";
+        leaf alias-name {
+          type zoning-name-type;
+          description
+            "The zone alias name.";
+        }
+        container member-entry {
+          description
+            "The alias member.";
+          leaf-list alias-entry-name {
+            type union {
+              type fibrechannel:wwn-type;
+              type domain-index-type;
+            }
+            min-elements 1;
+            description
+              "
+              The zone alias. The members are either a port WWN or
+              domain,index.
+              ";
+          }
+        }
+      }
+    }
+    container effective-configuration {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "The effective zoning configuration.";
+      leaf cfg-name {
+        type zoning-name-type;
+        description
+          "
+          The name of the effective configuration to be enabled or a 
+          configuration that is currently enabled. This must be the name
+          of a defined configuration that is already defined.
+          ";
+      }
+      leaf checksum {
+        type string {
+          length "32";
+          pattern "[0-9a-fA-F]{32}";
+        }
+        must "../cfg-name or (../cfg-action = 1) or (../cfg-action = 2)";
+        description
+          "
+          The checksum of the configuration database. The checksum is a
+          MD5 (Message-Digest algorithm 5) calculation
+          (128-bit cryptographic hash) used to verify data integrity. This
+          resource is used by the client to verify the zone database has not
+          changed since the configuration was read. It should be read as part
+          of the initial query before modifications are made. The changes are 
+          accepted if the checksum agrees and rejected if it does not.
+          ";
+      }
+      leaf cfg-action {
+        type uint8 {
+          range "0..4";
+        }
+        description
+          "
+          The action to be done to the pending zoning configuration changes.
+
+          The possible values are:
+
+          Read is not applicable                :   0
+          Save the pending changes              :   1
+          Disable the effective configuration   :   2
+          Clear the entire zone database        :   3
+          Clear any pending changes             :   4
+
+          This value is not present with a GET request.
+          ";
+      }
+      leaf default-zone-access {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enable or disable default zone access. The default zoning mode
+          controls device access if zoning is not implemented or if there is
+          no enabled zone configuration. Default zoning has
+          two access modes:
+
+          0 : Devices in the fabric cannot access any other device in the
+              fabric (no access).
+
+          1 : All devices within the fabric can communicate with all other
+              devices (all access).
+          ";
+      }
+      leaf db-max {
+        type uint32 {
+          range "0..4194304";
+        }
+        units "bytes";
+        config false;
+        description
+          "
+          The Zone DB maximum size. The Zone DB maximum size is the upper limit
+          for the Zone-defined configuration, determined by the amount of
+          nonvolatile memory available for storing the defined configuration.
+          The Zone DB maximum size is further reduced due to a message header
+          that is propagated with the zone configuration to all switches in the
+          fabric.
+
+          The maximum supported zone database size is 4 MB.
+          ";
+      }
+      leaf db-avail {
+        type uint32 {
+          range "0..4193060";
+        }
+        units "bytes";
+        config false;
+        description
+          "The amount of free space in bytes available in the zone database.";
+      }
+      leaf db-committed {
+        type uint32 {
+          range "0..4194304";
+        }
+        units "bytes";
+        config false;
+        description
+          "
+          The size in bytes of the defined configuration currently stored in
+          nonvolatile memory. If the context is for a virtual fabric, then this
+          resource is the size of the defined configuration for the logical
+          switch.
+          ";
+      }
+      leaf db-transaction {
+        type uint32 {
+          range "0..4194304";
+        }
+        units "bytes";
+        config false;
+        description
+          "
+          The amount of memory required to commit the current transaction). 
+          The DB transaction size will not be zero if the defined
+          configuration is being modified by RESTConf, Telnet, API,
+          or other applications; otherwise it is 0.
+          ";
+      }
+      leaf transaction-token {
+        type uint32 {
+          range "0..4294967280";
+        }
+        config false;
+        description
+          "
+          The token for the current zoning transaction. If there is no
+          outstanding zoning transaction, this is 0. If trying to access this
+          resource from a non-Primary Fabric Configuration Server (FCS) switch
+          when an FCS security policy is enabled, this resource will return an
+          empty tag.
+          ";
+      }
+      leaf db-chassis-wide-committed {
+        type uint32 {
+          range "0..16777216";
+        }
+        units "bytes";
+        config false;
+        description
+          "
+          If Virtual Fabrics is in use, this is the size in bytes for the 
+          zone database across all logical switches in the chassis.
+
+          If Virtual Fabrics is not in use, this is the size of the zone 
+          database for the switch.
+
+          Note that the db-committed value will be smaller than this resource
+          due to storage used for overhead.
+          ";
+      }
+      list enabled-zone {
+        key "zone-name";
+        config false;
+        description
+          "The enabled zones.";
+        leaf zone-name {
+          type zoning-name-type;
+          description
+            "The name of the zone.";
+        }
+        leaf zone-type {
+          type zone-type-type;
+          status deprecated;
+          description
+            "
+            The zone type.
+
+            Deprecated: Although this field is deprecated, it will still be
+            returned in responses and will contain valid data comparable to the
+            'zone-type-string' leaf.
+            ";
+        }
+        leaf zone-type-string {
+          type zone-type-string-type;
+          description
+            "The zone type.";
+        }
+        container member-entry {
+          description
+            "The zone members. ";
+          leaf-list entry-name {
+            type union {
+              type zoning-name-type;
+              type fibrechannel:wwn-type;
+            }
+            description
+              "
+              A list of the members in the zone. The members can only be
+              identified as either a WWN or domain,index. Zone aliases are
+              expanded when the configuration is enabled and are not included
+              in the effective configuration.
+              ";
+          }
+          leaf-list principal-entry-name {
+            when "../../zone-type = 1 or ../../zone-type = 2 or " +
+                 "../../zone-type-string = 'user-created-peer-zone' or " +
+                 "../../zone-type-string = 'target-created-peer-zone'";
+            type union {
+              type fibrechannel:wwn-type;
+              type domain-index-type;
+            }
+            description
+              "
+              If the zone is a peer zone, this property contains the list of
+              principals in the zone. The members can only be identified as
+              either a WWN or domain,index. Zone aliases are expanded when the
+              configuration is enabled and are not included in the effective
+              configuration.
+              ";
+          }
+        }
+      }
+    }
+    container fabric-lock {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      config false;
+      description
+        "
+        Contains the zone fabric lock metadata fields. Fields contain
+        information about the owner of a zone fabric-lock, the transaction
+        token, timeout, remaining time, and client information. The client
+        is one who has initiated the zone fabric lock and is typically
+        an external entity such as an external management interface or an
+        administrator using the command line interface.
+        ";
+      leaf lock-principal-domain-id {
+        type fibrechannel:domain-id-type;
+        description
+          "
+          Specifies the domain that currently owns the zone fabric lock. If
+          there is no lock-principal-domain-id, this field will be zero.
+          ";
+      }
+      leaf lock-principal-transaction-token {
+        when "../lock-principal-domain-id != 0"; 
+        type uint32 {
+          range "1..4294967280";
+        }
+        description
+          "
+          Specifies the token of the open zone transaction on the current
+          lock-principal-domain-id. Note that this field can be different than
+          the transaction-token field in the effective-configuration container
+          especially when there is an expired zone fabric lock timer, but
+          there is an open zone transaction on the local switch.
+          ";
+      }
+      leaf timeout {
+        when "../lock-principal-domain-id != 0"; 
+        type uint16 {
+          range "300..1830";
+        }
+        units "seconds";
+        description
+          "
+          Specifies the current zone fabric lock timeout value of the currently
+          open lock-principal-transaction-token. Note that on non lock principal
+          switches, there will be an added 30 second buffer.
+          ";
+      }
+      leaf remaining-time {
+        when "../lock-principal-domain-id != 0"; 
+        type uint16 {
+          range "1..1830";
+        }
+        units "seconds";
+        description
+          "
+          Specifies the remaining time of the open zone transaction owned by
+          the lock-principal-domain-id.
+          ";
+      }
+      leaf client-role {
+        when "../lock-principal-domain-id != 0"; 
+        type brocade-security-type:user-config-role-type;
+        description "Role name of the client account.";
+      }
+      leaf client-user-name {
+        when "../lock-principal-domain-id != 0"; 
+        type union {
+          type brocade-security-type:user-config-user-name-type;
+          type string {
+            length "0";
+          }
+        }
+        description
+          "
+          User name of the client account.
+          Empty tag if no user name is provided.
+          ";
+      }
+      leaf client-ip-address {
+        when "../lock-principal-domain-id != 0"; 
+        type union {
+          type inet:ip-address;
+          type string {
+            length "4";
+            pattern "none";
+          }
+        }
+        description
+          "
+          If one is being used, it is the IP-address from which the client
+          is logged into the switch. If one is not used (e.g. client-interface
+          is console), 'none' will be returned.
+          ";
+      }
+      leaf client-interface {
+        when "../lock-principal-domain-id != 0"; 
+        type fibrechannel:interface-type;
+        description "Interface used by the client to login to the switch.";
+      }
+      leaf client-application-name {
+        when "../lock-principal-domain-id != 0"; 
+        type string {
+          length "0..128";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The client-provided name of the manageability application
+          being used by the client.
+          ";
+      }
+    }
+  }
+}

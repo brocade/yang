@@ -1,0 +1,235 @@
+module brocade-operation-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-types";
+  prefix brocade-operation;
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module for the Remote 
+    Procedure Call (RPC) operations.
+          
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-10-03 {
+    description
+      "
+      Fabric OS 8.2.1b
+      -----
+      Refine descriptions.
+      
+      FOS 8.2.1
+      -----
+      Initial release for operations support.
+      ";
+    reference
+      "None";
+  }
+
+  typedef message-id-type {
+    type uint32 {
+      range 1..max;
+	  }
+    description 
+      "
+      It refers to Remote Procedure Call (RPC) message. When asynchronous
+      operation is triggered, it returns the random message identifier 
+      to associate with the operation being triggered. 
+      Application could use this identifier to get
+      the status of the operation in subsequent requests. 
+      ";
+  }
+
+  typedef protocol {
+    type enumeration {
+      enum scp {
+        description
+          "secure copy from/to remote host";
+      }
+      enum ftp {
+        description
+          "File Transfer Protocol";
+      }
+      enum sftp {
+        description
+          "Secure File Transfer Protocol";
+      }
+      enum http {
+        description
+          "HyperText Transfer Protocol";
+      }
+    }
+    description
+      "Specifies the protocol as either FTP or SCP or SFTP or HTTP.";
+  }
+
+  typedef eula-action-type {
+    type enumeration {
+      enum accept-eula {
+        description
+          "Confirmation of the user’s acceptance of EULA
+          (End User License Agreement). Firmwaredownload will progress
+          only when accept-eula is provided.";
+      }
+      enum decline-eula {
+        description
+          "Confirmation of the user’s denial of EULA
+          (End User License Agreement). Decline eula when selected
+          firmwaredownload will be aborted with appropriate error message.";
+      }
+      enum display-eula {
+        description
+          "Option to display the latest EULA
+           (End User License Agreement). The highest version of EULA
+           will be displayed.
+           Example: If switch is running FOS 9.0, and upgrading
+           to FOS 9.0.1, then the 9.0.1 EULA is displayed.
+           This principle also applies to the downgrade case.";
+      }
+    }
+    description
+      "Specifies the the options supported for EULA.";
+  }
+
+  grouping show-status-group {
+    description 
+      "
+      It defines the group of leafs associated with the 
+      operation. 
+      ";
+
+    container show-status {
+      description
+        "
+        RPC operation status details for the associated input message-id.
+        ";
+
+      leaf message-id {
+        type message-id-type;
+        description 
+          "
+          The random message-id which is required to retrieve the associated
+          operation status. 
+          ";
+      }
+
+      leaf operation {
+        type string { 
+          length "1..64";
+          pattern "supportsave|firmwaredownload";
+        }
+        description 
+          "
+          Operation name is returned as part of this   
+          leaf element. The show-status is common across all the operations 
+          supported in yang RPC feature. It would be helpful to the user to 
+          identify the exact operation status when application queries 
+          the status based on the message-id.  
+          ";
+      }
+
+      leaf status {
+        type string {
+	        length "1..32";
+          pattern "queued|in-progress|done|delivered|error|purge" +
+                  "|application-error";
+        }
+        description 
+          "
+          It indicates the exact state of the supportsave and firmwaredownload
+	  operation.When operation command is triggered, it will add into 
+          the queue i.e queued state. 'progress' status is returned until 
+          all the supportsave files are transferred 
+          to the remote server. 'done' state is set once supportsave operation 
+          is completed. When completion status is returned, it will 
+          move to 'delivered' state till its purged from the queue. 
+          If there are any supportsave operational level error or, 
+          application level error occurred, it sets 'error' 
+          or 'application-error' respectively. 'purge' state is used to 
+          remove the entry from the db. running status is returned when the
+	  firmwaredownload is in-progress. 'Completed' state is returned once
+	  the firmwaredownload operation is completed. 
+	
+          ";
+      }
+
+      leaf application-name {
+        type string {
+          length "1..64";
+          pattern "[ -~]{1,64}";
+        }
+        description 
+          "
+          The name of the application which is used to trigger 
+          the operation. This is parsed from 
+          the HTTP USER_AGENT standard header. 
+          ";
+      }
+
+      leaf percentage-complete {
+        type uint8 {
+	        range 0..100;
+        }
+        description 
+          "
+          Operation completion in percentage. 
+          ";
+      }
+   
+      container firmwaredownload {
+        when "../operation = firmwaredownload";
+        description
+          "
+          A list of firmwaredownload status messages or the EULA.
+          ";
+        leaf-list message {
+          when "not(../eula-text)";
+          type string {
+          length "1..10000";
+              pattern "[ -~]*";
+          }
+          description
+            "
+            Displays the status messages, depicting all stages of
+            firmwaredownload progress
+            ";
+        }
+        leaf eula-text {
+          when "not(../message)";
+          type string {
+          length "1..max";
+              pattern "[ -~]+";
+          }
+          description
+            "
+            Displays the contents of Latest EULA
+            (Brocade End User License Agreement).
+            ";
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,718 @@
+module brocade-logging {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-logging";
+  prefix brocade-logging;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import brocade-logging-types {
+    prefix brocade-logging-types;
+  }
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import brocade-security-yang-types {
+    prefix brocade-security-type;
+  }
+  import fibrechannel-yang-types {
+    prefix fibrechannel-yang-types;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-logging',
+    which helps configure the specified switch or director.
+
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-06-24 {
+    description
+      "
+      Fabric OS 9.0.0
+      ---------------
+      Modified leafs in audit-log, error-log, log-setting.
+      Added supportftp.
+      Refine descriptions.
+
+      Fabric OS 8.2.1b
+      ----------------
+      Refine descriptions.
+      
+      Fabric OS 8.2.1
+      ---------------
+      Initial release.
+      Refine descriptions.
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-logging {   
+    description 
+      "
+      The top-level container for all logging configuration functionalities 
+      provided by the switch.
+      ";
+    container audit {
+      description
+        "
+        The audit logging configuration parameters. You can configure certain 
+        filter classes, to set severity levels for audit messages, and enable 
+        or disable audit filters. Depending on the configuration, certain
+        classes are logged to syslog for auditing. Note that syslog 
+        configuration is required for logging audit messages.
+        ";
+      leaf audit-enabled {
+        type boolean;
+        description
+          "
+          Enables or disables the audit filters. Note that this does not
+          change the log class and log severity configuration.
+
+          true  : The audit filter is enabled.
+          false : The audit filter is disabled.
+          ";
+      }
+      leaf severity-level {
+        type brocade-logging-types:severity-level-type;
+        description
+          "
+          The severity level of the log messages you want to display. Displays 
+          log messages of the specified severity level and higher. You cannot 
+          enter multiple severity levels.
+          ";
+      }
+      container filter-class-list {
+        description
+          "A list of class types needed for audit configuration.";
+        leaf-list filter-class {
+          type brocade-logging-types:class-type;
+          description
+            "
+            The filters to be configured for audit classes.  You can set more 
+            than one audit class, separated by a comma. 
+            ";
+        }
+      }
+    }
+    list syslog-server {
+      key "server";
+      description
+        "
+        The remote syslog server. You can configure a switch to forward all 
+        error log entries to a remote syslog server. Brocade devices use the 
+        syslog daemon, a process available on most UNIX systems that reads and 
+        forwards system messages to the  appropriate log files or users, 
+        depending on the system configuration.
+        ";
+      leaf server {
+        type inet:host;
+        description
+          "
+          The IPv4 or IPv6 address or DNS name of the server.
+          ";
+      }
+      leaf port {
+        type inet:port-number;
+        description
+          "
+          The target syslog server's port number.
+          The default port number is 514 for non-secure mode and 
+          6514 for secure mode.
+          ";
+      }
+      leaf secure-mode {
+        type boolean;
+        description
+          "
+          Enables or disables secure syslog mode to send the error log messages
+          securely using the TLS protocol to the syslog server. 
+          Secure syslog mode is disabled by default.
+
+          true  : Secure mode is enabled. 
+          false : Secure mode is disabled.
+          ";
+      }
+    }
+
+    list raslog {
+      key "message-id";
+      description
+        "
+        A list of RASlog messages' configurable parameters, such as enabling
+        message logging, the message ID, the current severity level, 
+        transferring to the syslog server is enabled. This list also includes 
+        read-only leafs, such as the default severity, the message text, and 
+        the flooded flag. A maximum of 50 RASlog objects can be modified in
+        a single PATCH request.
+        ";
+      leaf message-id {
+        type brocade-logging-types:message-id-type;
+        description 
+          "The unique identifier for each RASlog message.";
+      }
+      leaf message-enabled {
+        type boolean;
+        description 
+          "
+          Whether message logging is enabled RASlog message identified by 
+          message ID.
+
+          true  : Message logging is enabled. 
+          false : Message logging is disabled.
+          ";
+      }
+      leaf message-flooded {
+        type boolean;
+        config "false";
+        description 
+          "
+          Whether the RASlog message is blocked due to flooding.
+
+          true  : The message is blocked due to flooding. 
+          false : The message is not blocked due to flooding.
+          ";
+      }
+      leaf syslog-enabled {
+        type boolean;
+        description 
+          "
+          Whether internal RASlog messages to be sent to syslog is enabled.
+
+          true  : Syslog is enabled. 
+          false : Syslog is disabled.
+          ";
+      }
+      leaf message-text {
+        type brocade-logging-types:ascii-text-type;
+        config "false";
+        description 
+          "The message text corresponding to the RASlog message.";
+      }
+      leaf current-severity {
+        type union {
+          type brocade-logging-types:severity-level-type;
+          type string {
+            length "7";
+            pattern "default";
+          }
+        }
+        description 
+          "
+          The current severity level of the RASlog. The default security level
+          sets severity to a pre-defined level of logging for the RASlog 
+          associated with the corresponding message ID. However, you can 
+          configure a different severity with this parameter. 
+          Valid values are info, warning, error, critical and default.
+          ";
+      }
+      leaf default-severity {
+        type brocade-logging-types:severity-level-type;
+        config "false";
+        description 
+          "
+          The pre-defined default severity level of the RASlog.
+          Values displayed are info, warning, error and critical.
+          ";
+      }
+    }
+
+    list raslog-module {
+      key "module-id";
+      description
+        "
+        A list of Fabric OS modules (identified by module ID) that have 
+        logging enabled. You can use this list to enable logging for Fabric OS 
+        modules.
+        ";
+      leaf module-id {
+        type brocade-logging-types:module-id-type;
+        description 
+          "The Fabric OS module identified by module ID.";
+      }
+      leaf log-enabled {
+        type boolean;
+        description
+          "
+          Whether logging is enabled for the Fabric OS module. This parameter 
+          is used only during a PATCH request. Note that this parameter does not
+          display when you use a GET request to display RASlog modules.
+
+          true  : Logging is enabled for the Fabric OS module. 
+          false : Logging is disabled for the Fabric OS module.
+          ";
+      }
+    }
+
+    list log-quiet-control {
+      key "log-type";
+      description
+        "
+        A list of parameters that control quiet time for logging based on the 
+        log type.
+        ";
+      leaf log-type {
+        type string {
+          length "5..6";
+          pattern "audit|raslog";
+        }
+        description 
+          "
+          The log type for which quiet time is configured.
+          Valid values are audit and raslog.
+          ";
+      }
+      leaf quiet-enabled {
+        type boolean;
+        mandatory "true";
+        description 
+          "
+          Whether quiet time is enabled for logs. 
+
+          true  : Quiet time is enabled. 
+          false : Quiet time is disabled.
+          ";
+      }
+      leaf start-time {
+        when "../quiet-enabled = true";
+        type brocade-logging-types:time-24hr-type;
+        must "../end-time";
+        description 
+          "
+          The RAS quiet start time for the specified log type. 
+          The quiet start time in the 24 hour clock format hh:mm.
+
+          hh : Hours [00 to 23]
+          mm : Minutes [00 to 59]
+          ";
+      }
+      leaf end-time {
+        when "../quiet-enabled = true";
+        type brocade-logging-types:time-24hr-type;
+        must "../start-time";
+        description 
+          "
+          The RAS quiet end time for the specified log type. Start time must be
+          configured before you can set the end time.
+          The quiet start time in the 24 hour clock format hh:mm.
+
+          hh : Hours [00 to 23]
+          mm : Minutes [00 to 59]
+          ";
+      }
+      container days-of-week {
+        description 
+          "
+          The days of the week for which you want to set quiet time for the 
+          specified log type.
+          ";
+        leaf-list day {
+          when "../../quiet-enabled = true";
+          type string {
+            length "3..8";
+            pattern "forever|everyday|mon|tue|wed|thu|fri|sat|sun";
+          }
+          must "../../start-time and ../../end-time";
+          description 
+            "
+            The days of the week for which you want to set quiet time for the 
+            specified log type.
+            You can use this along with the start and end times.
+
+            Empty string  : Disables quiet time for the specified log.
+            everyday      : Enables quiet time everyday for the specified 
+                            start time and end time.
+            forever       : Enables quiet time every day all day (you cannot
+                            enter a start or end time).
+            [mon..sun]    : Enables quiet time for the specified days of the 
+                            week for the specified start time and end time.
+            ";
+        }
+      }
+    }
+    container log-setting {
+      description
+        "
+        The system-wide parameters to control the logs.
+        ";
+      leaf syslog-facility-level {
+        type string {
+          length "10";
+          pattern "log_local0|log_local1|log_local2|log_local3|log_local4|" +
+                  "log_local5|log_local6|log_local7";
+        }
+        description
+          "
+          The facility level determines the priority of the syslog messages
+          being recorded at the server. A smaller facility level corresponds
+          to higher priority syslog messages.
+          ";
+      }
+      leaf keep-alive-period {
+        type uint16 {
+          range "0..24";
+        }
+        units "hours";
+        description 
+          "
+          The RASlog keep alive timeout. 
+          The system default is 1.
+
+          0       :  Disables the keep alive timeout. 
+          [1..24] :  Keeps logging alive for the specified time.
+          ";
+      }
+      leaf clear-log {
+        type enumeration {
+          enum "error-log" {
+            description
+              "
+              Error logs generated in the switch are cleared.
+              ";
+          }
+          enum "audit-log" {
+            description
+              "
+              Audit logs generated in the switch are cleared.
+              ";
+          }
+          enum "all" {
+            description
+              "
+              Error logs and audit logs generated in the switch are cleared.
+              ";
+          }
+        }
+        description
+          "
+          Operation attribute to select the log to be cleared. Values can be
+          error-log or audit-log.
+          ";
+      }
+    }
+    container supportftp {
+      description
+        "
+        To configure the server details at switch to transfer the debug logs
+	automatically when FFDC, panic or manual tracedumps are generated.
+        ";
+      leaf host {
+        type union {
+          type inet:host;
+          type string {
+            length "0";
+          }
+        }
+        description
+          "
+          IP address or DNS name of server to which debug logs have to be send.
+          ";
+      }
+      leaf user-name {
+        type string {
+          pattern "([!-~]{1,48})?";
+          pattern '\\' {
+            modifier invert-match;
+          }
+        }
+        description
+          "
+          User name of account in server.
+          ";
+      }
+      leaf password {
+          type brocade-security-type:base64-string-type;
+        description
+          "
+          Base64 encoded password for the account in server.
+          ";
+      }
+      leaf remote-directory {
+        type string {
+          pattern "([!-~]{1,48})?";
+          pattern '\\' {
+            modifier invert-match;
+          }
+        }
+        description
+          "
+          Directory path in server where switch log  will be saved.
+          ";
+        }
+      leaf auto-enabled {
+        type boolean;
+        description
+          "
+          Enable or disable auto dump of trace, FFDC, and core files 
+          to specified server.
+
+          true : Enable auto dump.
+          false : Disable auto dump.
+          ";
+      }
+      leaf protocol {
+        type brocade-security-type:sec-crypto-cfg-file-transfer-protocol-type;
+        description
+          "
+          Specifies the protocol used to transfer the trace data 
+          as scp, ftp or sftp.
+          ";
+      }
+      leaf connectivity-check-interval {
+        type uint32 {
+            range "0..9";
+        }
+        units "hours";
+        description
+          "
+          Specifies the time interval in units of hours at which the
+          server connectivity is tested periodically.
+          When set to 0, this connectivity test is disabled.
+          ";
+      }
+    }
+    list audit-log {
+      config "false";
+      description
+        "
+        This is used for listing all the auditlog events generated on the switch
+        and accumulated over a period of time.
+        ";
+      leaf sequence-number {
+        type uint32 {
+          range "1..1024";
+        }
+        description
+          "
+          Sequence number to identify the generated auditlog message.
+          ";
+      }
+      leaf time-stamp {
+        type yang:date-and-time;
+        description
+          "
+          Timestamp of the auditlog event generated.
+          ";
+      }
+      leaf message-id {
+        type brocade-logging-types:message-id-type;
+        description
+          "It uniquely identifies an auditlog message.";
+      }
+      leaf switch-user-friendly-name {
+        type string {
+          pattern "([0-9a-zA-Z][0-9a-zA-Z-._]{2,30})|" +
+                  "([0-9][0-9a-zA-Z-._]{2,30})";
+        }
+        description
+          "
+          A printable ASCII name for the switch or chassis based on the
+          context of the auditlog message.
+          ";
+      }
+      leaf message-text {
+        type string {
+          length "1..max";
+          pattern "[ -~]+";
+        }
+        description
+          "Message text populated with actual values in the auditlog message.";
+      }
+      leaf severity-level {
+        type brocade-logging-types:severity-level-type;
+        description
+          "
+          Severity level of the auditlog message. 
+          ";
+      }
+      leaf event-class {
+        type brocade-logging-types:event-class-type;
+        description
+          "
+          Event class of the auditlog message.
+          ";
+      }
+      leaf ip-address {
+        type union {
+          type inet:host;
+          type string {
+            length "4";
+            pattern "none";
+          }
+        }
+        description
+          "
+          IP-address from which user is logged in to the switch.
+          ";
+      }
+      leaf user-name {
+        type union {
+          type brocade-security-type:user-config-user-name-type;
+          type string {
+            length 27;
+            pattern "wwn_([0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){7})";
+          }
+        }
+        description
+          "
+          User at the switch session which generated the auditlog,
+          None if the generated audilog doesn’t have a user 
+          at the specific context.
+          ";
+      }
+      leaf role {
+        type brocade-security-type:user-config-role-type;
+        description
+          "
+          The user's role for the logical fabric context where the auditlog 
+          was generated.
+          ";
+      }
+      leaf interface {
+        type fibrechannel-yang-types:interface-type;
+        description
+          "
+          Interface used to login to the switch which generated the auditlog.
+          ";
+      }
+      leaf application-name {
+        type string {
+          pattern "[!-~]{3,16}";
+          pattern '\\' {
+            modifier invert-match;
+          }
+        }
+        description
+          "
+          Name of the Switch Manageability application run by user.
+          ";
+      }
+      leaf fabric-id {
+        type uint32 {
+          range "0..128";
+        }
+        description
+          "
+          Fabric id of switch that generated the auditlog. It is
+
+            0     : in chassis context
+            1-128 : fabric id of the logical switch in switch context.
+          ";
+      }
+    }
+    list error-log {
+      config "false";
+      description
+        "
+        This is used for listing all the raslog events generated on a switch
+        and accumulated over a period of time.
+        ";
+      leaf sequence-number {
+        type uint32 {
+          range "1..max";
+        }
+        description
+          "
+          Externally assigned sequence number to identify the generated 
+          raslog message.
+          ";
+      }
+      leaf time-stamp {
+        type yang:date-and-time;
+        description
+          "
+          Timestamp of the raslog event generated.
+          ";
+      }
+      leaf message-id {
+        type brocade-logging-types:message-id-type;
+        description
+          "It uniquely identifies a raslog message.";
+      }
+      leaf fabric-id {
+        type uint32 {
+          range "0..128";
+        }
+        description
+          "
+          Fabric id of switch that generated the raslog. It is
+
+            0     : in chassis context
+            1-128 : fabric id of the logical switch in switch context
+          ";
+      }
+      leaf slot-id {
+        type uint32 {
+          range "0..max";
+        }
+        description
+          "
+          It denotes slot id of the cp that generated raslog. It is
+          zero for pizza-box systems.
+          ";
+      }
+      leaf severity-level {
+        type brocade-logging-types:severity-level-type;
+        description
+          "
+          Severity level of the log message.
+          ";
+      }
+      leaf ffdc-generated-event {
+        type boolean;
+        description
+          "
+          Whether generated raslog is an FFDC event or not. The
+          values denote,
+
+          true  : The raslog is an FFDC event,
+          false : The raslog is not an FFDC event.
+          ";
+      }
+      leaf switch-user-friendly-name {
+        type string {
+          pattern "([0-9a-zA-Z][0-9a-zA-Z-._]{2,30})|" +
+                  "([0-9][0-9a-zA-Z-._]{2,30})";
+        }
+        description
+          "
+          A printable ASCII name for the switch or chassis based on the 
+          context of the raslog message.
+          ";
+      }
+      leaf message-text {
+        type string {
+          length "1..max";
+          pattern "[ -~]+";
+        }
+        description
+          "Message text populated with actual values in the raslog.";
+      }
+    }
+  }
+}

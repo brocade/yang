@@ -1,0 +1,299 @@
+module brocade-fibrechannel-routing {
+  namespace "urn:brocade.com:mgmt:brocade-fibrechannel-routing";
+  prefix fcr;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import brocade-zone {
+    prefix zone;
+  }
+
+  import brocade-fibrechannel-logical-switch {
+    prefix fibrechannel-logical-switch;
+  }
+
+  import brocade-chassis {
+    prefix chassis;
+  }
+
+  organization
+    "Brocade Communications Systems LLC.";
+  contact
+    "
+    Address  :  120 Holger Way
+                San Jose, CA 95134
+                U.S.A
+    Phone    :  +1-408-333-8000
+    E-mail   :  support@brocade.com
+    Website  :  www.brocade.com
+    ";
+  description
+    "
+    This module defines the YANG module 'fcr', which provides
+    details of FCR configuration in a operational chassis.
+
+    Copyright (c) 2018 Brocade Communications Systems LLC.
+    All rights reserved.
+    ";
+
+  revision 2020-06-03 {
+    description
+      "
+      Fabric OS 9.0.0
+      ---------------
+        Initial release
+      ";
+    reference "None";
+  }
+
+  typedef fcr-device-state {
+    type enumeration {
+      enum "configured" {
+        description
+          "
+          Device is configured to be in an LSAN, but the device is neither 
+          imported nor exists in this fabric.
+          ";
+      }
+      enum "initializing" {
+        description
+          "
+          Device is in an intermediate state. It is not yet imported into the
+          fabric.
+          ";
+      }
+      enum "exist" {
+        description
+          "
+          Device exists in this fabric (the fabric of the zone entry).
+          ";
+      }
+      enum "imported" {
+        description
+          "
+          Device has been imported (proxy created) into this fabric.
+          ";
+      }
+    }
+    description
+      "
+      State information of the device w.r.t FCR, valid states include are 
+      configured, initializing, exist, imported.
+      ";
+  }
+
+  container brocade-fibrechannel-routing {
+    description
+      "
+	  Displays FCR information for both Backbone and Ex-ports
+      ";
+    container routing-configuration {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "
+        Generic FCR configuration parameters.
+        ";
+      leaf maximum-lsan-count {
+        when "not(chassis:vf-enabled = true and
+              fibrechannel-logical-switch:base-switch-enabled = 0)";
+        type uint32 {
+          range "3000|5000|7500";
+        }
+        description
+          "
+          The default maximum LSAN count is set to 3000. User can modify this
+          LSAN count value. The valid values are 3000, 5000 and 7500.
+          Also, user cannot modify if base-switch-enabled state is false when
+          vf-enabled state is true.
+          ";
+      }
+      leaf backbone-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          Specifies the Backbone Fabric ID. It uniquely identifies a fabric in 
+          FC Router configurations. The backbone fabric is the fabric attached
+          to the U_Ports of the switch, for example, E_Ports or F_Ports. The
+          backbone fabric ID must be unique across all fabrics connected to the
+          FC Router.
+          ";
+      }
+      leaf shortest-ifl {
+        type boolean;
+        description
+          "
+          Enables or disables the shortest IFL mode in FC Router. When the
+          shortest IFL mode is enabled, FC Router can choose a lowest-cost IFL
+          path in the backbone fabric.
+
+            TRUE  : Enables the shortest IFL mode
+            FALSE : Disables the shortest IFL mode
+          ";
+      }
+      container lsan-enforce-tags {
+        description
+          "
+          Contains list of lsan enforce tags.
+          ";
+        leaf-list tag {
+          when "not(chassis:vf-enabled = true and
+                fibrechannel-logical-switch:base-switch-enabled = 0)";
+          type string {
+            length "0..8";
+            pattern "[0-9a-zA-Z]*"; 
+          }
+          description
+            "
+            Accepts only the LSANs from the edge fabric that matches the
+            specified tag string into the local FCR database. A valid tag is
+            a string of a maximum of eight characters. The maximum configurable
+            enforce tags is eight. In case speed tag is configured, only seven
+            enforce tags can be configured. Empty tags are not allowed.
+            Configuration is not allowed if base-switch-enabled state false when
+            vf-enabled state is true.
+            ";
+        }
+      }
+      leaf lsan-speed-tag {
+        when "not(chassis:vf-enabled = true and
+              fibrechannel-logical-switch:base-switch-enabled = 0)";
+        type string {
+          length "0..8";
+          pattern "[0-9a-zA-Z]*";
+        }
+        description
+          "
+          Allows the FCR to always import these target devices to the hosts 
+          specified in the LSANs that match the speed tag. Only one speed tag
+          is allowed per FC router. Empty tags are not allowed.
+          Not allowed if base-switch-enabled state false when vf-enabled state
+          is true.
+          ";
+      }
+    }
+    list lsan-zone {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      config false;
+      description
+        "
+        Displays the list of LSAN zone members in a particular zone.
+        ";
+      leaf edge-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The ID of the fabric in which the LSAN zone was created
+          ";
+      }
+      leaf zone-name {
+        type zone:zoning-name-type;
+        description
+          "
+          The name of the zone
+          ";
+      }
+      container members {
+        description
+          "
+          Contains the list of LSAN zone members of a particular zone
+          ";
+        leaf-list member {
+          type fibrechannel:wwn-type;
+          description
+            "
+            The member of the zone
+            ";
+        }
+      }
+    }
+    list lsan-device {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      config false;
+      description
+        "
+        Displays the information of each device.
+        ";
+      leaf source-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The fabric in which the device are physically present.
+          ";
+      }
+      leaf device-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The WWN of the device.
+          ";
+      }
+      leaf proxy-pid {
+        when "../device-status = imported";
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "
+          The proxy pid of the device.
+          ";
+      }
+      leaf imported-fabric-id {
+        when "../device-status = imported";
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The fabric in which the devices are imported.
+          ";
+      }
+      leaf physical-pid {
+        when "../device-status = imported or ../device-status = exist";
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "
+          The port ID of the device in source fabric.
+          ";
+      }
+      leaf device-status {
+        type fcr-device-state;
+        description
+          "
+          States include:
+
+            configured   - Device is configured to be in an LSAN, but the device
+                           is neither imported nor exists in this fabric
+            initializing - Device is in an intermediate state. It is not yet
+                           imported into the fabric.
+            exist        - Device exists in this fabric (the fabric of the zone
+                           entry).
+            imported     - Device has been imported (proxy created) into this
+                           fabric.
+          ";
+      }
+    }
+    list edge-fabric-alias {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      key "edge-fabric-id";
+      description
+        "
+        Displays edge fabric id's corresponding alias name
+        ";
+      leaf edge-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The ID of the fabric in which the LSAN zone was created
+          ";
+      }
+      leaf alias-name {
+        type string {
+          length "1..30";
+          pattern "[a-zA-Z0-9_]*";
+        }
+        description
+          "
+          Alias name of the specific edge fabric id.
+          ";
+      }
+	}
+  }
+}

@@ -1,0 +1,1109 @@
+module brocade-maps {
+
+    yang-version 1.1;
+    namespace "urn:brocade.com:mgmt:brocade-maps";
+    prefix brocade-maps;
+    
+    import brocade-maps-types {
+        prefix maps-types;
+    }
+    import ietf-inet-types {
+        prefix inet;
+    }
+    import ietf-yang-types {
+        prefix yang;
+    }
+
+    organization
+    "Broadcom Inc.";
+
+    contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+    description
+    "
+    Copyright © 2019 Broadcom. All rights reserved. The term 'Broadcom' refers to
+    Broadcom Inc. and/or its subsidiaries.
+    ";
+
+    revision 2019-01-25 {
+      description
+      "
+      Fabric OS 8.2.1b
+      -----
+      Refine descriptions.
+      
+      FOS 8.2.1
+      -----
+      Initial release.
+      Refine descriptions.
+      ";
+        reference
+          "
+          Brocade Monitoring and Alerting Policy Suite Configuration Guide
+          ";
+  }
+    
+  typedef maps-group-feature-type {
+    type enumeration {
+      enum "node-wwn" {
+        description
+          "
+          The node wwn feature.
+          ";
+      }
+      enum "port-name" {
+        description
+          "
+          The port name feature.
+          ";
+      }
+      enum "feature-unknown" {
+        description
+          "
+          The unknown feature
+          ";
+      }
+    }
+    description
+      "
+      The existing feature name for the group. Valid feature names
+      are PORTNAME and NODEWWN. You can create user-defined groups matching
+      port name or node WWN.
+      ";
+  }
+
+  typedef ssp-state-type {
+    type enumeration {
+      enum "unknown" {
+        description
+          "
+          The unknown state.
+          ";
+      }
+      enum "down" {
+        description
+          "
+          The down state - some service is already impacted.
+          ";
+      }
+      enum "marginal" {
+        description
+          "
+          The marginal state - if any FRU is in a marginal state, fix it or 
+          replace it with a new one.
+          ";
+      }
+      enum "healthy" {
+        description
+          "
+          The healthy state - normal operating condition.
+          ";
+      }
+    }
+    description
+      "
+      Switch status policy report state. The state gives the summary health of
+      the switch and individual components. A marginal state means if the 
+      corrective action not taken service may be impacted. A down state means
+      service is already impacted.
+      
+      SSP state can be set based on the rule having sw_marginal or sw_down
+      actions.
+      Example: for FAN state
+        (BAD_FAN>= 1) sw_marginal
+      ";
+  }
+
+  container brocade-maps {
+
+    description 
+      "
+      The manageable MAPS features.
+      ";
+      
+    container switch-status-policy-report {
+      config false;
+      description 
+        "
+        The Switch Status Policy (SSP) report. The SSP report provides the 
+        overall health status of the switch and includes enough information for
+        you to investigate further, if necessary.
+        ";
+
+
+      leaf switch-health {
+        type ssp-state-type;
+        description 
+          "
+          The overall status of the switch. The switch state is determined by 
+          the state of one or more of its components.
+          ";
+        }
+      leaf power-supply-health {
+        type ssp-state-type;
+        description
+          "
+          The state of the power supplies. 
+          ";
+        }
+        
+      leaf fan-health {
+        type ssp-state-type;
+        description
+          "
+          The state of the fans. 
+          ";
+        }
+        
+      leaf wwn-health {
+        if-feature maps-types:chassis-platform;
+        type ssp-state-type;
+        description 
+          "
+          The state of the WWN cards. 
+          ";
+        }
+        
+      leaf temperature-sensor-health {
+        type ssp-state-type;
+        description
+          "
+          The state of the temperature sensors. 
+          ";
+        }
+        
+      leaf ha-health {
+        if-feature maps-types:chassis-platform;
+        type ssp-state-type;
+        description
+          "
+          The state of the high availability state (both control processors 
+          are in sync).
+          ";
+      }
+      leaf control-processor-health {
+        if-feature maps-types:chassis-platform;
+        type ssp-state-type;
+        description
+          "
+          The  state of the control processors.
+          ";
+      }
+      leaf core-blade-health {
+        if-feature maps-types:chassis-platform;
+        type ssp-state-type;
+        description 
+          "
+          The state of the core blades. 
+          ";
+      }
+      leaf blade-health {
+        if-feature maps-types:chassis-platform;
+        type ssp-state-type;
+        description 
+          "
+          The state of the application blades.
+          ";
+      }
+      leaf flash-health {
+        type ssp-state-type;
+        description
+          "
+          The state of the flash usage. Flash usage could be above the
+          threshold or limit.
+          ";
+      }
+      leaf marginal-port-health {
+        type ssp-state-type;
+        description 
+          "
+          The state of the marginal ports. 
+          ";
+      }
+      leaf faulty-port-health {
+        type ssp-state-type;
+        description
+          "
+          The state of the faulty ports.
+          ";
+      }
+      leaf missing-sfp-health {
+        type ssp-state-type;
+        description
+          "
+          The state of the missing SFPs.
+          ";
+      }
+      leaf error-port-health {
+        type ssp-state-type;
+        description
+          "
+          The state of the error ports.
+          ";
+      }
+      leaf expired-certificate-health {
+        type ssp-state-type;
+        description
+          "
+          The state of the expired certificate.
+          ";
+      }
+      leaf airflow-mismatch-health {
+        type ssp-state-type;
+        description
+          "
+          The state of the air flow. This parameter monitors the air flow 
+          direction of the power supply fan FRUs and blower FRUs and generates 
+          an alert if there is a mismatch in the air flow direction of any two 
+          power supply fans or any two blowers.
+          ";
+        }
+    }
+    container system-resources {
+      config false;
+      description 
+        "
+        The system resources (such as CPU, RAM, and flash memory usage). 
+        Note that usage is not real time and may be delayed up to 2 minutes.
+        ";
+        
+      leaf cpu-usage {
+        type uint32 {
+          range "0 .. 100";
+        }
+        units "percentage";
+        description 
+          "
+          The percentage of CPU usage.
+          ";
+      }
+      leaf memory-usage {
+        type uint32 {
+          range "0 .. 100";
+        }
+        units "percentage";
+        description
+          "
+          The percentage of memory usage. 
+          ";
+      }
+      leaf total-memory {
+        type uint32 {
+          range "0 .. max";
+        }
+        units "kilobytes";
+        description
+          "
+          The total memory usage.
+          ";
+      }
+      leaf flash-usage {
+        type uint32 {
+          range "0 .. 100";
+        }
+        units "percentage";
+        description
+        "
+        The percentage of flash usage. 
+        ";
+      }
+    }
+    
+    list paused-cfg {
+      key "group-type";
+      description
+        "
+        A list of elements or element groups that you want to pause or resume 
+        monitoring. You can only pause or resume monitoring of ports, 
+        FCIP circuits, or SFPs.
+        ";
+        
+        leaf group-type {
+          type enumeration {
+            enum "fc-port" {
+              description
+                "
+                The FC port group type. This group manages the FC ports.
+                ";
+            }
+            enum "sfp" {
+              description
+                "
+                The FC SFP group type. This group manages the FC SFPs.
+                The system can have different SFPs based on speed or vendor.
+                ";
+            }
+            enum "circuit" {
+              description
+                "
+                The circuit group type. This group manages circuits.
+                A circuit is a virtual connection between two extension systems.
+                ";
+            }
+          }
+          description
+            "
+            The element group of which you want to pause or resume monitoring.
+            ";
+        }
+        container members {
+          description
+            "
+            A list of elements (ports, FCIP circuits, or SFPs). There must be 
+            at least one member in the list.
+            ";
+          leaf-list member {
+            type string {
+              length "0..100";
+              pattern "[a-z,' ']*([0-9]{1,3})*|-|,|/";
+            }
+            min-elements 1;
+            description
+              "
+              An element (port, FCIP circuit, or SFP).
+              ";
+          }
+        }
+    }
+
+    list group {
+      key "name";
+      description
+        "
+        A list of groups to be monitored using the same set of thresholds. 
+        For example, you can create a group of ports that behave in a similar 
+        manner, such as UNIX ports or long-distance ports. Note that all 
+        elements (ports, FCIP circuits, or SFPs) in a group must be of the same 
+        type. By creating a group of similar elements, you can manage these 
+        elements as a single entity. 
+        You can create up to 64 user-defined groups per logical switch.
+        ";
+      leaf name {
+       type maps-types:maps-group-name-type;
+       description
+         "
+         The group name.
+         ";
+      }
+      leaf group-type {
+       type maps-types:maps-group-type-type;
+       mandatory true;
+       description
+         "
+         The group type.
+         ";
+      }
+      leaf group-feature {
+       type maps-group-feature-type;
+       description
+         "
+         The group feature.
+         ";
+      }
+      leaf feature-pattern {
+       when "../group-feature == node-wwn and ../group-feature == port-name";
+       type string {
+         length "0..32";
+         pattern "!|[a-zA-Z0-9?,_,-,:,*]*";
+       }
+       description
+         "
+         The feature pattern.
+         ";
+      }
+      leaf is-predefined {
+       type boolean;
+       config false;
+       description
+         "
+         Whether the group is a system-defined or user-defined group. You 
+         cannot delete system-defined groups; however, you can augment the 
+         ports managed by the group.
+         
+         true : The group is system-defined. 
+         false: The group is user-defined.
+         ";
+      }
+      leaf is-modifiable {
+       type boolean;
+       config false;
+       description
+         "
+         Whether you can modify the group. You can modify all user-defined 
+         groups, and predefined port type groups, except  for the 
+         ALL_QUARANTINED_PORTS group and any flow group (although the parameter
+         is true).
+         true : The system-defined group can be modified. 
+         false: The system-defined group cannot be modified. 
+         ";
+      }
+      container members {
+       when "../group-feature != node-wwn and ../group-feature != port-name";
+       description
+         "
+         A list of members (such as, node-wwn or port-name).
+         ";
+       leaf-list member {
+         type string {
+           length "0..100";
+           pattern "[a-z,' ']*([0-9]{1,3})*|-|,|/";
+         }
+         description
+           "
+           A member (such as, node-wwn or port-name).
+           ";
+        }
+      }
+    }
+    
+    container maps-config {
+      description
+        "
+        The MAPS configuration for the switch. You can perform the following 
+        MAPS configurations using this container:
+        1. View the current MAPS configuration.
+        2. Define the actions to take on the switch when a threshold is 
+           triggered.
+        3. Specify the e-mail addresses to which the alerts are sent.
+        4. Delete all user-defined MAPS configurations related to rules, groups,
+           policies, and so on.
+        ";
+        
+      container actions {
+        description
+          "
+          The global MAPS actions list.
+          ";
+        leaf-list action {
+          type maps-types:maps-generic-action-type;
+          description
+            "
+            The MAPS actions. You can enable one or more actions globally at 
+            the switch level or per rule. 
+            ";
+        }
+      }
+      leaf decommission-cfg {
+        type enumeration {
+          enum "impair" {
+            description
+              "
+              The decommission behavior is to impair the link. After 
+              this action triggers, the port remains online with no routes
+              unless no other shortest path links exist.
+              ";
+          }
+          enum "with-disable" {
+            description
+              "
+              The decommission behavior is to decommission and disable the 
+              port (or fence if the process fails).
+              ";
+            }
+          }
+          description
+            "
+            The decommission behavior (with-disable or impair). The default is
+            with-disable.
+            ";
+      }
+      container recipient-address-list {
+        description
+          "
+          The recipient list for e-mail alerts.
+          ";
+        leaf-list recipient-address {
+          type string {
+            length "5..128";
+            pattern "[0-9a-zA-Z@_.]*";
+          }
+          max-elements 5;
+          description 
+            "
+            The e-mail address (such as john@mmm.com or psingh@xyz.com) for
+            recipients of e-mail alerts.
+            ";
+        }
+      }
+
+      leaf sender-address {
+        type string {
+          length "5..128";
+          pattern "[0-9a-zA-Z@_.]*";
+        }
+        description 
+          "
+          The e-mail address of the sender.
+          ";
+      }
+      leaf domain-name {
+        type string {
+          length "4..63";
+          pattern "([a-zA-Z]{0,1}[0-9a-zA-Z_]{2,3}[0-9a-zA-Z_]{4,63})";
+        }
+        description 
+        "
+        The domain name. Enter none to clear the name.
+        ";
+      }
+      leaf relay-ip-address {
+        type inet:ip-address;
+        description 
+          "
+          The relay IP address. Enter none to clear the IP address.
+          ";
+      }
+      container test-email {
+        description
+          "
+          The test email.
+          ";
+        leaf subject {
+        type string {
+          length "0..256";
+          pattern "[ -~]";
+        }
+        description
+          "
+          The subject for the email alert.
+          ";
+        }
+        leaf body {
+          type string {
+            length "0..512";
+            pattern "[ -~]";   
+        }
+          description
+            "
+            The message for the email alert.
+            ";
+          }
+        }
+      }
+      list dashboard-rule {
+        config false;
+        description
+          "
+          A list of dashboards. The dashboard enables you to view the events or 
+          rules triggered and the objects on which the rules were triggered over
+          a specified period of time You can also clear the dashboard data. 
+          
+          You can view a triggered rules list for the last 7 days. You need the 
+          rule list to get the complete picture of switch operation. 
+          The dashboard data provides two views of the operating state - 
+          the state since midnight and the state for the last 7 days.
+          For both the views, you need to complete details of each rule 
+          triggered and all of the rule data.
+          ";
+
+        leaf category {
+          type maps-types:maps-dashboard-category-type;
+          description
+            "
+            The dashboard category. Each rule can belong to only one category.
+            ";
+        }
+        leaf name {
+          type maps-types:maps-rule-name-type;
+          description 
+            "
+            The rule name.
+            ";
+        }
+        leaf triggered-count {
+          type uint32 {
+            range "0..max";
+          }
+          description 
+            "
+            The number of times the rule was triggered for the category.
+            ";
+        }
+        leaf time-stamp {
+          type yang:date-and-time;
+          description 
+            "
+            The date and time that the rule was last triggered.
+            ";
+        }
+        leaf repetition-count {
+          type uint32 {
+            range "0..max";
+          }
+          description 
+            "
+            The number of times a rule was triggered. The same rule can be 
+            triggered multiple times for the same or different objects. 
+            For example, if the defALL_D_PORTSCRC_10 rule is triggered 20 times 
+            in an hour for different objects, then the repetition-count is 20.
+            ";
+        }
+        container objects {
+          description 
+            "
+            The objects that violated the rule. For example port, circuit.
+            ";
+          leaf-list object {
+            type string {
+              pattern "[0-9a-fA-F,/]*";
+            }
+            description
+              "
+              The object that violated the rule. For example, port, circuit, 
+              and so on. The object format is as follows: <element>:<value>. 
+              For example, 'F-Port 10:90' and 'U-Port 11:11'.
+              ";
+          }
+        }
+      }
+    
+    container dashboard-misc {
+      description
+        "
+        The dashboard miscellaneous information (such as start time 
+        and operation).
+        ";
+      
+      leaf maps-start-time {
+        type yang:date-and-time;
+        config false;
+        description
+          "
+          The MAPS start time. MAPS is restartable service which means the 
+          start time could be different than system up time.
+          ";
+        }
+        leaf clear-data {
+          type boolean;
+          default "true";
+          description
+            "
+            Whether to clear the dashboard data.
+            true : Clears the dashboard data. 
+            false: Does not clear the dashboard data.
+            ";
+        }
+    }
+    list rule {
+      key "name";
+      description
+        "
+        A list of rules. You can use the rules container to configure and 
+        manage MAPS monitoring rules and to display configured rules. A rule 
+        associates a condition (threshold) with actions that are triggered when 
+        the specified condition is reached. A rule must be in the enabled MAPS 
+        policy to be active. When you modify a rule in the enabled MAPS policy,
+        the rule does not take effect until you re-enable the policy.
+        ";
+ 
+      leaf name {
+        type maps-types:maps-rule-name-type;
+        description
+          "
+          The rule name.
+          ";
+      }
+      leaf is-rule-on-rule {
+        type maps-types:maps-rule-type;
+        mandatory true;
+        description
+          "
+          The rule name. A rule can be one of two types: base or rule-on-rule. 
+          A base rule monitors the statistics or FRUs whereas a rule-on-rule 
+          monitors the base rule.
+          ";
+      }
+      leaf monitoring-system {
+        type maps-types:maps-monitoring-system-type;
+        mandatory true;
+        description
+          "
+          The statistic or error to be monitored (CRC, ITW, PS_STATE, 
+          and so on).
+          ";
+      }
+      leaf time-base {
+        type maps-types:maps-time-base-type;
+        mandatory true;
+        description
+          "
+          The time interval between two samples to be compared.
+          ";
+      }
+      leaf logical-operator {
+        type maps-types:maps-logical-operator-type;
+        mandatory true;
+        description
+          "
+          The relational operation to be used in evaluating the condition.
+          ";
+      }
+      leaf threshold-value {
+        type maps-types:threshold-value-type;
+        mandatory true;
+        description
+          "
+          The threshold value. Thresholds are the values at which potential 
+          problems might occur. For example, in configuring a port threshold, 
+          you can select a specific value at which an action is triggered 
+          because of too many threshold violations.
+          ";
+      }
+      leaf group-name {
+        type maps-types:maps-group-name-type;
+        must "../is-rule-on-rule = false and ../group-name != ''" {
+          error-message "group-name can't be empty.";
+        }
+        must "../is-rule-on-rule = true and "+
+          "(../group-name = '' or ../group-name = 'RULE')" {
+          error-message "Group name can only take the value 'RULE'";
+        }
+        description
+          "
+          The group name (such as ALL_PORTS).
+          ";
+      }
+      container actions {
+        description
+          "
+          The MAPS actions.
+          ";
+          leaf-list action {
+            type maps-types:maps-generic-action-type;
+            min-elements 1;
+            description
+              "
+              A MAPS action.
+              ";
+          }
+      }
+      leaf is-predefined {
+        type boolean;
+        config false;
+        description
+          "
+          Whether the group is a system-defined or user-defined group. 
+          You cannot delete system-defined groups; however, you can augment the 
+          ports managed by the group.
+          true : The group is system-defined. 
+          false: The group is user-defined.
+          ";
+      }
+      leaf event-severity {
+        type maps-types:maps-event-severity-type;
+        description
+          "
+          The user configured severity (warning, error, critical, info). 
+          ";
+      }
+      leaf toggle-time {
+        type uint32 {
+          range "2..3600";
+        }
+        units "second";
+        description
+          "
+          The port's toggle time.
+          ";
+      }
+      leaf quiet-time {
+        type uint32 {
+          range "60..31536000";
+        }
+        units "second";
+        description
+          "
+          The quiet time. The rule is not triggered until quiet time 
+          has expired..
+          ";
+      }
+      leaf quiet-time-clear {
+        type boolean;
+        default false;
+        description
+          "
+          Whether to clear quiet time.
+          true : Clears the quiet time from the rule. 
+          false: Does not clear the quiet time from the rule.
+          ";
+      }
+      leaf un-quarantine-timeout {
+        type uint32 {
+          range "0..2147483647";
+        }
+        units "second";
+        description
+          "
+          The un-quarantine timeout.
+          ";
+      }
+      leaf un-quarantine-clear {
+        type boolean;
+        description
+          "
+          Whether to clear the un-quarantine timeout.
+          true : Clears the quiet time from the rule. 
+          false: Does not clear the quiet time from the rule.
+          ";
+        }
+      }
+      list maps-policy {
+        key "name";
+        description
+          "
+          The MAPS policy. This container enables you to create and manage 
+          monitoring policies. A MAPS policy is a set of rules that define 
+          thresholds for measures and actions to take when a threshold 
+          is triggered. When you enable a policy, all of the rules in the 
+          policy are in effect. A switch can have multiple policies.
+          ";
+
+        leaf name {
+          type maps-types:maps-policy-name-type;
+          description 
+            "
+            The MAPS policy name.
+            ";
+        }
+        container rule-list {
+          description
+            "
+            A list of rules in the policy.
+            ";
+          leaf-list rule {
+            type maps-types:maps-rule-name-type;
+            description
+              "
+              The rule name.
+              ";
+          }
+        }
+        leaf is-active-policy {
+          type boolean; 
+          default false;
+          description
+            "
+            Whether the policy is active. You can configure multiple policies; 
+            however, only one policy can be active at a time.
+            true : This policy is active. 
+            false: This policy is not active.
+            ";
+        }
+        leaf is-predefined-policy {
+          type boolean; 
+          config false;
+          description
+            "
+            Whether the policy is predefined or user-defined. Fabric OS ships 
+            with 4 predefined policies (dflt_conservative_policy, 
+            dflt_aggressive_policy, dflt_moderate_policy, and dflt_base_policy).
+            true : This policy is predefined. 
+            false: This policy is user-defined.
+            ";
+        }
+    }
+    list monitoring-system-matrix {
+      key "monitoring-system group-type";
+      config false;
+      description
+        "
+        A list of monitoring systems. Each monitoring system can support
+        different time bases, actions, and thresholds. Some monitoring systems 
+        are supported only on specific systems. For example, circuit or tunnel
+        monitoring systems are only supported on extension platforms.
+        ";
+      leaf monitoring-system {
+        type maps-types:maps-monitoring-system-type;
+        description
+          "
+          The monitoring system name. 
+          ";
+      }
+      leaf dashboard-category {
+        type maps-types:maps-dashboard-category-type;
+        description
+          "
+          The dashboard category of the monitoring system.
+          ";
+      }
+      leaf group-type {
+        type maps-types:maps-group-type-type;
+        description
+          "
+          The group type.
+          ";
+      }
+      container base-time-bases {
+        description
+          "
+          The time bases.
+          ";
+        leaf-list time-base {
+          type maps-types:maps-time-base-type;
+          description
+            "
+            A list of the supported time bases for the monitoring system.
+            ";
+        }
+      }
+      container rule-on-rule-time-bases {
+        when "../is-rule-on-rule-supported == true";
+        description
+          "
+          The supported rule on rules time bases for the monitoring system.
+          ";
+        leaf-list rule-on-rule-time-base {
+          type maps-types:maps-time-base-type;
+          description 
+            "
+            A list of the supported time bases for rule on rules for the 
+            monitoring system.
+            ";
+        }
+      }
+      leaf is-read-only {
+        type boolean;
+        description 
+          "
+          Whether the monitoring system is read only.
+          ";
+      }
+      leaf monitored-logical-switch {
+        type enumeration {
+          enum "all-logical-switches" {
+            description
+              "
+              The monitoring system is in all the logical switches.
+              "; 
+          }
+          enum "default-switch-only" {
+            description
+              "
+              The monitoring system is only in the default logical switch.
+              "; 
+          }
+        }
+        description 
+          "
+          Whether the monitoring system is in all logical switches or only 
+          the default logical switch.
+          ";
+      }
+      leaf is-rule-on-rule-supported {
+        type boolean;
+        description
+          "
+          Whether rule on rule is supported.
+
+          true : Rule on rule is supported.
+          false: Rule on rule is not supported.
+          ";
+      }
+      leaf is-quiet-time-supported {
+        type boolean;
+        description 
+          "
+          Whether quiet time is supported.
+          
+          true  : Quiet time is supported
+          false : Quiet time is not supported
+          ";
+      }
+      leaf minimum-quiet-time {
+        when "../is-quiet-time-supported == true";
+        type uint32 {
+          range "60..31536000";
+        }
+        units "second";
+        description 
+          "
+          The minimum quiet time.
+          ";
+      }
+      leaf monitoring-type {
+        type maps-types:monitoring-type-type;
+        description 
+          "
+          The monitoring type(event based or poll based) for the 
+          monitoring system. 
+          ";
+      }
+      leaf data-type {
+        type maps-types:data-type-type;
+        description 
+          "
+          The data type support. Each monitoring system supports different 
+          data types for thresholds.
+          ";
+      }
+      leaf description {
+        type string {
+          length "1..128";
+        }
+        description 
+          "
+          A description of the monitoring system.
+          ";
+      }
+      container actions {
+        description
+          "
+          The global MAPS actions list.
+          ";
+        leaf-list action {
+          type maps-types:maps-generic-action-type;
+          description
+            "
+            A list of the MAPS actions defined for this monitoring system. 
+            ";
+        }
+      }
+      leaf unit {
+        type maps-types:maps-data-unit;
+        description
+          "
+          The data unit.
+          ";
+      }
+      leaf data-range {
+        type string {
+          length "0..100";
+          pattern "[0-9]*[A-Z]*[_,-]";
+        }
+        description
+          "
+          The data range.
+          ";
+      }
+      container logical-operators {
+        description
+          "
+          The supported operations.
+          ";
+        leaf-list logical-operator {
+          type maps-types:maps-logical-operator-type;
+          description
+            "
+            The logical operator.
+            ";
+        }
+      }
+    }
+  }
+}

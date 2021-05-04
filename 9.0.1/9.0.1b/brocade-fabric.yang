@@ -1,0 +1,258 @@
+module brocade-fabric {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fabric";
+  prefix fabric;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'fabric', which provides
+    a view of all of the switches in the fabric that are operational.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2020-02-05 {
+    description
+      "
+      Fabric OS 8.2.0a
+      ----------------
+        Deprecated 'fcid' (replaced by 'fcid-hex')
+
+      Fabric OS 8.2.1
+      ----------------
+        Refine switch-user-friendly-name/chassis-user-friendly-name/
+        user-friendly-name regular expressions.
+        Formatting
+        Organization information
+        Increase firmware-version length
+        Added path count leaf
+        Refine descriptions
+        Naming standard update.
+
+      Fabric OS 9.0.0
+      ----------------
+        Added topology lists
+        Updated firmware-version for pattern.
+        Deprecated 'path-count'(replaced by topology-domain path-count leaf)
+        Add 'fibrechannel:fibrechannel_switch_platform' check
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-fabric {
+    config false;
+    description
+      "
+      Fabric state parameters. Currently, requests are made using QUERY
+      specifying the vf-id of the specific fabric which will provide the
+      fabrics state parameters.
+      ";
+    list fabric-switch {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      key "name";
+      description
+        "The list of configured switches in the fabric.";
+      leaf name {
+        type fibrechannel:wwn-type;
+        description
+          "The Fibre Channel WWN of the switch.";
+      }
+      leaf switch-user-friendly-name {
+        type string {
+          length "0..30";
+          pattern "([a-zA-Z0-9][0-9a-zA-Z-._]{0,29})";
+        }
+        description
+          "An ASCII name assigned to the switch by the administrator.";
+      }
+      leaf chassis-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The chassis WWN.";
+      }
+      leaf chassis-user-friendly-name {
+        type string {
+          length "0..31";
+          pattern "([a-zA-Z][0-9a-zA-Z-._]{0,29})?";
+        }
+        description
+          "An ASCII name assigned to the switch chassis by the administrator.";
+      }
+      leaf domain-id {
+        type fibrechannel:domain-id-type;
+        description
+          "
+          The highest level in a three-level addressing hierarchy used in the
+          Fibre Channel address identifier. A domain typically is associated
+          with a single Fibre Channel switch.
+          ";
+      }
+      leaf principal {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Indicates if this switch is the fabric principal switch. The possible
+          values are:
+
+          0 : Switch is not principal switch
+          1 : Switch is principal switch
+          ";
+      }
+      leaf fcid {
+        type fibrechannel:fcid-type;
+        status deprecated;
+        description
+          "
+          The destination ID (D_ID) of the switch (decimal format).
+
+          Deprecated: Please use 'fcid-hex' leaf instead.
+          ";
+      }
+      leaf fcid-hex {
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "The destination ID (D_ID) of the switch (hexadecimal format).";
+      }
+      leaf ip-address {
+        type inet:ipv4-address;
+        description
+          "IPV4 address for the switch";
+      }
+      leaf fcip-address {
+        type inet:ipv4-address;
+        description
+          "The IP address the switch is using for Fibre Channel over IP.";
+      }
+      leaf ipv6-address {
+        type inet:ipv6-address;
+        description
+          "IPV6 address for the switch";
+      }
+      leaf firmware-version {
+        type string {
+          length "0..255";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          A human readable string identifying the firmware version running
+          on the switch.
+          ";
+      }
+      leaf path-count {
+        type uint32 {
+          range "0..16";
+        }
+        status deprecated;
+        description
+          "
+          The number of paths available to each remote domain.
+
+          Deprecated: Please use path-count leaf from topology-domain list.
+          ";
+      }
+    }
+    list access-gateway {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      key "switch-wwn";
+      config false;
+      description
+        "
+        Lists all the access gateway connect to the fabric.
+        This can be retrieved by querying on any of switches part of the Fabric.
+        ";
+      leaf switch-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The world wide name (WWN) of the connected Access Gateway.";
+      }
+      leaf user-friendly-name {
+        type string {
+          length "1..30";
+          pattern "([0-9a-zA-Z][0-9a-zA-Z-._]{2,30})|" +
+                  "([0-9][0-9a-zA-Z-._]{2,30})";
+        }
+        description
+         "
+         The ASCII name assigned to the Access Gateway by the administrator.
+         1 to 30 alphanumeric characters plus hyphens, periods, and
+         underscores. Spaces are not allowed. A switch name can begin with
+         a letter or number, but a switch name that begins with a numeric
+         character (0-9) must also have at least an underscore (_),
+         hyphen (-), period (.), or alphabetic character (A-Z, a-z).
+         A switch name with only numeric characters is not valid.
+         ";
+      }
+      leaf firmware-version {
+        type string {
+          length "1..255";
+          pattern "[ -~]+";
+        }
+        description
+          "
+          A human readable string identifying the firmware version running
+          on the access gateway switch.
+          ";
+      }
+      container ip-addresses {
+        description
+          "
+          List of out-of-band IP addresses assigned to the Ethernet port on the
+          Access Gateway.
+          ";
+        leaf-list ip-address {
+          type inet:ip-address;
+          description
+            "
+            List of out-of-band IP addresses assigned to the Ethernet port of
+            the switch.
+            ";
+        }
+      }
+      leaf is-edge-ag {
+        type boolean;
+        description
+          "
+          Whether the Connected Access Gateway switch is Core AG or Edge AG.
+
+          true  : device is an edge AG device
+          false : device is not an edge AG device
+          ";
+      }
+    }
+  }
+}
