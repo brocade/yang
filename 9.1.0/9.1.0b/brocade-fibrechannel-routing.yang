@@ -1,0 +1,707 @@
+module brocade-fibrechannel-routing {
+  namespace "urn:brocade.com:mgmt:brocade-fibrechannel-routing";
+  prefix fcr;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import brocade-zone {
+    prefix zone;
+  }
+
+  import brocade-fibrechannel-logical-switch {
+    prefix fibrechannel-logical-switch;
+  }
+
+  import brocade-chassis {
+    prefix chassis;
+  }
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  organization
+    "Brocade Communications Systems LLC.";
+  contact
+    "
+    Address  :  120 Holger Way
+                San Jose, CA 95134
+                U.S.A
+    Phone    :  +1-408-333-8000
+    E-mail   :  support@brocade.com
+    Website  :  www.brocade.com
+    ";
+  description
+    "
+    This module defines the YANG module 'fcr', which provides
+    details of FCR configuration in a operational chassis.
+
+    Copyright (c) 2021 Brocade Communications Systems LLC.
+    All rights reserved.
+    ";
+
+  revision 2022-01-18 {
+    description
+      "
+      Fabric OS 9.1.0b
+      ----------------
+        Added fibrechannel:brocade-empty-string-type support
+
+      Fabric OS 9.1.0
+      ---------------
+        Added fibrechannel-router list
+        Added router-statistics container
+        Added routing-configuration/migration-mode leaf
+        Added a leaf 'persistent-translate-domain-enabled' in the container
+        'routing-configuration.'
+        Added lists 'proxy-config,' 'translate-domain-config' and
+        'stale-translate-domain.'
+        Add 'translate-domain-config/front-domain-owner' leaf
+        Update description of backbone-fabric-id leaf
+
+      Fabric OS 9.0.0
+      ---------------
+        Initial release
+      ";
+    reference "None";
+  }
+
+  typedef fcr-device-state {
+    type enumeration {
+      enum "configured" {
+        description
+          "
+          Device is configured to be in an LSAN, but the device is neither 
+          imported nor exists in this fabric.
+          ";
+      }
+      enum "initializing" {
+        description
+          "
+          Device is in an intermediate state. It is not yet imported into the
+          fabric.
+          ";
+      }
+      enum "exist" {
+        description
+          "
+          Device exists in this fabric (the fabric of the zone entry).
+          ";
+      }
+      enum "imported" {
+        description
+          "
+          Device has been imported (proxy created) into this fabric.
+          ";
+      }
+    }
+    description
+      "
+      State information of the device w.r.t FCR, valid states include are 
+      configured, initializing, exist, imported.
+      ";
+  }
+
+
+  typedef fibre-channel-router-owner {
+    type enumeration {
+      enum "local" {
+        description
+          "
+          The owner front domain belongs to the current fibrechannel router.
+          ";
+      }
+      enum "remote" {
+        description
+          "
+          The owner front domain belongs to the other fibrechannel router.
+          ";
+      }
+      enum "remote-fabric" {
+        description
+          "
+          The owner front domain belongs to the fibrechannel router in
+          another Backbone fabric.
+          ";
+      }
+      enum "not-applicable" {
+        description
+          "
+          The owner fibrechannel router status is not applicable.
+          ";
+      }
+    }
+    description
+      "
+      Represents the owner fibrechannel router of the front domain.
+      ";
+  }
+
+
+  container brocade-fibrechannel-routing {
+    description
+      "
+      Displays FCR information for both Backbone and EX_ports
+      ";
+    container routing-configuration {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "
+        Generic FCR configuration parameters.
+        ";
+      leaf maximum-lsan-count {
+        when "(chassis:vf-enabled = false) or "
+           + "(not(chassis:vf-enabled = true and "
+           + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+        type uint32 {
+          range "3000|5000|7500";
+        }
+        description
+          "
+          The default maximum LSAN count is set to 3000. User can modify this
+          LSAN count value. The valid values are 3000, 5000 and 7500.
+          Also, user cannot modify if base-switch-enabled state is false when
+          vf-enabled state is true.
+          ";
+      }
+      leaf backbone-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          Specifies the Backbone Fabric ID. It uniquely identifies a fabric in 
+          FC Router configurations. The backbone fabric is the fabric attached
+          to the U_Ports of the switch, for example, E_Ports or F_Ports. The
+          backbone fabric ID must be unique across all fabrics connected to the
+          FC Router.
+          Backbone Fabric ID cannot be modified when virtual fabric mode is ON.
+          ";
+      }
+      leaf shortest-ifl {
+        type boolean;
+        description
+          "
+          Enables or disables the shortest IFL mode in FC Router. When the
+          shortest IFL mode is enabled, FC Router can choose a lowest-cost IFL
+          path in the backbone fabric.
+
+            TRUE  : Enables the shortest IFL mode
+            FALSE : Disables the shortest IFL mode
+          ";
+      }
+      container lsan-enforce-tags {
+        description
+          "
+          Contains list of lsan enforce tags.
+          ";
+        leaf-list tag {
+          when "(chassis:vf-enabled = false) or "
+             + "(not(chassis:vf-enabled = true and "
+             + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+          type string {
+            length "0..8";
+            pattern "[0-9a-zA-Z]*"; 
+          }
+          description
+            "
+            Accepts only the LSANs from the edge fabric that matches the
+            specified tag string into the local FCR database. A valid tag is
+            a string of a maximum of eight characters. The maximum configurable
+            enforce tags is eight. In case speed tag is configured, only seven
+            enforce tags can be configured. Empty tags are not allowed.
+            Configuration is not allowed if base-switch-enabled state false when
+            vf-enabled state is true.
+            ";
+        }
+      }
+      leaf lsan-speed-tag {
+        when "(chassis:vf-enabled = false) or "
+           + "(not(chassis:vf-enabled = true and "
+           + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+        type string {
+          length "0..8";
+          pattern "[0-9a-zA-Z]*";
+        }
+        description
+          "
+          Allows the FCR to always import these target devices to the hosts 
+          specified in the LSANs that match the speed tag. Only one speed tag
+          is allowed per FC router. Empty tags are not allowed.
+          Not allowed if base-switch-enabled state false when vf-enabled state
+          is true.
+          ";
+      }
+      leaf migration-mode {
+        type boolean;
+        description
+          "
+          Enables or disables the migration mode on an FCR switch. Enabling the
+          migration mode on an FCR facilitates the user to proceed with
+          decommissioning actions leading to removal of the FCR switch from the
+          backbone fabric. The decommission actions should result in disabling
+          all the EX_Port(s) connected to the edge fabric from which traffic has
+          been migrated (to other FCRs). Later, the user could disable the
+          migration mode and/or physically remove the switch from the topology.
+          Migration of FCR B2E traffic is not supported.
+
+            true  : Migration mode is enabled
+            false : Migration mode is disabled
+          ";
+      }
+      leaf persistent-translate-domain-enabled {
+        when "(chassis:vf-enabled = false) or "
+           + "(not(chassis:vf-enabled = true and "
+           + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+        type boolean;
+        description
+          "
+          Enables or disables the state of persistence for translate domain
+          ID configuration. FCR creates the translate domain for a remote
+          fabric  if a valid persistent translate domain ID is configured
+          in the local fabric, even if no devices are imported or exported
+          across the edge fabrics. Disabling the persistent translate domain
+          parameter prevents the translate domain from being created.
+
+          true  : Persistent translate domain is enabled.
+          false : Persistent translate domain is disabled.
+
+          By default, persistent translate domain is enabled.
+          ";
+      }
+    }
+    list lsan-zone {
+      when "(chassis:vf-enabled = false) or "
+         + "(not(chassis:vf-enabled = true and "
+         + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+      config false;
+      description
+        "
+        Displays the list of LSAN zone members in a particular zone.
+        ";
+      leaf edge-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The ID of the fabric in which the LSAN zone was created
+          ";
+      }
+      leaf zone-name {
+        type zone:zoning-name-type;
+        description
+          "
+          The name of the zone
+          ";
+      }
+      container members {
+        description
+          "
+          Contains the list of LSAN zone members of a particular zone
+          ";
+        leaf-list member {
+          type fibrechannel:wwn-type;
+          description
+            "
+            The member of the zone
+            ";
+        }
+      }
+    }
+    list lsan-device {
+      when "(chassis:vf-enabled = false) or "
+         + "(not(chassis:vf-enabled = true and "
+         + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+      config false;
+      description
+        "
+        Displays the information of each device.
+        ";
+      leaf source-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The fabric in which the device are physically present.
+          ";
+      }
+      leaf device-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The WWN of the device.
+          ";
+      }
+      leaf proxy-pid {
+        when "../device-status = imported";
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "
+          The proxy pid of the device.
+          ";
+      }
+      leaf imported-fabric-id {
+        when "../device-status = imported";
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The fabric in which the devices are imported.
+          ";
+      }
+      leaf physical-pid {
+        when "../device-status = imported or ../device-status = exist";
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "
+          The port ID of the device in source fabric.
+          ";
+      }
+      leaf device-status {
+        type fcr-device-state;
+        description
+          "
+          States include:
+
+            configured   - Device is configured to be in an LSAN, but the device
+                           is neither imported nor exists in this fabric
+            initializing - Device is in an intermediate state. It is not yet
+                           imported into the fabric.
+            exist        - Device exists in this fabric (the fabric of the zone
+                           entry).
+            imported     - Device has been imported (proxy created) into this
+                           fabric.
+          ";
+      }
+    }
+    list edge-fabric-alias {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      key "edge-fabric-id";
+      description
+        "
+        Displays edge fabric id's corresponding alias name
+        ";
+      leaf edge-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The ID of the fabric in which the LSAN zone was created
+          ";
+      }
+      leaf alias-name {
+        type string {
+          length "1..30";
+          pattern "[a-zA-Z0-9_]*";
+        }
+        description
+          "
+          Alias name of the specific edge fabric id.
+          ";
+      }
+    }
+    list fibrechannel-router {
+      when "(chassis:vf-enabled = false) or "
+         + "(not(chassis:vf-enabled = true and "
+         + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+      config false;
+      description
+        "
+        Displays the list of FC routers and its information that exists in the
+        FC Router backbone fabric.
+
+        This list supports the following query parameter combination:
+
+        domain-id
+        ";
+      leaf domain-id {
+        type fibrechannel:domain-id-type;
+        description
+          "
+          The Domain ID of the FC Router.
+
+          This leaf can be queried.
+          ";
+      }
+      leaf router-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The World Wide Name of the FC Router.
+          ";
+      }
+      leaf ipv4-address {
+        type union {
+          type inet:ipv4-address;
+          type fibrechannel:brocade-empty-string-type;
+        }
+        description
+          "
+          The Ethernet IPv4 address of the FC Router.
+          ";
+      }
+      leaf ipv6-address {
+        type union {
+          type inet:ipv6-address;
+          type fibrechannel:brocade-empty-string-type;
+        }
+        description
+          "
+          The Ethernet IPv6 address of the FC Router.
+          ";
+      }
+      leaf switch-user-friendly-name {
+        type string {
+          length "0..30";
+          pattern "([a-zA-Z0-9][0-9a-zA-Z-._]{0,29})";
+        }
+        description
+          "
+          Switch name of the FC Router.
+          ";
+      }
+    }
+    container router-statistics {
+      if-feature fibrechannel:fibrechannel_router_platform;
+      config false;
+      description
+        "
+        Information about the resources that is available in the fibrechannel
+        router.
+        ";
+      leaf lsan-zones-in-use {
+        type uint32 {
+          range "0..7500";
+        }
+        description
+          "
+          Displays the count of currently used LSAN zones.
+          ";
+      }
+      leaf maximum-lsan-devices {
+        type uint32 {
+          range "10000|15000";
+        }
+        description
+          "
+          Maximum available LSAN device database entries.
+          ";
+      }
+      leaf lsan-devices-in-use {
+        type uint32 {
+          range "0..15000";
+        }
+        description
+          "
+          Currently used LSAN device database entries. Each proxy or
+          physical device constitutes an entry.
+          ";
+      }
+      leaf maximum-proxy-device-slots {
+        type uint32 {
+          range "10000|15000";
+        }
+        description
+          "
+          Maximum available proxy device slots.
+          A proxy device is presented to an edge fabric as being connected
+          to a translate domain slot. A slot is the port number and AL_PA
+          combination. The slot-to-device WWN association is persistently
+          stored.
+          ";
+      }
+      leaf proxy-device-slots-in-use {
+        type uint32 {
+          range "0..15000";
+        }
+        description
+          "
+          Currently used count of proxy device slots.
+          ";
+      }
+      leaf maximum-proxy-devices {
+        type uint32 {
+          range "2000|4000";
+        }
+        description
+          "
+          Maximum count of proxy device for the physical port(EX_Port).
+          ";
+      }
+      leaf maximum-nr-ports {
+        type uint32;
+        description
+          "
+          Displays maximum available NR_Port entries. Destination NR_Port
+          entries are stored at every physical port for routing decision
+          purposes.
+          ";
+      }
+    }
+    list proxy-config {
+      when "(chassis:vf-enabled = false) or "
+         + "(not(chassis:vf-enabled = true and "
+         + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+      key "imported-fabric-id device-wwn";
+      description
+        "
+        Displays or configures proxy devices presented by an FC Router.
+        ";
+      leaf imported-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The fabric in which the devices are imported.
+          ";
+      }
+      leaf device-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The WWN of the device.
+          ";
+      }
+      leaf proxy-device-slot {
+        type fibrechannel:area-address-type;
+        description
+          "
+          The slot used for the device WWN. The device WWN-to-slot association
+          can be configured persistently.
+
+          The slot format is 0xAAPP, where AA specifies the translate domain
+          area_ID (0xF0..0xFF) and 0xPP specifies the Port ID value or the low
+          8-bits of the proxy device address (0x01..0xFE).
+          ";
+      }
+    }
+    list translate-domain-config {
+      when "(chassis:vf-enabled = false) or "
+         + "(not(chassis:vf-enabled = true and "
+         + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+      key "imported-fabric-id exported-fabric-id";
+      description
+        "
+        Displays the translate domain configuration.
+        ";
+      leaf imported-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The fabric ID of the fabric that contains the translate domain.
+          ";
+      }
+      leaf exported-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The fabric ID of the remote fabric represented by this translate
+          domain.
+          ";
+      }
+      leaf preferred-translate-domain-id {
+        type fibrechannel:domain-id-type;
+        description
+          "
+          The preferred domain ID of the translate phantom domain.
+          During a fabric build, he principal switch attempts to provide the
+          translate domain with the requested domain ID, but it may not
+          provide it if there are domain ID conflicts with other domains in
+          the fabric. If the requested domain ID (such as the preferred
+          domain ID) is unavailable, the domain ID assignment is completely
+          at the discretion of the principal switch. The assignment domain ID
+          is persistently stored and is used as the preferred domain ID in the
+          future.
+          ";
+      }
+      leaf owner-front-domain-id {
+        type fibrechannel:domain-id-type;
+        config false;
+        description
+          "
+          The owner front domain ID for this translate domain.
+
+          This data is available only if the owner FC Router was nominated
+          for the edge fabrics represented by 'imported-fabric-id' and
+          'exported-fabric-id.'
+          ";
+      }
+      leaf translate-wwn {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "
+          The translate WWN of the device.
+
+          This data is available only if the translate domain is created by the
+          FC Router, for the edge fabrics represented by 'imported-fabric-id'
+          and 'exported-fabric-id.'
+          ";
+      }
+      leaf front-domain-owner {
+        type fibre-channel-router-owner;
+        config false;
+        description
+          "
+          Whether the 'owner-front-domain-id' belongs to this FCR, the other FCR
+          in the same Backbone fabric or the FCR in another Backbone fabric.
+          ";
+      }
+    }
+    list stale-translate-domain {
+      when "(chassis:vf-enabled = false) or "
+         + "(not(chassis:vf-enabled = true and "
+         + "fibrechannel-logical-switch:base-switch-enabled = 0))";
+      key "imported-fabric-id stale-translate-domain-id";
+      description
+        "
+        Displays stale translate domains associated with the specific FID.
+        Only supports delete method.
+        ";
+      leaf imported-fabric-id {
+        type fibrechannel:fabric-id-type;
+        description
+          "
+          The fabric in which the devices are imported.
+          ";
+      }
+      leaf stale-translate-domain-id {
+        type fibrechannel:domain-id-type;
+        description
+          "
+          A translate domain becomes stale when the remote edge fabric
+          for which this translate domain was created in the specified
+          edge fabric becomes unreachable.
+          ";
+      }
+      leaf owner-front-domain-id {
+        type fibrechannel:domain-id-type;
+        config false;
+        description
+          "
+          The owner front domain ID of the stale translate domain.
+          ";
+      }
+      leaf front-domain-owner {
+        type fibre-channel-router-owner;
+        config false;
+        description
+          "
+          Whether the 'owner-front-domain-id' belongs to this FCR or the other
+          remote FCR.
+          ";
+      }
+      leaf dual-backbone {
+        type boolean;
+        config false;
+        description
+          "
+          Whether the topology is dual Backbone.
+
+          true  : Is a dual Backbone fabric.
+          false : Not a dual Backbone fabric.
+
+          NOTE: Translate domain can be owned by front domain of other Backbone.
+          So, the 'stale-translate-domain-id' displayed may or may not be a
+          Stale translate domain. To confirm, the stale entries should be
+          verified in the other Backbone also.
+          ";
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+module brocade-access-gateway-types {
+
+  yang-version 1.1;
+    namespace "urn:brocade.com:mgmt:brocade-access-gateway-types";
+    prefix brocade-access-gateway-type;
+
+    organization
+        "Broadcom Inc.";
+
+  contact
+    "
+  Address:
+
+    1320 Ridder Park Road
+    San Jose, CA 95131
+    USA
+
+  Support:
+
+    https://www.broadcom.com/support/fibre-channel-networking/
+
+  Website:
+
+    https://www.broadcom.com/products/fibre-channel-networking/software/
+
+   ";
+
+  description
+     "
+     This module defines the YANG module 'brocade-access-gateway',
+     which provides a detailed view of configuration and runtime
+     information of the Access Gateway.
+
+     Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+     to Broadcom Inc. and/or its subsidiaries.
+     ";
+
+  revision 2021-03-15 {
+    description
+      "
+      FOS 9.1.0
+      ---------
+      Added new enums read-only in reliable-status-string.
+      Added new enum operational-status-type for port state.
+
+      ";
+     reference "None";
+   }
+
+  typedef reliable-type {
+    type enumeration {
+       enum "unreliable" {
+          description
+            "
+            N_Port link is Unreliable.
+            ";
+        }
+        enum "reliable" {
+           description
+             "
+             N_Port link is Reliable.
+             ";
+        }
+        enum "not-applicable" {
+           description
+             "
+             N_Port link status is Not applicable.
+             ";
+        }
+    }
+    description
+      "
+      The reliable status of the N_Port.
+      ";
+  }
+  typedef operational-status-type {
+    type enumeration {
+      enum "online" {
+      description
+        "
+        port is online.
+        ";
+      }
+      enum "offline" {
+      description
+        "
+        port is offline.
+        ";
+      }
+    }
+    description
+      "
+      The operational status for port .
+      ";
+  }
+}

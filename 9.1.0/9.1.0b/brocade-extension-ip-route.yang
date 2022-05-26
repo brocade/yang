@@ -1,0 +1,150 @@
+module brocade-extension-ip-route {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-extension-ip-route";
+  prefix brocade-extension-ip-route;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import brocade-interface-types {
+    prefix brocade-interface-types;
+  }
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for managing
+    brocade-extension-ip-route.
+     
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-06-29 {
+    description
+      "
+      Fabric OS 8.2.1
+      ---------------
+        Formatting
+        Organization information
+
+      Fabric OS 9.0.0
+      ---------------
+        Add 'fibrechannel_extension_platform' feature check
+
+      Fabric OS 9.1.0
+      ---------------
+        Add correct pattern length statement for status-flags leaf.
+        Update ip-prefix support
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-extension-ip-route {
+    description
+      "
+      Represents static IP route on the IP interface defined on extension blade
+      or system.
+      ";
+    list extension-ip-route {
+      if-feature fibrechannel:fibrechannel_extension_platform;
+      key "name dp-id ip-address ip-prefix-length";
+      description
+        "
+        Represents static IP route on the IP interface defined on extension
+        blade or system.
+        ";
+      leaf name {
+        type brocade-interface-types:ip-extension-interface-type;
+        description
+          "The name of the interface.";
+      }
+      leaf dp-id {
+        type uint16 {
+          range "0..1";
+        }
+        description
+          "
+          Extension Data Path Processor ID associated
+          with the IP Route. Based on platform either
+          it will have a single DP or dual DP. In case of
+          single DP only DP0 is supported, and in case of
+          dual DP both DP0 and DP1 are supported.
+
+          0 : DP0
+          1 : DP1
+          ";
+      }
+      leaf ip-address {
+        type union {
+          type inet:ip-address;
+          type inet:ip-prefix;
+        }
+        description
+          "Specifies the destination IPv4/IPv6 address.";
+      }
+      leaf ip-prefix-length {
+        type brocade-interface-types:ip-prefix-length;
+        description
+          "
+          The prefix length operator for the destination IP address. Once set,
+          prefix length can not be changed.
+          ";
+      }
+      leaf ip-gateway {
+        type brocade-interface-types:ip-gateway-type;
+        mandatory true;
+        description
+          "
+          Specifies the IP address of an IP router that can route packets to the
+          destination IP address. The gateway address must be on the same IP
+          subnet as one of the port IP addresses. This operand is optional with
+          IPv6 addresses. Once set, IP gateway can not changed.
+          ";
+      }
+      leaf status-flags {
+        type string {
+          length "0..6";
+          pattern "(([UGHCSL]) )*";
+        }
+        config false;
+        description
+          "
+          Iproute Flags:
+
+            U = Usable
+            G = Gateway
+            H = Host
+            C = Created (Interface)
+            S = Static
+            L = LinkLayer
+          ";
+      }
+    }
+  }
+}

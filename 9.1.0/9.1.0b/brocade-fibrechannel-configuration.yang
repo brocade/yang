@@ -1,0 +1,589 @@
+module brocade-fibrechannel-configuration {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-fibrechannel-configuration";
+  prefix brocade-fibrechannel-configuration;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import brocade-fibrechannel-switch {
+    prefix fibrechannel-switch;
+  }
+
+  import brocade-fibrechannel-logical-switch {
+    prefix fibrechannel-logical-switch;
+  }
+
+  import brocade-chassis {
+    prefix chassis;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-fibrechannel-configuration',
+    which helps configure the given switch or director.
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-03 {
+    description
+      "
+      Fabric OS 9.1.0
+      ----------------
+      Fixed alignment issues in leaf cs-ctl-mode.
+      Modified the type of the leaf enforce-login.
+      Added preserved-domain-id-mode-enabled leaf to the fabric container.
+      Update feature conditional statement for the leafs principal-priority,
+      principal-selection-enabled and preserved-domain-id-mode-enabled.
+      Updated description statement for leaf xisl-enabled.
+
+      Fabric OS 9.0.0
+      ----------------
+      Added fabric-lock-timeout leaf to zone-configuration container.
+      Added chassis-config-settings container.
+      Added principal-selection-enabled leaf & principal-priority leaf 
+      to fabric container.
+
+      Fabric OS 8.2.1
+      ----------------
+      Initial release (FOS 8.2.1)
+      Refine descriptions
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-fibrechannel-configuration {
+    description 
+      "This is the top level container of configuration parameters.";
+
+    container switch-configuration {
+      description 
+        "Provides switch configuration parameters.";
+
+      leaf trunk-enabled {
+        type boolean;
+        description 
+          "
+          Enables or disables trunking on all ports in the logical switch. 
+          At the port level, you can disable trunking using the port-level REST 
+          method. Note that this operation is persistent and disruptive for all 
+          ports in the logical switch.
+          
+		  true : Trunking is enabled on all ports in the logical switch.
+		  false : Trunking is disabled on all ports in the logical switch.
+          ";
+
+      }
+      leaf wwn-port-id-mode {
+        when "fibrechannel-logical-switch:base-switch-enabled = 0";
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description 
+          "
+          Indicates whether WWN port ID mode is enabled on a switch.
+          
+          When enabled, WWN port ID mode supports both dynamic and static 
+          WWN-based PID assignment. Every time the device logs into the switch, 
+          the device is guaranteed the same PID.it is  guaranteed to get the 
+          same PID.
+          
+            true  : WWN port ID mode is enabled on the 
+            false : WWN port ID mode is disabled on the switch. 
+          ";
+      }
+      leaf edge-hold-time {
+        type uint16 {
+          range "80..500";
+        }
+        units "milliseconds";
+        description 
+          "
+          The maximum time that a frame can wait after it is received on the 
+          ingress port and before it is delivered to the egress port.
+          Initial Value is Medium (220 ms).
+          
+          For a non-default logical switch, valid values include:
+            80  : Edge Hold Time, Low (80 ms),
+            220 : Edge Hold Time, Medium (220 ms),
+            500 : Edge Hold Time. Medium (500 ms).
+          
+          For a default switch the valid values can be:
+            80..500 : User-defined values are allowed only on default switch.
+          ";
+      }
+      leaf area-mode {
+        when "fibrechannel-switch:enabled-state = 3 and 
+              (fibrechannel-logical-switch:default-switch-status = 1 or
+              (fibrechannel-logical-switch:default-switch-status = 0 and
+              fibrechannel-logical-switch:ficon-mode-enabled = 0))";
+        if-feature fibrechannel:fibrechannel_chassis_platform;
+        type uint8 {
+          range "0..2";
+        }
+        description
+          "
+          The area mode for a default switch or non-default, non-FICON logical 
+          switch. Note that the switch must be in a disabled state to configure 
+          the area mode.
+
+          For a default switch, valid values include:
+
+            0 : 10-bit addressing mode (default)
+            1 : Zero-based area assignment (8-bit address mode)
+          
+          For a non-default and non-FICON logical switch, valid values include:
+
+            0 : 10-bit addressing mode (default)
+            1 : Zero-based area assignment
+            2 : Zero-based area assignment 
+
+          A non-default logical switch with FICON mode enabled is not supported.
+          ";                                        
+      }
+      leaf xisl-enabled {
+        when "chassis:vf-enabled = true";
+        type boolean;
+        description
+          "
+          Indicates whether XISL feature is enabled or disabled.
+          This is mutually exclusive with the Application Header configuration.
+          By default XISL feature is enabled on the switch
+          Turning off XISL use requires confirmation because all LISLs will be
+          removed upon execution.
+
+            true  : XISL use is enabled on the switch.
+            false : XISL use is disabled on the switch.
+          ";
+      }
+    }
+    container f-port-login-settings {
+      must "fibrechannel-switch:enabled-state = 3";
+      description
+        "
+        Provides parameters for F_Port login settings. Note that the switch must
+        be in a disabled state to configure F_Port login settings.
+        ";
+      leaf max-logins {
+        type uint16 {
+          range "1..max";
+        }
+        description
+          "
+          The maximum number of allowed logins for the switch. The maximum
+          value is determined by multiplying 126 * number_of_ports_in_switch. 
+          The initial default value is 16 * number_of_ports_in_switch.
+          ";
+      }
+      leaf max-flogi-rate-per-switch {
+        type uint16 {
+          range "0..max";
+        }
+        units "logins per second";
+        description
+          "The maximum number of FLOGIs allowed on a switch.";
+      }
+      leaf stage-interval {
+        type uint16 {
+          range "0..10000";
+        }
+        units "milliseconds";
+        description
+          "
+          The interval setting for the rate at which F_Ports are enabled.
+          ";
+      }
+      leaf free-fdisc {
+        type uint16 {
+          range "0..255";
+        }
+        description
+          "
+          The number of logins allowed before staging.
+
+          The values indicate:
+            0       : Disables the staging of FDISC logins.
+            1..255  : Enables staging and allows the specified number of logins.
+
+          This parameter, if nonzero, enables staging of FDISC logins by
+          rejecting the FDISC requests with logical busy, when the requests
+          are more than the number of configured logins per second.
+          ";
+      }
+
+      leaf enforce-login {
+        type uint16 {
+          range "0..2";
+        }
+        description
+          "
+          The precedence for login when 2 devices with the same port WWN (PWWN)
+          compete for login. All modes are for NPIV and non-NPIV F_Ports.
+          The initial value is 0.
+
+          The values indicate:
+            0 : The first FLOGI/FDISC login takes precedence,
+            1 : The second FLOGI/FDISC login takes precedence,
+            2 : The second FDISC login takes precedence on FDISC and
+                on FLOGI login the first FLOGI takes precedence.
+          ";
+      }
+ 
+      leaf enforce-login-string {
+        type enumeration {
+          enum "first-flogi-or-first-fdisc-precedence" {
+            description
+              "The first FLOGI/FDISC login takes precedence";
+          }
+          enum "second-flogi-or-second-fdisc-precedence" {
+            description
+              "The second FLOGI/FDISC login takes precedence";
+          }
+          enum "first-flogi-or-second-fdisc-precedence" {
+            description
+              "
+              The second FDISC login takes precedence on FDISC and
+              on FLOGI login the first FLOGI takes precedence.
+              ";
+          }
+
+        }
+        description
+          "
+          The precedence for login when 2 devices with the same port WWN (PWWN)
+          compete for login. All modes are for NPIV and non-NPIV F_Ports.
+          The initial value is firstFlogiOrFirstFdiskPrecedence.
+          ";
+      }
+      leaf max-flogi-rate-per-port {
+        type uint16 {
+          range "0..100";
+        }
+        units "logins per second";
+        description
+          "
+          The maximum number of logins allowed, per second, on a given port.
+          If the rate is exceeded, the port is fenced.
+          ";
+      }
+    }
+
+    container port-configuration {
+      description
+        "Port configuration parameters.";
+      leaf portname-mode {
+        type string {
+          length "0..15";
+          pattern "off|default|fdmi|dynamic";
+      	}
+      	description
+      	  "
+      	  The available port name modes:
+
+            off     : No port name configuration.
+            default : The port name corresponds to the port index.
+
+          The following modes are not available in AG mode:
+
+            fdmi    : The port name corresponds to the attached FDMI host name.
+            dynamic : The port name corresponds to the format defined by the 
+                      dynamic-portname-format leaf.
+          ";
+      }
+      leaf dynamic-portname-format {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type string {
+          length "0..13";
+          pattern "[STICAFR](([.]|_|-)[STICAFR])*";
+        }
+        description
+          "
+          The format of the dynamic port name is composed of fields that are 
+          mapped using the following characters:
+
+            S : Switch name
+            T : Port type
+            I : Port index
+            C : Slot number/port number (only applicable on the chassis)
+            A : Alias name
+            F : FDMI host name
+            R : Remote switch name
+
+          Multiple unique fields may be specified, separated by hyphens (-), 
+          periods (.), or underscores (_). Fields may not be repeated and field
+          separators must be the same.
+          ";
+      }
+
+      leaf dynamic-d-port-enabled {
+        type boolean;
+        description
+          "
+          The port has D_Port capability but it is not explicitly configured. 
+          Tests are always initiated by the remote side of the port.
+
+            true  : Dynamic D_Port configuration is enabled.
+            false : Dynamic D_Port configuration is disabled.
+          ";
+      }
+      leaf on-demand-d-port-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+          The port has D_Port capability, but it is not explicitly configured. 
+          The test is initiated by internal events of the switch, such as
+          slotpoweroff/slotpoweron or persistentdisable/enable.
+          The port remains a D_Port until the test is successful.
+
+            true  : On demand D_Port configuration is enabled.
+            false : On demand D_Port configuration is disabled.
+          ";
+      }
+    }
+
+    container zone-configuration {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "Zoning configuration parameters.";
+      leaf node-name-zoning-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+          Enables or disables node name checking for zoning. The switch must be
+          disabled to change this value.
+
+            true  : Node name checking for zoning is enabled.
+            false : Node name checking for zoning is disabled.
+          ";
+      }
+      leaf fabric-lock-timeout {
+        type uint16 {
+          range "5..30";
+        }
+        units "minutes";
+        description
+          "
+          Specifies the zone fabric lock timeout duration in minutes. The
+          default value is 5 minutes.
+          ";
+      }
+    }
+
+    container fabric {
+      description
+        "Provides attributes applicable for a switch.";
+      leaf insistent-domain-id-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+          Indicates whether Insistent Domain ID (IDID) is enabled.
+          
+          For a FICON switch, this leaf is read only and you cannot update 
+          the parameter. 
+
+            true  : IDID is enabled. Switches that cannot be programmed with a 
+                    unique domain ID will segment from the fabric. Check each 
+                    switch that has IDID configured, and make sure that their 
+                    domain IDs are unique within the configuration.
+            false : IDID is disabled. The fabric automatically resolves domain 
+                    ID conflicts during fabric merges or builds unless IDID is 
+                    configured.
+          ";
+      }
+      leaf principal-selection-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+           Enables or disables principal  switch  selection.
+
+           true     : Enables principal switch selection mode.
+
+           false    : Disables principal switch selection mode.
+          ";
+      }
+      leaf principal-priority {
+        when "../principal-selection-enabled = true";
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type fibrechannel:brocade-hex-string-type {
+          length "4";
+        }
+        description
+          "
+           Sets  the  principal  selection  priority  of  the
+           switch. Not  all of these values can be assigned.
+           This mechanism provide a preference for a switch
+           requesting to be the principal switch in a fabric,
+           but they do not provide an absolute guarantee that
+           a switch requesting to be the principal switch is
+           granted this status.
+
+           0x01     Highest and default priority (if priority nt given).
+
+           0x02     Should be avoided as this is internal priority
+                    given during fabric rebuild.
+
+           0x03-    Priority  value range. Higher  numbers
+           0xFE     mean lower priority.
+
+           0xFF     Switch  is not capable of acting as a principal
+                    switch.
+          ";
+      }
+      leaf preserved-domain-id-mode-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+           Enables or disables Preserved Domain ID Allocation feature.
+
+           true     : Enables Preserved Domain ID Allocation feature.
+
+           false    : Disables Preserved Domain ID Allocation feature.
+          ";
+      }
+    }
+    container chassis-config-settings {
+      description
+        "Corresponds to the configurechassis command config parameters.";
+      leaf firmware-synchronization-enabled {
+        type boolean;
+        description
+          "Enables the firmware from the active CP to automatically
+           sync with the standby CP.";
+      }
+      leaf http-session-ttl {
+        type uint32 {
+          range "60..432000";
+        }
+        units "seconds";
+        description
+          "It denotes the timeout value for BNA,
+           SANNav, REST, PyFOS. Units in seconds.";
+      }
+      leaf ezserver-enabled {
+	if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "To enable EZServer. True - enable False - disable.";
+      }
+      leaf cs-ctl-mode {
+        type enumeration {
+          enum "default-mode" {
+            description
+              "
+              When CS_CTL default-mode is enabled, mapping of CS_CTL values to
+              QoS priority for the frame priority is as follows
+              CS_CTL value 1-8 - Priority Low.
+              CS_CTL value 9-16 - Priority Medium.
+              CS_CTL value 17-24 - Priority High.
+              We must run slotpoweroff and slotpoweron commands
+              via CLI/REST for all the edge blade; in a fixed-port switch,
+              you must reboot the switch, because this mode change affects the 
+              persistent storage in the switches and chassis, rebooting
+              is required for the new CS_CTL mode to become effective.
+              ";
+          }
+          enum "auto-mode" {
+            description
+              "
+              When CS_CTL auto-mode is enabled, mapping of CS_CTL values to
+              QoS priority for the frame prioritization is as follows
+              CS_CTL value 1 - Priority Low.
+              CS_CTL value 2 - Priority Medium.
+              CS_CTL value 3 - Priority High
+              We must run slotpoweroff and slotpoweron commands
+              via CLI/REST for all the edge blade; in a fixed-port switch,
+              you must reboot the switch, because this mode change affects the 
+              persistent storage in the switches and chassis, rebooting
+              is required for the new CS_CTL mode to become effective.
+              ";
+          }
+        }
+        description
+          "Describes about the CS_CTL mapping modes";
+      }
+		
+      leaf sddq-limit {
+	type uint32 {
+          range "0..32";
+	}
+	  description
+	    "Specifies the number of user ports that can be 
+	     quarantined in the chassis or unit. Valid values
+	     from 0 to 32. The default value is 10";
+      }
+      leaf vtap-qos-compatibility-mode {
+	type boolean;
+        description
+	    "This variable enables or disables VTAP and
+	     QoS high priority zone compatibility mode.
+	     If VTAP and QoSH compatibility mode is enabled
+	     and affected VTAP features are also active on any
+	     of the logical switches within the chassis, then VTAP/QoS
+	     compatibility cannot be disabled. The VTAP features must be 
+	     deactivated on all the logical switches in the chassis
+	     before disabling this setting.
+	     By default, this mode is disabled. true - ON, false - OFF.
+	    ";
+      }
+      leaf secure-mode-enabled {
+        type boolean;
+        default false;
+        description
+          "
+          Enables or Disables secure configuration download or upload.
+          ";
+      }
+      leaf file-suffix-enabled {
+        type boolean;
+        default false;
+        description
+          "
+          If Enabled it appends a suffix to the uploaded configuration
+          file.The suffix includes chassis name and timestamp in format
+          yymmdd_hhmmss.
+         ";
+      }
+      leaf custom-index {
+        type uint32 {
+          range "0..1000";
+        }
+        default 0;
+        description
+          "
+          OEM custom configuration.
+          This attribute is for internal purpose only.
+          ";
+      }
+    }
+  }
+}

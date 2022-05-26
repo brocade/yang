@@ -1,0 +1,193 @@
+module brocade-application-server {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-application-server";
+  prefix brocade-application-server;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    The Application Server provides a way to manage application specific
+    services (e.g., application identifiers).
+
+    Requests for the Application Server are carried over the Common Transport.
+    The Application Server is intended to be distributed among Switches,
+    making the Application Server immediately available to an Nx_Port once
+    it has successfully completed Fabric Login. However, the Application
+    Server is not restricted or required to be part of a Fabric, and may be
+    located in any Nx_Port.
+
+    -----
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  reference
+    "
+    ANSI INCITS 545-20xx Rev 1.x, Fibre Channel - Link Services - 5
+    (FC-LS-5).
+
+    ANSI INCITS xxx-20xx Rev 0.x, Fibre Channel - Framing and Signaling - 6
+    (FC-FS-6).
+
+    ANSI INCITS 548-201x Rev 11.03, Fibre Channel - Generic Services - 8
+    (FC-GS-8).
+
+    ANSI INCITS xxx-20xx Rev 0.x, Fibre Channel - Switch Fabric - 8
+    (FC-SW-8).
+    ";
+
+  revision 2021-03-01 {
+    description
+      "
+      Fabric OS 9.1.0:
+      ----------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  grouping application-server-device-group {
+
+    description
+      "
+      The common (non-keyed) device entry data model for device-centric
+      information stored by the application server.
+      ";
+
+    leaf n-port-id {
+      type fibrechannel:fcid-hex-string-type;
+      description
+        "
+        The N_Port ID (Fibre Channel address) of the device.
+
+        This leaf can be queried.
+        ";
+    }
+
+    leaf application-id {
+      type uint32  {
+        range "0..max";
+      }
+      description
+        "
+        The application identifier that has been allocated to the entity
+        identifier for a given N_Port ID.
+
+        This leaf can be queried.
+        ";
+    }
+
+    leaf entity-id-hex {
+      type fibrechannel:brocade-hex-string-type;
+      description
+        "
+        The entity identifier as hexadecimal number.
+        ";
+    }
+
+    leaf entity-id-ascii {
+      type string  {
+        length "0..255";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        The entity identifier as an ASCII string. If the registered value is
+        not within a printable ASCII range, then the response is empty
+        (NULL).
+
+        This leaf can be queried.
+        ";
+    }
+
+    leaf entity-name {
+      type string {
+        length "0..63";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        An alias name for the entity.
+        The registration of this attribute is optional.
+        ";
+    }
+
+    leaf host-identifier {
+      type string {
+        length "0..63";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        The common host name associated with the entity.
+        The registration of this attribute is optional.
+        ";
+    }
+
+    leaf symbolic-data {
+      type string {
+        length "0..127";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        The symbolic information associated with the entity.
+        The registration of this attribute is optional.
+        ";
+    }
+  }
+
+  container brocade-application-server {
+    config false;
+    description
+      "
+      The top-level container for the application server module.
+      ";
+
+    list application-server-device {
+
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "
+        A list of application identifier allocations.
+
+        This list supports the following query parameter combinations:
+
+          n-port-id
+          n-port-id + application-id
+          entity-id-ascii
+          n-port-id + entity-id-ascii
+        ";
+
+      uses application-server-device-group;
+
+    }
+  }
+}

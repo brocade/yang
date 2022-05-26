@@ -1,0 +1,80 @@
+module brocade-operation-security-role-clone {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-security-role-clone";
+  prefix brocade-operation-security-role-clone;
+
+  import brocade-security-yang-types {
+    prefix brocade-security-type;
+  }
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This yang module defines system security operation definitions. 
+          
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-19 {
+    description
+      "
+      FOS 9.1.0
+      --------
+      Initial release. 
+      ";
+    reference
+      "None";
+  }
+
+  rpc security-role-clone {
+    description
+      "
+      The RPC command definition to trigger a security role clone operation.
+      ";
+    input {
+      container security-role-clone-parameters {
+      description
+        "
+        The security role clone operation input container.
+        ";
+        leaf name {
+	  type brocade-security-type:user-config-role-type;
+          mandatory true;
+          description
+            "
+            Specifies the new role name.
+            ";
+        }
+        leaf source-name {
+          type brocade-security-type:user-config-role-type;
+          mandatory true;
+          description
+            "
+            Specifies name of the role to be cloned.
+            ";
+        }
+      }
+    }
+  }
+}

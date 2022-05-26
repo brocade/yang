@@ -1,0 +1,150 @@
+module brocade-operation-security-acl-policy {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-security-acl-policy";
+  prefix brocade-operation-security-acl-policy;
+  
+  import "brocade-security-yang-types" {
+    prefix brocade-security-type;
+  }
+  
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for configuring and
+    managing security related policies and configurations on a switch.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-19 {
+    description
+      "
+      
+      Fabric OS 9.1.0
+      ----------------
+        Initial release
+      
+      ";
+    reference
+      "None";
+  }
+  rpc security-acl-policy {
+    description
+      "
+      The RPC command definition for security policy operation on a Brocade
+      switch.
+      ";
+    input {
+      list security-policy-parameters {
+        description
+          "
+          List of policy parameters for configuring SCC/FCS/DCC.
+          ";
+        leaf policy-name {
+          type brocade-security-type:security-policy-name-type;
+          description
+            "
+            The security policy name. Valid Values are 
+            - SCC_POLICY
+            - FCS_POLICY
+            - DCC_POLICY_*
+            Policy name name must be capitalized.
+            The policy name DCC_POLICY_* can be up to 30 characters, including
+            the prefix DCC_POLICY_
+            ALL_DCC_POLICY, ALL_STALE_DCC_POLICY are valid for delete instance.
+            ";
+        }
+        container members {
+          description
+            "
+            List of policy members for SCC/FCS/DCC policy.
+            ";
+          leaf-list member {
+            type brocade-security-type:security-input-type;
+            description
+              "
+              Information for configuring security policy.
+              For DCC_POLICY, only one member is allowed per DCC policy object.
+              ";
+          }
+        }
+        container switch-ports {
+          when "../policy-name != FCS_POLICY and ../policy-name != SCC_POLICY" +
+               " and ../members/member != *";
+          description
+            "Port list";
+          leaf-list port {
+            type union {
+              type fibrechannel:user-port-number-type;
+              type string {
+                length "1";
+                 pattern "'*'";
+              }
+            }  
+            description
+              "
+              Port can be specified by asterisk (*) or by port index.
+              Asterisk (*) specifies all ports in the switch.
+            ";
+          }
+        }
+        leaf include-device {
+          when "../policy-name != FCS_POLICY and ../policy-name != SCC_POLICY";
+          type boolean;
+          description
+            "
+            Specifies whether device(s) connected to the port should be
+            included in the policy or not.
+            true : Connected device(s) will be included.
+            false: Connected device(s) will NOT be included.
+            ";
+        }
+        leaf action {
+          type brocade-security-type:security-policy-action-type;
+          description
+            "
+            The action to take on the security policy. Security policy
+            configurations are saved automatically after any change.
+            ";
+        }
+        leaf fcs-position {
+          when "../action=fcs-move and ../policy-name=FCS_POLICY";
+          type uint16 {
+            range "1..1024";
+          }
+          default 1;
+          description
+            "
+            Specifies the to position of the FCS switch for FCS move.
+            ";
+        }
+      }
+    }
+  }
+}

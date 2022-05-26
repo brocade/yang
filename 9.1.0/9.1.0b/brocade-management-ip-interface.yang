@@ -1,0 +1,297 @@
+module brocade-management-ip-interface {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-management-ip-interface";
+  prefix brocade-management-ip-interface;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import brocade-fru-types {
+    prefix fru;
+  }
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import brocade-lldp {
+    prefix lldp;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-management-ip-interface'
+    which provides a detailed view of chassis level IP configurations for
+    the management interface of switch.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-06-29 {
+    description
+      "
+      Initial release (FOS 9.1.0).
+      ";
+    reference "None";
+  }
+
+  container brocade-management-ip-interface {
+    description
+      "
+      A detailed view of chassis level IP configurations for management
+      interface of switch.
+      ";
+    container management-ip-interface {
+      description
+        "
+        Chassis level IP configurations for management interface of switch.
+        ";
+      container static-ip-addresses {
+        description
+          "
+          List of out-of-band static IPv4 and IPv6 addresses assigned to the
+          ethernet port of the switch.
+          ";
+        leaf-list ip-address {
+          type union {
+            type inet:ip-address;
+            type inet:ip-prefix;
+          }
+          description
+            "
+            List of out-of-band static IP addresses assigned to the ethernet
+            port of the switch.
+            ";
+        }
+      }
+      container stateful-ip-addresses {
+        config false;
+        description
+          "
+          List of out-of-band DHCP and DHCPv6 addresses assigned to the
+          ethernet port of the switch.
+          ";
+        leaf-list ip-address {
+          type union {
+            type inet:ip-address;
+            type inet:ip-prefix;
+          }
+          config false;
+          description
+            "
+            List of out-of-band stateful IP addresses assigned to the ethernet
+            port of the switch.
+            ";
+        }
+      }
+      container stateless-ipv6-addresses {
+        config false;
+        description
+          "
+          List of out-of-band stateless IPv6 addresses assigned to the ethernet
+          port of the switch.
+          ";
+        leaf-list ip-address {
+          type union {
+            type inet:ipv6-address;
+            type inet:ipv6-prefix;
+          }
+          config false;
+          description
+            "
+            List of out-of-band stateless IP addresses assigned to the ethernet
+            port of the switch.
+            ";
+        }
+      }
+      container static-ip-gateways {
+        description
+          "
+          List of IPv4 and IPv6 static gateway addresses for the switch
+          IP address.
+          ";
+        leaf-list ip-gateway {
+          type fru:ip-gateway-type;
+          description
+            "
+            List of static gateway IP addresses of an IP router that can route
+            packets to the destination IP address. The gateway address must be
+            on the same IP subnet as one of the port IP addresses. Only one
+            IPv4 static gateway and one IPv6 static gateway are allowed.
+            ";
+        }
+      }
+      container stateless-ipv6-gateways {
+        config false;
+        description
+          "
+          List of IPv6 stateless gateway addresses for the stateless and
+          stateful IPv6 addresses configured in switch.
+          ";
+        leaf-list ip-gateway {
+          type union {
+            type inet:ipv6-address;
+            type inet:ipv6-prefix;
+          }
+          config false;
+          description
+            "
+            List of stateless gateway IPv6 addresses advertised by IP router and
+            configured in switch to route packets to the destination IP address.
+            ";
+        }
+      }
+      leaf dhcp-gateway {
+        type union {
+          type inet:ipv4-address;
+          type fibrechannel:brocade-empty-string-type;
+        }
+        config false;
+        description
+          "
+          The IPv4 gateway of switch IP network obtained from DHCP server.
+          It is valid only when management-ip-configurations includes 'dhcp'.
+          ";
+      }
+      leaf static-subnet-mask {
+	type union {
+          type inet:ipv4-address;
+          type fibrechannel:brocade-empty-string-type;
+        }
+        description
+          "
+          Statically configured IPv4 subnet mask of the switch IP network.
+          It is valid only when management-ip-configurations does not include
+          'dhcp'.
+          ";
+      }
+      leaf dhcp-subnet-mask {
+        type union {
+          type inet:ipv4-address;
+          type fibrechannel:brocade-empty-string-type;
+        }
+        config false;
+        description
+          "
+          The IPv4 subnet mask of the switch IP network obtained from DHCP
+          server. It is valid only when management-ip-configurations includes
+          'dhcp'.
+          ";
+      }
+      leaf dhcp-enabled {
+        type boolean;
+        description
+          "
+          Whether DHCP configuration is enabled or not. DHCP(Dynamic Host
+          Configuration Protocol) in IPv4 features DHCP address, mask, gateway
+          and DNS configuration from DHCP server.
+
+            true: DHCP configuration has to be set to or is in enabled state,
+            false: DHCP configuration has to be set to or is in disabled state.
+          ";
+      }
+      leaf dhcpv6-enabled {
+        type boolean;
+        description
+          "
+          Whether DHCPv6 configuration is enabled or not. Dynamic
+          Host Configuration Protocol in IPv6 features DHCPv6 address,
+          stateless gateways and DNS configuration from DHCPv6 server.
+
+            true: DHCPv6 configuration has to be set to or is in enabled state,
+            false: DHCPv6 configuration has to be set to or
+                   is in disabled state.
+          ";
+      }
+      leaf ipv6-auto-enabled {
+        type boolean;
+        description
+          "
+          Whether IPv6 Stateless Auto configuration is enabled or not.
+          Stateless Auto configuration in IPv6 featuring stateless addresses,
+          stateless gateways and DNS configuration from DHCPv6 server.
+
+            true: Auto configuration has to be set to or is in enabled state,
+            false: Auto configuration has to be set to or is in disabled state.
+          ";
+      }
+    }
+    list management-interface-lldp-neighbor {
+      key "cp-name physical-interface";
+      config false;
+      description
+        "
+        The list of LLDP neighbor devices connected to
+        phsyical management interface";
+      leaf cp-name {
+        type fibrechannel:cp-name-type;
+        description
+          "
+           For fixed-port switch, valid name is cp0.
+           For chassis switch, valid names are cp0 and cp1.
+          ";
+      }
+      leaf physical-interface {
+        type fibrechannel:physical-interface-type;
+        description
+          "Physical management interface name.
+           For fixed-port switch, valid name is eth0.
+           For chassis switch, valid names are eth0 and eth3.
+           ";
+      }
+      uses lldp:lldp-neighbor-parameters-group;
+    }
+
+    list management-interface-lldp-statistics {
+      key "cp-name physical-interface";
+      config false;
+      description
+        "
+        The LLDP protocol specific Tx, Rx and Error statistics
+        of the phsyical management interface
+        ";
+      leaf cp-name {
+        type fibrechannel:cp-name-type;
+        description
+          "
+           For fixed-port switch, valid name is cp0.
+           For chassis switch, valid names are cp0 and cp1.
+          ";
+      }
+      leaf physical-interface {
+        type fibrechannel:physical-interface-type;
+        description
+          "Physical management iterface name.
+           For fixed-port switch, valid name is eth0.
+           For chassis switch, valid names are eth0 and eth3.
+           ";
+      }
+      uses lldp:lldp-statistics-parameters-group;
+    }
+
+  }
+}

@@ -1,0 +1,87 @@
+module brocade-operation-portchannel {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-portchannel";
+  prefix brocade-portchannel;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import brocade-interface-types {
+    prefix brocade-interface-types;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    The 'brocade-operation-portchannel' YANG module provides the means for
+    following portchannel related operations
+    1. Resetting portchannel statistics
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-04-07 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  rpc portchannel {
+    description
+      "
+      The RPC command definition for portchannel operations
+      on a Brocade switch.
+      ";
+    input {
+      container portchannel-operation-parameters {
+        if-feature "fibrechannel:fibrechannel_chassis_platform or " +
+                   "fibrechannel:fibrechannel_extension_platform";
+        description
+          "portchannel actions container";
+        leaf name {
+          type brocade-interface-types:portchannel-interface-name-type;
+          description
+            "The portchannel interface name.";
+        }
+        leaf action {
+          type enumeration {
+            enum "reset-statistics" {
+              description
+                "Reset portchannel related statistics of the given portchannel";
+            }
+          }
+          description
+            "portchannel actions on the given portchannel";
+        }
+      }
+    }
+  }
+}

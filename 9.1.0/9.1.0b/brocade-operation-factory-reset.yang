@@ -1,0 +1,127 @@
+module brocade-operation-factory-reset {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-factory-reset";
+  prefix brocade-operation-factory-reset;
+
+  import brocade-operation-types {
+    prefix brocade-operation-types;
+  }
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for running
+    factoryreset on a switch.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-04-30 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release.
+        Refined descriptions.
+      
+      ";
+    reference
+      "None";
+  }
+
+  rpc factory-reset {
+    description
+      "
+      The RPC command definition for the factory reset operation on a Brocade
+      switch.
+      ";
+    input {
+      container reset-option-parameters {
+        description
+          "
+          Performs a factory reset operation on a specified feature.
+          ";
+        container clear-features {
+          description
+            "
+            A list of configurations that you want to clear during the
+            factory reset operation.
+            To clear all configurations, specify all.
+            ";
+          leaf-list feature {
+            type union {
+              type brocade-operation-types:clear-feature-type;
+              type string {
+                length "0..3";
+                pattern "all";
+              }
+            }
+            description
+              "
+              The feature configuration that you want to clear during
+              the factory reset operation.
+              ";
+          }
+        }
+        container keep-features {
+          description
+            "
+            A list of configurations that you want to keep during the
+            factory reset operation.
+            ";
+          leaf-list feature {
+            type brocade-operation-types:keep-feature-type;
+            description
+              "
+              The feature configuration that you want to keep during
+              the factory reset operation.
+              ";
+          }
+        }
+      }
+    }
+    output {
+      container factory-reset-operation-status {
+        description
+          "
+          The factory reset operation status.
+          ";
+        leaf status-message {
+          type string {
+            length "1..1024";
+            pattern "[ -~]+";
+          }
+          description
+          "
+            The status message (success or failure) of the factory
+            reset operation.
+            The operation status is returned only if the keep
+            feature IP is set; otherwise, a successful factory reset
+            resets the IP and the operation status times out.
+          ";
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,77 @@
+module brocade-operation-ntp-clock-server {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-ntp-clock-server";
+  prefix brocade-operation-ntp-clock-server;
+
+  import brocade-time-yang-types {
+    prefix brocade-time-type;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains the collection of YANG definitions for Time Server.
+     
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-19 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  rpc ntp-clock-server {
+    description
+      "
+      The RPC command definition for Brocade time server operations.
+      ";
+
+    input {
+      list clock-server-parameters {
+        description
+          "
+          Configures clock server and server key index.
+          ";
+        leaf action {
+          type brocade-time-type:ts-operation-type;
+          description
+            "
+            The action to configure clock server list and
+            server key index list. Available actions include:  
+            o create
+            o modify
+            ";
+        }
+        uses brocade-time-type:ntp-clock-server-group;
+      }    
+    }
+  }
+}

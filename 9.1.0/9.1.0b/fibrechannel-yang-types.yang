@@ -1,0 +1,1367 @@
+module fibrechannel-yang-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:params:xml:ns:brocade:fibrechannel-yang-types";
+  prefix fibrechannel-yang-types;
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of generally useful derived YANG data
+    types.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  reference
+    "
+    ANSI INCITS 433-2006, Fibre Channel - Link Services (FC-LS).
+
+    ANSI INCITS 463-2010, Fibre Channel - Generic Services - 6 (FC-GS-6).
+
+    ANSI INCITS 511-2016, Fibre Channel - Switch Fabric - 6 (FC-SW-6).
+
+    ANSI INCITS 545-20xx, Fibre Channel - Framing and Signaling - 5
+    (FC-FS-5).
+    ";
+
+  revision 2021-09-07 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+      Added typedefs:
+        protocol-speed-type
+        ag-mode-type
+        product-name-type
+        area-address-type
+        cp-name-type
+        physical-interface-type
+        brocade-empty-string-type
+        topology-report-error-type
+        chassis-user-friendly-name-type
+
+      Added features:
+        fibrechannel_non_virtual_fabric_platform
+        fibrechannel_lag_platform
+        fibrechannel_router_platform
+        fibrechannel_traffic_optimizer_platform
+
+      Fabric OS 9.0.0
+      ---------------
+      Added features:
+        fibrechannel_virtual_fabric_platform
+        fibrechannel_extension_platform
+        fibrechannel_extended_isl
+        portchannel_platform
+
+      Added types:
+        time-24hr-extended-type
+
+      Formatting
+        Updated the length and pattern of typedef
+        'time-24hr-extended-type'
+
+      Fabric OS 8.2.1b
+      ----------------
+      Refine descriptions.
+      
+      Fabric OS 8.2.1
+      ----------------
+        Added types:
+          brocade-hex-string-type
+          fcid-hex-string-type
+          port-type-string-type
+          user-port-number-type
+
+        Deprecated types:
+          fcid-type
+
+        Added features:
+          feature access_gateway_platform
+          fibrechannel_switch_platform
+          fibrechannel_chassis_platform
+
+        Formatting
+        Organization information
+      ";
+    reference
+      "None";
+  }
+
+  typedef brocade-hex-string-type {
+    type string {
+      length "0..514";
+      pattern "0[xX][0-9a-fA-F]*";
+    }
+    description
+      "
+      Brocade hexadecimal string format
+      ---------------------------------
+      This type defines a generic case-insensitive hexadecimal string that
+      requires a '0x' prefix (also case-insensitive).  Modules that use this
+      type may refine the length to a lower value, if needed.
+      ";
+  }
+
+  typedef area-address-type {
+    type string {
+      length "0|6";
+      pattern "(0[xX][0-9a-fA-F]{4})?";
+    }
+    description
+      "
+      The 16-bit area address format - for example:
+      0x0A40
+      ";
+  }
+
+  typedef wwn-type {
+    type string {
+      length "0..24";
+      pattern "([0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){7})?";
+    }
+    description
+      "
+      A 64-bit identifier, with a 60-bit value preceded by a 4-bit
+      Network_Address_Authority Identifier, used to identify entities in
+      Fibre Channel (e.g., Nx_Port, node, F_Port, or Fabric).
+
+      Fibre channel WWN (16 hex digits with the colon separator).
+
+      For example:
+            11:22:33:44:55:66:77:88
+      ";
+  }
+
+  typedef domain-id-type {
+    type uint32 {
+      range "0..239";
+    }
+    description
+      "Fibre Channel switch domain identifier. Value of zero indicates
+       segmented link.";
+  }
+
+  typedef fcid-type {
+    type uint32 {
+      range "0..16777215";
+    }
+    status deprecated;
+    description
+      "
+      Fibre channel ID (FCID), decimal format.
+
+      Deprecated: Please use 'fcid-hex-string-type' instead.
+      ";
+  }
+
+  typedef fcid-hex-string-type {
+    type string {
+      length "8";
+      pattern "0[xX][0-9a-fA-F]*";
+    }
+    description
+      "
+      Definition of the Fibre Channel address for an Nx_Port
+      (FCID), hexadecimal format. The format allows for six
+      hexadecimal digits prefixed by '0x' or '0X'.
+
+      For example:
+
+        0x010200
+
+      ";
+  }
+
+  typedef fabric-id-type {
+    type uint32 {
+      range "1..128";
+    }
+    description
+      "Fabric ID (FID)";
+  }
+
+  typedef time-generated-type {
+    type uint32 {
+      range "1..2147483646";
+    }
+    units "seconds";
+    description
+      "
+      The time at which the statistics were queried. This value specified the
+      time since epoch in seconds.
+      ";
+  }
+
+  typedef time-24hr-extended-type {
+    type string {
+      length "0|8";
+      pattern "^$|[0-2][0-9]:[0-5][0-9]:[0-5][0-9]";
+    }
+    description
+      "
+      Specifies time. Time is in 24 hour clock format HH:MM:SS
+
+        HH : Hours [00 to 23],
+        MM : Minutes [00 to 59],
+        SS : Seconds [00 to 59].
+      ";
+  }
+
+  typedef fc4-type-type {
+    type string {
+      length "0..512";
+      pattern "(0[xX][0-9a-fA-F]{2}| |IPFC|FCP|FCP-Features|SATA-Tunnel|" +
+              "SBCCS|SBCCS-Channel|SBCCS-Control-Unit|FC-CT|FC-SW|FC-IFR|" +
+              "FC-NVMe|HIPPI-FP|MIL-STD-1553|ASM|FC-VI|Application-Services|" +
+              "Generic-FC-Features|RNID-Topology-Discovery)*";
+    }
+    description
+      "
+      A space-delimited string of FC-4 types:
+
+      IPFC                      (0x05)
+      FCP                       (0x08)
+      FCP-Features              (0x0A)
+      SATA-Tunnel               (0x14)
+      SBCCS                     (0x18)
+      SBCCS-Channel             (0x1B)
+      SBCCS-Control-Unit        (0x1C)
+      FC-CT                     (0x20)
+      FC-SW                     (0x22)
+      FC-IFR                    (0x25)
+      FC-NVMe                   (0x28)
+      HIPPI-FP                  (0x40)
+      MIL-STD-1553              (0x48)
+      ASM                       (0x49)
+      FC-VI                     (0x58)
+      Application-Services      (0x60)
+      Generic-FC-Features       (0xDE)
+      RNID-Topology-Discovery   (0xDF)
+      0xnn                      (Unknown/Reserved <hexadecimal value>)
+      ";
+  }
+
+  typedef fc4-features-type {
+    type string {
+      length "0..512";
+      pattern "( |FCP-Initiator|FCP-Target|FC-NVMe-Discovery-Service|" +
+              "FC-NVMe-Initiator|FC-NVMe-Target)*";
+    }
+    description
+      "The registered FC-4 Features in relation to a given FC-4 Type.";
+  }
+
+  typedef speed-type {
+    type string {
+      length "0..512";
+      pattern "( |bit-[0-9]{1,2}|speed-1-gfc|speed-2-gfc|speed-10-gfc|" +
+              "speed-4-gfc|speed-8-gfc|speed-16-gfc|speed-32-gfc|" +
+              "speed-20-gfc|speed-40-gfc|speed-128-gfc|speed-64-gfc|" +
+              "speed-256-gfc|speed-not-established|speed-10-ge|" +
+              "speed-40-ge|speed-100-ge|speed-25-ge|speed-50-ge|" +
+              "speed-400-ge)*";
+    }
+    description
+      "
+      The possible Fibre Channel transmission speeds:
+
+      speed-1-gfc           (Mask Value (hex): 0000 0001)
+      speed-2-gfc           (Mask Value (hex): 0000 0002)
+      speed-10-gfc          (Mask Value (hex): 0000 0004)
+      speed-4-gfc           (Mask Value (hex): 0000 0008)
+      speed-8-gfc           (Mask Value (hex): 0000 0010)
+      speed-16-gfc          (Mask Value (hex): 0000 0020)
+      speed-32-gfc          (Mask Value (hex): 0000 0040)
+      speed-20-gfc          (Mask Value (hex): 0000 0080)
+      speed-40-gfc          (Mask Value (hex): 0000 0100)
+      speed-128-gfc         (Mask Value (hex): 0000 0200)
+      speed-64-gfc          (Mask Value (hex): 0000 0400)
+      speed-256-gfc         (Mask Value (hex): 0000 0800)
+      speed-not-established (Mask Value (hex): 0000 8000)
+      speed-10-ge           (Mask Value (hex): 0001 0000)
+      speed-40-ge           (Mask Value (hex): 0002 0000)
+      speed-100-ge          (Mask Value (hex): 0004 0000)
+      speed-25-ge           (Mask Value (hex): 0008 0000)
+      speed-50-ge           (Mask Value (hex): 0010 0000)
+      speed-400-ge          (Mask Value (hex): 0020 0000)
+      bit-n                 (Unknown/Reserved <bit position>)
+      ";
+  }
+
+  typedef port-type-string-type {
+    type string {
+      length "0..64";
+      pattern "0[xX][0-9a-fA-F]{2}|n-port|nl-port|f/nl-port|" +
+              "nx-port|f-port|fl-port|e-port|b-port|a-port";
+    }
+    description
+      "
+      n-port    (0x01)
+      nl-port   (0x02)
+      f/nl-port (0x03)
+      nx-port   (0x7F)
+      f-port    (0x81)
+      fl-port   (0x82)
+      e-port    (0x84)
+      b-port    (0x85)
+      a-port    (0x86)
+      0xnn      (Unknown/Reserved <hexadecimal value>)
+      ";
+  }
+
+  typedef class-of-service-type {
+    type string {
+      length "0..256";
+      pattern "( |bit-[4-9]|bit-[1-2][0-9]|bit-3[0-1]|class-f|" +
+              "class-1|class-2|class-3)*";
+    }
+    description
+      "
+      A string representation of the Class of Service bit-field (see FC-SW).
+
+      Bit 0 - Class F
+        Represented as 'class-f'
+
+      Bit 1 - Class 1
+        Represented as 'class-1'
+
+      Bit 2 - Class 2
+        Represented as 'class-2'
+
+      Bit 3 - Class 3
+        Represented as 'class-3'
+
+      Bit 4 - obsolete
+        Represented as 'bit-4'
+
+      Bit 5: reserved
+        Represented as 'bit-5'
+
+      Bit 6 - obsolete
+        Represented as 'bit-6'
+
+      Bits 7 to 31: reserved
+        Represented as 'bit-7' though 'bit-31', respectively
+      ";
+  }
+
+  typedef slot-port-name-type {
+    type string {
+      length "0..32";
+      /* pattern with 12 slots and 1024 ports separated by a slash */
+      pattern "(([0-9]|1[0-9])/([1][0-9][0-9][0-9]|[1-9][0-9][0-9]|" +
+              "[1-9][0-9]|[0-9]))?";
+    }
+    description
+      "
+      Typically the name of the interface.  The slot and port number of the
+      port (slot/port).
+      ";
+  }
+
+  typedef port-number-type {
+    type user-port-number-type {
+    range "0..3400";
+    }
+    description
+    "
+    Count of ports or port numbers.
+    ";
+  }
+
+  typedef user-port-number-type {
+    type int32 {
+      range "-1..3400";
+    }
+    description
+      "Fibre Channel port user port number.";
+  }
+
+  typedef octet-member-index-type {
+      type int8 {
+      range "0..7";
+    }
+    description
+      "Used to identify which member in the octet for a given trunk.";
+  }
+
+  typedef deskew-type {
+    type uint16 {
+      range "0..255";
+    }
+    units "10ns";
+    description 
+       "Time in 10ns units. Used by trunking for fibrechannel ports.";
+  }
+
+  typedef percentage-type {
+    type string {
+      length  "1..6";
+        pattern "([0-9][0-9].[0-9][0-9]|[0-9].[0-9][0-9]|100.00)";
+      }
+      description 
+        "Percentage string up to two decimal places.";
+  }
+
+  typedef ag-mode-type {
+    type enumeration {
+      enum "not-supported" {
+        description
+          "
+          AG mode is not supported by this device.
+          ";
+      }
+      enum "disabled" {
+        description
+           "
+           AG mode is supported and is currently disabled.
+           ";
+      }
+      enum "enabled" {
+        description
+          "
+          AG mode is supported and is currently enabled.
+          ";
+      }
+    }
+     description
+       "
+       Indicates the Access Gateway (AG) mode capability and state. A
+       switch is capable of AG mode support when this value is not supported.
+       ";
+  }
+
+ typedef dynamic-load-sharing-level-type {
+    type enumeration {
+      enum "disabled" {
+        description 
+          "
+          Disables the Dynamic Load Sharing (DLS) capability.
+          ";
+      }
+      enum "dls" {
+        description
+          "
+          Enables only the base Dynamic Load Sharing (DLS) capability.
+          ";
+      }
+      enum "lossless-dls" {
+        description
+          "
+          Enables the Dynamic Load Sharing (DLS) and LosslessDLS capability.
+          ";
+      }
+      enum "two-hop-lossless-dls" {
+        description
+          "
+          Enables the Two-Hop LosslessDLS enhancement to LosslessDLS.
+          ";
+      }
+    }
+    description
+      "
+      Supported combination for the Dynamic Load Sharing (DLS) capability
+      ";
+  }
+
+  typedef interface-type {
+    type enumeration {
+      enum "none" {
+        description
+          "
+          User interface is either undefined or unknown.
+          ";
+      }
+	   enum "console" {
+        description
+          "
+          User interface is console.
+          ";
+      }
+      enum "modem" {
+        description
+          "
+          User interface is modem.
+          ";
+      }
+      enum "telnet" {
+        description
+          "
+          User interface is telnet.
+          ";
+      }
+      enum "ssh" {
+        description
+          "
+          User interface is SSH.
+          ";
+      }
+      enum "rpc" {
+        description
+          "
+          User interface is RPC.
+          ";
+      }
+      enum "http" {
+        description
+          "
+          User interface is HTTP.
+          ";
+      }
+      enum "https" {
+        description
+          "
+          User interface is HTTPS.
+          ";
+      }
+      enum "snmp" {
+        description
+          "
+          User interface is SNMP.
+          ";
+      }
+      enum "fms" {
+        description
+          "
+          User interface is FMS.
+          ";
+      }
+	   enum "zoneserver" {
+        description
+          "
+          User interface is ZONESERVER.
+          ";
+      }
+    }
+    description
+      "
+      Types of interfaces to the switch
+      ";
+  }
+
+  typedef advanced-performance-tuning-policy-type {
+    type enumeration {
+      enum "port-based" {
+        description
+          "
+          Port-Based routing policy for the switch.
+          ";
+      }
+      enum "device-based" {
+        description
+          "
+          Device-Based routing policy for the switch. (FICON support only)
+          ";
+      }
+      enum "exchange-based" {
+        description
+          "
+          Exchange-Based routing policy for the switch.
+          ";
+      }
+    }
+    description
+      "
+      Supported routing modes for the Advanced Performance Tuning (APT) policy.
+      ";
+  }
+
+  feature access_gateway_platform {
+    description
+      "
+      Indicates that the Fibre Channel switch is in Access Gateway mode.
+
+      This feature is mutually exclusive with the
+      'fibrechannel_switch_platform' feature.
+      ";
+  }
+
+  feature fibrechannel_switch_platform {
+    description
+      "
+      Indicates that the Fibre Channel switch is in Native mode.
+
+      This feature is mutually exclusive with the
+      'access_gateway_platform' feature.
+      ";
+  }
+
+  feature fibrechannel_chassis_platform {
+    description
+      "
+      Indicates a slot-based, director-class platform.
+
+      Native mode only.
+      ";
+  }
+
+  feature fibrechannel_virtual_fabric_platform {
+    description
+      "
+      Indicates that Virtual Fabric mode is enabled (i.e., VF Mode).
+
+      This feature requires the switch to be in Native mode.
+      ";
+  }
+
+  feature fibrechannel_non_virtual_fabric_platform {
+    description
+      "
+      Indicates that Virtual Fabric mode is disabled (i.e., VF Mode).
+
+      This feature is mutually exclusive with the
+      fibrechannel_virtual_fabric_platform feature.
+      ";
+  }
+
+  feature fibrechannel_extension_platform {
+    description
+      "
+      Indicates that the Extension platform is supported.
+
+      This feature requires the switch to be in Native mode.
+      ";
+  }
+
+  feature fibrechannel_extended_isl {
+    description
+      "
+      Indicates that Extended ISL (XISL) use is supported on this platform.
+
+      XISL use requires VF Mode to be enabled.
+
+      This feature requires the switch to be in Native mode.
+      ";
+  }
+
+  feature portchannel_platform {
+    description
+      "
+      Indicates that Port Channels are supported on this platform.
+
+      This feature requires the switch to be in Native mode.
+      ";
+  }
+
+  feature fibrechannel_standalone_switch_platform {
+    description
+      "
+      Indicates a non-director class Fibre Channel switch.
+
+      This feature is mutually exclusive with the
+      'fibrechannel_chassis_platform' feature.
+      ";
+  }
+
+  feature fibrechannel_router_platform {
+    description
+      "
+      Indicates that the Fibre Channel Router is enabled.
+
+      This feature requires the switch to be in Native mode.
+
+      A switch/chassis having the 'fibrechannel_virtual_fabric_platform'
+      feature, should have a Base switch, i.e., fibrechannel-logical-
+      switch:base-switch-enabled' should be true for at least one logical
+      switch in the switch/chassis.
+      ";
+  }
+
+  feature fibrechannel_lag_platform {
+    description
+      "
+      Indicates that fibrechannel LAGs are supported on this platform.
+      ";
+  }
+
+  typedef fibrechannel-trunk-type {
+    type enumeration {
+      enum "inter-switch-link" {
+        description
+          "
+          trunk is a logical bundle of e-ports on a port blade or pizza box
+          i.e. switch to switch links.
+          ";
+      }
+      enum "inter-chassis-link" {
+        description
+          "
+          trunk is a logical bundle of e-ports on a core blade in a chassis
+          i.e. chassis to chassis links.
+          ";
+      }
+      enum "inter-fabric-link" {
+        description
+          "
+          trunk is a logical bundle of ex-ports between two fabrics using
+          port blades or pizza box.
+          ";
+      }
+      enum "f-port" {
+        description
+          "
+          trunk is a logical bundle of f-ports i.e. switch to device links
+          on port blade or pizza box.
+          ";
+      }
+      enum "f-port-access-gateway" {
+        description
+          "
+          trunk is a logical bundle of switch to switch links in a access
+          gateway mode on port blades or pizza box.
+          ";
+      }
+    }
+    description
+      "
+      Types of links which have been bundled together in a trunk.
+      ";
+  }
+
+  typedef protocol-speed-type {
+    type enumeration {
+      enum "not-established" {
+        description
+          "
+          Speed and/or protocol information not available.
+          ";
+      }
+      enum "1-gfc" {
+        description
+          "
+          1 Gigabit Fibre Channel
+          ";
+      }
+      enum "2-gfc" {
+        description
+          "
+          2 Gigabit Fibre Channel
+          ";
+      }
+      enum "4-gfc" {
+        description
+          "
+          4 Gigabit Fibre Channel
+          ";
+      }
+      enum "8-gfc" {
+        description
+          "
+          8 Gigabit Fibre Channel
+          ";
+      }
+      enum "10-gfc" {
+        description
+          "
+          10 Gigabit Fibre Channel
+          ";
+      }
+      enum "12-gfc" {
+        description
+          "
+          12 Gigabit Fibre Channel
+          ";
+      }
+      enum "16-gfc" {
+        description
+          "
+          16 Gigabit Fibre Channel
+          ";
+      }
+      enum "20-gfc" {
+        description
+          "
+          20 Gigabit Fibre Channel
+          ";
+      }
+      enum "24-gfc" {
+        description
+          "
+          24 Gigabit Fibre Channel
+          ";
+      }
+      enum "28-gfc" {
+        description
+          "
+          28 Gigabit Fibre Channel
+          ";
+      }
+      enum "32-gfc" {
+        description
+          "
+          32 Gigabit Fibre Channel
+          ";
+      }
+      enum "40-gfc" {
+        description
+          "
+          40 Gigabit Fibre Channel
+          ";
+      }
+      enum "48-gfc" {
+        description
+          "
+          48 Gigabit Fibre Channel
+          ";
+      }
+      enum "53-gfc" {
+        description
+          "
+          53 Gigabit Fibre Channel
+          ";
+      }
+      enum "56-gfc" {
+        description
+          "
+          56 Gigabit Fibre Channel
+          ";
+      }
+      enum "64-gfc" {
+        description
+          "
+          64 Gigabit Fibre Channel
+          ";
+      }
+      enum "80-gfc" {
+        description
+          "
+          80 Gigabit Fibre Channel
+          ";
+      }
+      enum "96-gfc" {
+        description
+          "
+          96 Gigabit Fibre Channel
+          ";
+      }
+      enum "112-gfc" {
+        description
+          "
+          112 Gigabit Fibre Channel
+          ";
+      }
+      enum "128-gfc" {
+        description
+          "
+          128 Gigabit Fibre Channel
+          ";
+      }
+      enum "160-gfc" {
+        description
+          "
+          160 Gigabit Fibre Channel
+          ";
+      }
+      enum "192-gfc" {
+        description
+          "
+          192 Gigabit Fibre Channel
+          ";
+      }
+      enum "224-gfc" {
+        description
+          "
+          224 Gigabit Fibre Channel
+          ";
+      }
+      enum "256-gfc" {
+        description
+          "
+          256 Gigabit Fibre Channel
+          ";
+      }
+      enum "320-gfc" {
+        description
+          "
+          320 Gigabit Fibre Channel
+          ";
+      }
+      enum "384-gfc" {
+        description
+          "
+          384 Gigabit Fibre Channel
+          ";
+      }
+      enum "448-gfc" {
+        description
+          "
+          448 Gigabit Fibre Channel
+          ";
+      }
+      enum "512-gfc" {
+        description
+          "
+          512 Gigabit Fibre Channel
+          ";
+      }
+      enum "640-gfc" {
+        description
+          "
+          640 Gigabit Fibre Channel
+          ";
+      }
+      enum "768-gfc" {
+        description
+          "
+          768 Gigabit Fibre Channel
+          ";
+      }
+      enum "896-gfc" {
+        description
+          "
+          896 Gigabit Fibre Channel
+          ";
+      }
+      enum "1024-gfc" {
+        description
+          "
+          1024 Gigabit Fibre Channel
+          ";
+      }
+      enum "1280-gfc" {
+        description
+          "
+          1280 Gigabit Fibre Channel
+          ";
+      }
+      enum "1536-gfc" {
+        description
+          "
+          1536 Gigabit Fibre Channel
+          ";
+      }
+      enum "1792-gfc" {
+        description
+          "
+          1792 Gigabit Fibre Channel
+          ";
+      }
+      enum "2048-gfc" {
+        description
+          "
+          2048 Gigabit Fibre Channel
+          ";
+      }
+      enum "1-ge" {
+        description
+          "
+          1 Gigabit Ethernet
+          ";
+      }
+      enum "10-ge" {
+        description
+          "
+          10 Gigabit Ethernet
+          ";
+      }
+      enum "25-ge" {
+        description
+          "
+          25 Gigabit Ethernet
+          ";
+      }
+      enum "40-ge" {
+        description
+          "
+          40 Gigabit Ethernet
+          ";
+      }
+      enum "50-ge" {
+        description
+          "
+          50 Gigabit Ethernet
+          ";
+      }
+      enum "100-ge" {
+        description
+          "
+          100 Gigabit Ethernet
+          ";
+      }
+      enum "400-ge" {
+        description
+          "
+          400 Gigabit Ethernet
+          ";
+      }
+      enum "bit-0" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-1" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-2" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-3" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-4" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-5" {
+        description
+         "
+         Unrecognized speed classification.
+         See FC-GS FDMI.
+         ";
+      }
+      enum "bit-6" {
+        description
+         "
+         Unrecognized speed classification.
+         See FC-GS FDMI.
+         ";
+      }
+      enum "bit-7" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-8" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-9" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-10" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-11" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-12" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-13" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-14" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-15" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-16" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-17" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-18" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-19" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-20" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-21" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-22" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-23" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-24" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-25" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-26" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-27" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-28" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-29" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-30" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "bit-31" {
+        description
+          "
+          Unrecognized speed classification.
+          See FC-GS FDMI.
+          ";
+      }
+      enum "auto-negotiated" {
+        description
+          "
+          Port is in auto negotiation mode. 
+          ";
+      }
+    }
+    description
+      "
+      Specifies numeric link speed (or bandwidth) with respect to the
+      Ethernet (Layer-2) or Fibre Channel (Physical Interface) protocol.
+
+      This value applies to individual ports, and Link Aggregation Groups
+      such as a Fibre Channel Trunk, Fibre Channel LAG, or Port Channel.
+      ";
+  }
+
+  typedef product-name-type {
+    type string {
+      length "1..255";
+      pattern "[ -~]{1,255}";
+    }
+    description
+      "
+      The typedef defines a common Brocade Switch, Chassis or Blade product
+      names known to customer.
+
+      Example
+	Extension Platforms :  7810/7840/SX6(blade)
+      ";
+  }
+
+  typedef cp-name-type {
+    type enumeration {
+      enum "cp0" {
+        description
+          "CP in fixed-port switch and CP 0 in chassis.";
+      }
+      enum "cp1" {
+        description
+          "CP 1 in chassis.";
+      }
+    }
+    description
+      "
+      Name of the host CP in fixed-port and chassis switch.
+      Valid value for host CP in fixed-port switch is cp0.
+      Valid values for host CP in chassis switch are cp0 and cp1.
+      ";
+  }
+
+  typedef physical-interface-type {
+   type enumeration {
+     enum "eth0" {
+       description
+         "Physical ethernet interface eth0";
+     }
+     enum "eth3" {
+       description
+         "Physical ethernet interface eth3.";
+     }
+   }
+   description
+     "
+     Name of the phsyical management interface.
+     For fixed-port switch, valid name is eth0.
+     For chassis switch, valid names are eth0 and eth3.
+     ";
+  }
+
+  typedef brocade-empty-string-type {
+    type string {
+      length "0";
+      pattern '^.{0}$';
+    }
+    description
+      "
+      Definition of an empty string. This typedef is to be used within a union
+      with other data types that cannot be modified to accommodate an empty
+      string. The primary use case would be a node that utilizes a
+      non-modifiable IETF typedef that does not account for an empty response.
+
+      This type typedef should not be used on its own outside of a union.
+      ";
+  }
+
+  typedef topology-report-error-type {
+    type enumeration {
+      enum "unreachable-domain" {
+        description
+          "
+          A fabric domain that is unreachable.
+          ";
+      }
+      enum "logical-isl-restriction" {
+        description
+          "
+          A fabric domain that is only reachable via a path that has
+          a Logical ISL restriction.
+          ";
+      }
+      enum "non-routing-domain-restriction" {
+        description
+          "
+          A fabric domain that is only reachable via a path that tries
+          to pass through a non-routing domain.
+          ";
+      }
+    }
+    description
+      "
+      The type of topology errors that can be reported by FSPF.
+
+      The affected domain are in the fabric build domain list, but no valid
+      paths were identified by FSPF for routing traffic to the domain.
+      ";
+  }
+
+  feature fibrechannel_traffic_optimizer_platform {
+    description
+      "
+      Indicates platform support for Brocade Traffic Optimizer.
+      ";
+  }
+
+  typedef chassis-user-friendly-name-type {
+    type string {
+      length "0..31";
+      pattern "([a-zA-Z][0-9a-zA-Z-._]{0,30})?";
+    }
+    description
+      "An ASCII name assigned to the switch chassis by the administrator.";
+  }
+}

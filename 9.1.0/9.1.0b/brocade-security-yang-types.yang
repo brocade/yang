@@ -1,0 +1,1904 @@
+module brocade-security-yang-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-security-yang-types";
+  prefix brocade-sec;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+    ";
+
+  description
+    "
+    This module contains the collection of security YANG types.
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  reference
+    "None";
+
+  revision 2022-01-06 {
+
+    description
+      "
+      Fabric OS 8.2.1
+      ---------------
+        Initial release.
+        Refine descriptions.
+  
+      Fabric OS 9.0.0
+      ---------------
+        Support extension certificates
+        
+      Fabric OS 9.0.1
+      ---------------
+        Added ldap-tls-mode-type definition
+      
+      Fabric OS 9.1.0
+      ---------------
+        Added types for FOS Security
+        Added types for access interface and RBAC
+        Obsoleted leaf ip-address-in-subject-alternative-name
+        Added containers subject-alternative-name-dns-names
+        Added containers subject-alternative-name-ip-addresses
+        Added types for FOS Security
+        Added types for RBAC class permission.
+        Added types for RBAC role.
+        Added certificate-hexdump-type definition
+        Added new type for FOS Security
+        Added compliance related types for System Security.
+        Updated types for security-policy-distribute-permission-type.
+        Updated type for host-type.
+        Added extension-certificate-entity-type definition.
+        Updated user-config-role-type description.
+        updates to  rbac-context-type.
+        Added role-name-type typedef.
+        Added ipfilter-policy-info-group
+        Added boot-up-self-test-status-type typedef.
+        Updated the type for home-virtual-fabric-type.
+        Added new type for known-host-type.
+
+      Fabric OS 9.1.0b
+      ---------------
+        Updated the pattern for known-host-type.
+     ";
+    reference
+      "None";
+  }
+
+  typedef aaa-protocols-type {
+    type enumeration {
+      enum "chap" {
+        description
+          "Challenge-Handshake Authentication Protocol";
+      }
+      enum "pap" {
+        description
+          "Password Authentication Protocol";
+      }
+    }
+    description
+      "
+      Authentication protocols that are commonly used by both
+      RADIUS and TACACS+.
+      ";
+  }
+ 
+  typedef aaa-encryption-algorithm-type {
+    type enumeration {
+      enum "none" {
+        description
+          "Null encryption algorithm";
+      }
+      enum "aes256" {
+        description
+          "AES-256 algorithm";
+      }
+    }
+    description
+      "Encryption algorithm type.";
+  } 
+
+  typedef aaa-authspec-type {
+    type string {
+      length "1..128";
+      pattern "radius;local|"+
+              "radius;localbackup|"+
+              "tacacs+;local|"+
+              "tacacs+;localbackup|"+
+              "ldap;local|"+
+              "ldap;localbackup|"+
+              "radius|"+
+              "tacacs+|"+
+              "ldap|"+
+              "local";
+    }
+    description
+      "Authentication mode for RADIUS, TACACS+ and LDAP.";
+  }
+
+  typedef aaa-timeout-type {
+    type uint16 {
+      range "1..30";
+    }
+    units "seconds";
+    default 3;
+    description
+      "Response timeout for the RADIUS, TACACS+ and LDAP.";
+  }
+  
+  typedef ldap-tls-mode-type {
+    type enumeration {
+      enum "starttls" {
+        description
+          "Selects StartTLS mode";
+      }
+      enum "ldaps" {
+        description
+          "Selects LDAPS mode";
+      }
+    }
+    description
+      "LDAP TLS mode of StartTLS or LDAPS.";
+  } 
+
+  typedef tls-protocol-type {
+    type string {
+      length "1..10";
+      pattern  "any|"+
+               "TLSv1.3|"+
+               "TLSv1.2|"+
+               "TLSv1";
+    }
+    description
+      "TLS protocol.TLSv1.3 is supported only for https application";
+  }
+
+  typedef default-string-type {
+    type string {
+      length "1..max";
+      pattern "[ -~]*";
+    }
+    description
+      "Default string";
+  }
+
+  typedef user-config-role-type {
+    type string {
+      length "0|4..16";
+      pattern "^$|[a-z]{4,16}";
+    }
+    description
+      "
+      Specifies the account's role. Displays an empty string
+      if there is no role configured.
+      ";
+  }
+
+  typedef role-name-type {
+    type string {
+      length "4..16";
+      pattern "[a-z]{4,16}";
+    }
+    description
+      "
+      Specifies the account's role name.
+      ";
+  }
+
+  typedef user-config-user-name-type {
+    type string {
+      length "1..32";
+      pattern "([a-zA-Z][0-9a-zA-Z._]{0,31})";
+    }
+    description
+      "Specifies the name of the account.";
+  }
+
+  typedef user-config-login-user-name-type {
+    type string {
+      length "1..32";
+      pattern "([a-zA-Z_][0-9a-zA-Z._]*)";
+    }
+    description
+      "Specifies the name of the remote user
+       account.";
+  }
+
+  typedef user-config-access-hours-type {
+    type uint16 {
+      range "1..24";
+    }
+    units "hours";
+    description
+      "Hours in 24h format";
+  }
+
+  typedef user-config-access-minutes-type {
+    type uint16 {
+      range "1..60";
+    }
+    units "minutes";
+    description
+      "Minutes";
+  }
+
+  typedef home-virtual-fabric-type {
+    type union {
+      type fibrechannel:fabric-id-type;
+      type uint32 {
+        range "0";
+      }
+    }
+    description
+      "
+      Specifies the account's home Virtual Fabric.
+      The valid values for home-virtual-fabric-id is in the range '1-128'.
+      A value of '0' may be used in case the home-virtual-fabric-id is not
+      set or not valid.
+      ";
+  }
+
+  typedef virtual-fabric-role-id-type {
+    type string; 
+    description
+      "
+      Specifies the Virtual Fabrics to be added to the LDAP role
+      Format is <role>=<virtual-fabric-id-list> where role is the LDAP role and
+      virtual-fabric-id-list is a list of comma-seperated virtual fabric(s).
+      Example strings include:
+        o user=5
+        o admin=9-14
+        o newuserA=1,2,3
+        o newuserB=1,11-21
+      ";
+  }
+
+  grouping virtual-fabric-configuration-group {
+    description
+      "This common model is used for both user-config and ldap-role-map module";
+
+    leaf home-virtual-fabric {
+      type home-virtual-fabric-type;
+      description
+        "
+        Specifies the account's home Virtual Fabric.
+        If the value is not configured in ldap-role-map, GET will
+        fetch '0' value.
+        ";
+    }
+    leaf chassis-access-role {
+      type user-config-role-type;
+      description
+        "
+        Specifies the account's access permissions regarding chassis-level
+        commands.
+        ";
+    }
+  }
+
+  typedef ipfilter-action-type {
+    type enumeration {
+      enum "activate" {
+        description
+          "Activates the specified IP filter policy.";
+      }
+      enum "clone" {
+        description
+          "Creates a replica of an existing IP filter policy.";
+      }
+    }
+    description
+      "Indicates the action that must be taken on IPFilter policies.";
+  }
+
+  typedef password-cfg-operation-type {
+    type enumeration {
+      enum "hash-config" {
+        description
+          "Sets the hash type. Valid values are md5, sha256, or sha512.";
+      } 
+      enum "default" {
+        description
+          "Configures all password policies to their default value.";
+      }
+      enum "delete-all" {
+        description
+          "Removes the password expiration policies of all users.";
+      }
+    }
+    description
+      "Create/Delete Password policy configuration";
+  }
+
+  typedef virtual-fabric-action-type {
+    type enumeration {
+      enum "addlf" {
+        description
+          "Add virtual fabric list in existing user configuration.";
+      }
+      enum "deletelf" {
+        description
+          "Delete virtual fabric list from existing user configuration.";
+      }
+    }
+    description
+      "Add/Delete virtual fabric for user configuration";
+  }
+
+  typedef hash-algorithm-type {
+    type enumeration {
+      enum "md5" {
+        description
+          "md5 hash type.";
+      }
+      enum "sha256" {
+        description
+          "sha256 hash type.";
+      }
+      enum "sha512" {
+        description
+          "sha512 hash type.";
+      }
+    }
+    description
+      "Sets the hash type.";
+  }
+
+  typedef ipfilter-name-type {
+    type string {
+      length "1..20";
+      pattern "([a-zA-Z0-9_]{1,20})";
+    }
+    description
+      "The name of the ipfilter policy.";
+  }
+
+  typedef host-type {
+    type union {
+      type inet:ip-address;
+      type inet:ip-prefix;
+      type string {
+        pattern "any";
+      }
+    }
+    description
+      "Specifies the IP address.";    
+  }
+
+  typedef ipfilter-ip-version-type {
+    type enumeration {
+      enum "IPv4" {
+        description
+          "Creates an IP filter policy with the specified type IPv4.";
+      }
+      enum "IPv6" {
+        description
+          "Creates an IP filter policy with the specified type IPv6.";
+      }
+    }
+    description
+      "Indicates the type of policy IPv4 or IPv6.";
+  }
+
+  typedef ipfilter-protocol-type {
+    type enumeration {
+      enum "tcp" {
+        description
+          "Specifies the protocol type tcp";
+      }
+      enum "udp" {
+        description
+          "Specifies the protocol type udp";
+      }
+    }
+    description
+      "Types of protocol TCP or UDP.";
+  }
+
+  typedef ipfilter-permission-type {
+    type enumeration {
+      enum "permit" {
+        description
+          "Specifies the permit action associated with this rule.";
+      }
+      enum "deny" {
+        description
+          "Specifies the deny action associated with this rule.";
+      }
+    }
+    description
+      "Blocking or permitting the ports.";
+  }
+
+  typedef ipfilter-traffic-type {
+    type enumeration {
+      enum "INPUT" {
+        description
+          "Specifies the type of traffic INPUT.";
+      }
+      enum "FORWARD" {
+        description
+          "Specifies the type of traffic FORWARD.";
+      }
+    }
+    description
+      "
+      Specifying the type of traffic that are allowed for the specified
+      IP address.
+      ";
+  }
+
+  typedef sec-crypto-cfg-default-template-name-type {
+    type enumeration {
+      enum "default_generic" {
+        description
+          "Generic Template for Security Crypto Configuration.";
+      }
+      enum "default_strong" {
+        description
+          "Template for High Security Crypto Configuration.";
+      }
+      enum "default_fips" {
+        description
+          "FIPS Template for Security Crypto Configuration.";
+      }
+      enum "default_cc" {
+        description
+          "Common Criteria (CC) Template for Security Crypto Configuration.";
+      }
+    }
+    description
+      "Specify the names of default templates.";
+  }
+
+  typedef sec-crypto-cfg-template-name-type {
+    type string {
+      length "1..256";
+      pattern "[a-zA-Z0-9_]{1,256}";
+    }
+    description
+      "
+      Specify name of the template.
+      Default template names such as,
+      o default_generic
+      o default_cc
+      o default_strong
+      o default_fips
+      cannot be used for user defined template addition or deletion.
+      ";
+  }
+
+  typedef sec-crypto-cfg-file-transfer-protocol-type {
+    type enumeration {
+      enum "scp" {
+        description
+          "scp type";
+      }
+      enum "sftp" {
+        description
+          "sftp type";
+      }
+      enum "ftp" {
+        description
+          "ftp type";
+      }
+    }
+    description
+      "Specify SCP or SFTP or FTP for file transfer.";
+  }
+
+  typedef sec-crypto-cfg-actions-type {
+    type enumeration {
+      enum "apply" {
+        description
+          "Activate a default or user-defined template file.";
+      }
+      enum "verify" {
+        description
+          "
+          Verifies the running configuration against a required configuration
+          specified in the template file. If this operation returns '204 No
+          Content', the verify was successful.
+          ";
+      }
+      enum "import" {
+        description
+          "
+          Imports a template file from a specified external host.
+          The template name should not be same as default template names
+          when importing the file.
+          ";
+      }
+      enum "export" {
+        description
+          "
+          Exports a template file to the specified external host.
+          Template name should be that of a default or user defined 
+          template that already exists.
+          Following are the default templates,
+          o default_generic
+          o default_strong
+          o default_fips
+          o default_cc
+          ";
+      }
+    }
+    description
+      "
+      o apply - Enforce default or user-defined template file.
+      o verify - Verifies the running configuration against a required
+                 configuration specified in the template file.
+      o import - Imports a template file from a specified external host.
+      o export - Exports a template file to the specified external host.
+      ";
+  }
+
+  typedef sec-crypto-cfg-tls-cipher-type {
+    type string {
+      length "1..64";
+      pattern "[-+!0-9]{0,1}[a-zA-Z0-9]{2,64}";
+    }
+    description
+      "Cipher algorithms are valid for HTTPS, RADIUS, LDAP, and SYSLOG.";
+  } 
+
+  typedef validation-mode-type {
+    type enumeration {
+      enum "basic" {
+        description
+          "Basic mode";
+      }
+      enum "strict" {
+        description
+          "Strict mode";
+      }
+    }
+    description
+      "X509 validation mode selection";
+  }
+
+  grouping import-export-param-group {
+    description
+      "
+      This model is used for importing and exporting configurations
+      to/from host.
+      ";
+    leaf remote-user-name {
+      type string {
+        length "1..256";
+        pattern "([0-9a-zA-Z_.]{1,256})";
+      }
+      description
+        "Specifies the user name for the host.";
+    }
+    leaf remote-host-ip {
+      type inet:host;
+      description
+        "Specifies the remote host ip address.";
+    }
+    leaf remote-user-password {
+      type string {
+        length "1..512";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        Password for the remote user. Password must be
+        encoded with Base64 encoding scheme
+        ";
+    }
+    leaf remote-directory {
+      type string {
+        length "1..4096";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        Specifies the remote directory fully qualified path name(FQPN).
+        ";
+    }
+  }
+
+  grouping seccrypto-import-export-param-group {
+    description
+      "
+      This model is used for importing and exporting templates
+      to/from host.
+      ";
+    leaf remote-user-name {
+      type string {
+        length "1..256";
+        pattern "([0-9a-zA-Z_.]{1,256})";
+      }
+      description
+        "Specifies the user name for the host.";
+    }
+    leaf remote-host-ip {
+      type inet:host;
+      description
+        "Specifies the remote host ip address.";
+    }
+    leaf remote-user-password {
+      type string {
+        length "1..512";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        Password for the remote user. Password must be 
+        encoded with Base64 encoding scheme
+        ";
+    }
+    leaf remote-directory {
+      type string {
+        length "1..4096";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        Specifies the remote directory fully qualified path name(FQPN).
+        If action is import, remote directory must be fully qualified file
+        name. If the action is export, remote directory can be fully qualified
+        file name (to export template with a name of user's choice) or
+        directory name (to export template with the name same as that of
+        template on switch).
+        ";
+    }
+    leaf file-transfer-protocol-type {
+      type sec-crypto-cfg-file-transfer-protocol-type;
+      description
+        "
+        Specifies the protocol as either SCP, SFTP, or FTP for file
+        transfer
+        ";
+    }
+  }
+
+  typedef user-password-type {
+    type string {
+      length "1..40";
+      pattern "[ -~]{1,40}";
+      pattern ":" {
+        modifier invert-match;
+      }
+    }
+    description
+      "Specifies a password for the account.";
+  }
+
+ typedef sshutil-hash-type {
+    type enumeration {
+      enum "md5" {
+        description
+          "md5 hash type.";
+      }
+      enum "sha1" {
+        description
+          "sha1 hash type.";
+      }
+      enum "sha256" {
+        description
+          "sha256 hash type.";
+      }
+      enum "sha384" {
+        description
+          "sha384 hash type.";
+      }
+      enum "sha512" {
+        description
+          "sha512 hash type.";
+      }
+    }
+    description
+      "Sets the hash type.";
+  }
+
+  typedef sshutil-algorithm-type {
+    type enumeration {
+      enum rsa {
+        description
+          "RSA type";
+      }
+      enum dsa {
+        description
+          "DSA type";
+      }
+      enum ecdsa {
+        description
+          "ECDSA type";
+      }
+    }
+    description
+      "key algorithm type";
+  }
+
+  typedef sshutil-key-type {
+    type enumeration {
+      enum public-private-key {
+        description "Generate specified public-private key pair.";
+      }
+      enum host-key {
+        description "Generate ssh host key.";
+      }
+    }
+    description "sshutil key generation type";
+  }
+  typedef sshutil-operation-type {
+    type enumeration {
+      enum import {
+        description
+        "
+        Import public key for a specified user.
+        Imported public keys are used for passwordless incoming
+        SSH connections.
+        ";
+      }
+      enum export {
+        description
+        "
+        Export public key. Exported public keys are used for
+        passwordless outgoing SSH connections.
+        ";
+      }
+    }
+    description
+      "Operations";
+  }
+
+  typedef certificate-entity-type {
+    type enumeration {
+      enum cert {
+        description
+          "Specifies a switch certificate.";
+      }
+      enum ca {
+        description
+          "Specifies a CA certificate for extension only.";
+      }
+      enum ca-client {
+        description
+          "Specifies a CA client certificate.";
+      }
+      enum ca-server {
+        description
+          "Specifies a CA server certificate.";
+      }
+      enum csr {
+        description
+          "Specifies a CSR file.";
+      }
+    }
+    description
+      "Specifies the certificate for switch/CA/CSR";
+  }
+
+  typedef extension-certificate-entity-type {
+    type union {
+      type certificate-entity-type;
+      type fibrechannel:brocade-empty-string-type;
+    }
+    description
+      "Specifies the extension certificate for switch/CA/CSR";
+  }
+
+  typedef gen-certificate-entity-type {
+    type enumeration {
+      enum cert {
+        description "To Generate a switch certificate.";
+      }
+      enum csr {
+        description "To generate a CSR.";
+      }
+    }
+    description
+      "Specifies the type for certificate generation.";  
+  }
+
+  typedef certificate-application-type {
+    type enumeration {
+      enum commoncert {
+        description
+          "common certificate";
+      }
+      enum https {
+        description
+          "Certificate for HTTP secured";
+      }
+      enum radius {
+        description
+          "
+          Certificate for Remote Authentication Dial-In User Service.
+          ";
+      }
+      enum ldap {
+        description
+          "
+          Certificate for Lightweight Directory Access Protocol.
+          ";
+      }
+      enum syslog {
+        description
+          "Certificate for syslog";
+      }
+      enum fcap {
+        description
+          "Certificate for FCAP.
+          RSA is the only supported key algorithm type.
+          ";
+      }
+      enum extension {
+        description
+          "Certificate for Extension.";
+      }
+    }
+    description
+      "Specifies the certificate type.";  
+  }
+
+  typedef seccertmgmt-operation-type {
+    type enumeration {
+      enum import {
+        description
+          "
+          Import certificates from the server or to download a certificate
+          issued by a CA after sending the CSR to the CA.
+          ";
+      }
+      enum export {
+        description
+          "
+          Export certificate to a host and a CSR to server to the Certification
+          Authority (CA) that issues the certificate.
+          ";
+      }
+    }
+    description
+      "certificate management operations.";
+  }
+  typedef seccertmgmt-action-type {
+    type enumeration {
+      enum import {
+        description
+          "
+          Import certificates from the server or to download a certificate
+          issued by a CA after sending the CSR to the CA.
+          ";
+      }
+    }
+    description
+      "certificate management action.";
+  }
+  typedef seccertmgmt-protocol-type {
+    type enumeration {
+      enum scp {
+        description
+          "secure copy from/to remote host";
+      }
+      enum ftp {
+        description
+          "File Transfer Protocol";
+      }
+    } 
+    description
+      "Specifies the protocol as either FTP or SCP.";
+  }
+  typedef keysize-type {
+    type enumeration {
+      enum 1024 {
+        description
+          "key size of 1024 bytes";
+      }
+      enum 2048 {
+        description
+          "key size of 2048 bytes";
+      }
+      enum 4096 {
+        description
+          "
+          key size of 4096 bytes.
+          Not supported by FCAP
+          ";
+      }
+      enum 8192 {
+        description
+          "
+          key size of 8192 bytes.
+          Not supported by FCAP.
+          Key-pair generation with 8192 bytes is highly CPU intensive.
+          Can cause high CPU usage and session time out. On such instance,
+          user is advised to verify the generated status by another
+          GET instance.
+          ";
+      }
+      enum P384 {
+        description
+          "
+          elliptic 384 bit curve
+          Supported by HTTPS and extension only
+          ";
+      }
+
+    }
+    description
+      "
+      Specifies the size of the key. The greater the value, the more secure
+      is the connection; however, performance degrades with size.
+      ";
+  }
+  typedef seccertmgmt-hash-type {
+    type enumeration {
+      enum sha1 {
+        description
+          "
+          Secure Hash Algorithm that generates a 160-bit (20-byte) hash value.
+          ";
+      }
+      enum sha256 {
+        description
+          "
+          Secure Hash Algorithm that generates a unique, fixed size 256-bit
+          (32-byte) hash.
+          ";
+      }
+      enum sha384 {
+        description
+          "
+          Secure Hash Algorithm that generates a unique, fixed size 384-bit
+          (48-byte) hash.
+          Not supported with DSA algorithm key type.
+          Not supported by FCAP.
+          ";
+      }
+      enum sha512 {
+        description
+          "
+          Secure Hash Algorithm that uses 64 byte words.
+          Not supported with DSA algorithm key type.
+          Not supported by FCAP.
+          ";
+      }
+    }
+    description
+      "Specifies the hash type.";
+  }
+  typedef base64-string-type {
+    type string {
+      length "0|4..max";
+      pattern "([!-~]{4,})?";
+    }
+    description
+      "
+      Base64 encoded string. Base64 is a binary-to-text encoding scheme that
+      represents binary data in an ASCII string where each Base64 digit
+      represents exactly 6 bits of data. So a plain string of 3 characters
+      is represented by a Base64 encoded string of 4 characters. The generic
+      string length relation between the plain and its encoded representation
+      is: length of encoded string = 0 for null string or a multiple of 4
+      greater than or equal to (4 * n)/3, where 'n' is the number of
+      characters in the plain string.
+      ";
+  }
+  grouping certificate-details-group {
+    description
+      "Information needed to create certificate/CSR";
+    leaf country-name {
+      type string {
+        length "2";
+        pattern "[A-Z]+";
+      }
+      description
+        "Specifies Country name.";
+    }
+    leaf state-name {
+      type string {
+        length "1..128";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies state name.";
+    }
+    leaf locality-name {
+      type string {
+        length "1..128";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies locality name.";
+    }
+    leaf organization-name {
+      type string {
+        length "1..64";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies organization name.";
+    }
+    leaf unit-name {
+      type string {
+        length "1..64";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies unit name.";
+    }
+    leaf domain-name {
+      type string {
+        length "1..64";
+        pattern "[ -~]+";
+      }
+      description
+        "Specifies the Fully qualified Domain Name, or IP address.";
+    }
+    leaf ip-address-in-subject-alternative-name {
+      when "../certificate-entity=csr " + 
+      "and ../certificate-type=https|radius|ldap|syslog ";
+      type boolean;
+      default "false";
+      status obsolete;
+      description
+        "
+        Whether X509v3 Subject Alternative Name extension include iPAddress.
+        true  : Include iPAddress.
+        false : Do not include iPAddress.
+        ";
+    }
+    container subject-alternative-name-dns-names {
+      when "../certificate-entity=csr " + 
+      "and ../certificate-type=https|radius|ldap|syslog ";
+      description
+        "
+        X509v3 Subject Alternative Name extension for DNS names.
+        ";
+      leaf-list dns-name {
+          type inet:host;
+          description
+            "
+            A list of FQDNs for Subject Alternative Name extension.
+            ";
+      }
+    }
+    container subject-alternative-name-ip-addresses {
+      when "../certificate-entity=csr " + 
+      "and ../certificate-type=https|radius|ldap|syslog ";
+      description
+        "
+        X509v3 Subject Alternative Name extension for IP addresses.
+        ";
+      leaf-list ip-address {
+          type inet:ip-address;
+          description
+            "
+            A list of IP addresses for Subject Alternative Name extension.
+            ";
+      }
+    }
+  }
+  typedef security-policy-state-type {
+    type enumeration {
+      enum "active" {
+        description
+          "The current status of the policy is active.";
+      }
+      enum "defined" {
+        description
+          "The current status of the policy is defined.";
+      }
+    }
+    description
+      "The current status of the policy.";
+  }
+  typedef security-policy-default-name-type {
+    type enumeration {
+      enum "SCC_POLICY" {
+        description
+          "Switch Connection Control policy.";
+      }
+      enum "FCS_POLICY" {
+        description
+          "Fabric Configuration Server policy.";
+      }
+      enum "ALL_DCC_POLICY" {
+        description
+          "
+          Deletes all DCC policies from the defined policy list.
+          Applicable only for delete instance.
+          ";
+      }
+      enum "ALL_STALE_DCC_POLICY" {
+        description
+          "
+          Deletes all stale DCC policies from the defined policy list.
+          Applicable only for delete instance.
+          ";
+      }
+    }
+    description
+      "Indicates the policy name for security policies.";
+  }
+  typedef security-policy-name-type {
+    type union {
+      type security-policy-default-name-type;
+      type string {
+        length "10..30";
+        pattern "DCC_POLICY_[ -~]{1,30}|'*'";
+      }
+    }
+    description
+      "
+      Device Connection Control policy.
+      Name has the common prefix DCC_POLICY_ followed by a string of
+      user-defined characters. These characters do not have to be
+      capitalized.
+      ";
+  }
+  typedef security-input-type {
+    type union {
+      type fibrechannel:wwn-type;
+      type fibrechannel:domain-id-type;
+      type string {
+        length "1..128";
+        pattern "[ -~]+|'*'";
+      }
+    }
+    description
+      "
+      Input for creating security policy operations and authentication secret.
+      WWN or domain ID or switch name.
+      A wildcard (*) may be specified to include all switches in the fabric.
+      Not Applicable for GET instance.
+      ";
+  }
+  typedef dcc-policy-member-type {
+    type enumeration {
+      enum "switch" {
+        description
+          "Switch member for DCC policy.";
+      }
+      enum "device" {
+        description
+          "Device member for DCC policy.";
+      }
+    }
+    description
+      "Identifies the WWN provided in operation is for switch or device.";
+  }
+  grouping security-info-group {
+    description
+      "Information about a switch or device";
+    leaf switch-wwn {
+      type fibrechannel:wwn-type;
+      description
+        "
+        The switch-wwn member contains an 8 byte value that identifies the
+        switch that contains the E_Port.
+        ";
+    }
+    leaf domain-id {
+      type fibrechannel:domain-id-type;
+      description 
+        "
+        The highest level in a three-level addressing hierarchy used in
+        the Fibre Channel address identifier. A domain typically is
+        associated with a single Fibre Channel switch. 
+        ";
+    }
+    leaf switch-name {
+      type string {
+        length "0..128";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        A printable ASCII name for the switch.
+        ";
+    } 
+  }
+  grouping ipfilter-policy-info-group {
+    description
+      "Information about a chassis";
+    leaf chassis-wwn {
+      type fibrechannel:wwn-type;
+      description
+        "
+        The chassis-wwn member contains an 8 byte value that identifies the
+        chassis.
+        ";
+    }
+    leaf domain-id {
+      type fibrechannel:domain-id-type;
+      description
+        "
+        The highest level in a three-level addressing hierarchy used in
+        the Fibre Channel address identifier. A domain typically is
+        associated with a single Fibre Channel switch.
+        ";
+    }
+    leaf chassis-user-friendly-name {
+      type fibrechannel:chassis-user-friendly-name-type;
+      description
+        "
+        A printable ASCII name for the chassis.
+        ";
+    }
+  }
+
+  grouping dcc-policy-group {
+    description
+      "Connectivity information about a switch or device";
+      leaf wwn {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "
+          The wwn member contains an 8 byte value that identifies the
+          switch or node.
+          ";
+      }
+      leaf member-type {
+        type dcc-policy-member-type;
+        config false;
+        description
+          "
+          Specifies the provided WWN member as device WWN or switch WWN.
+          ";
+      }
+      leaf domain-id {
+        when "../member-type=switch";
+        type fibrechannel:domain-id-type;
+        config false;
+        description 
+          "
+          The highest level in a three-level addressing hierarchy used in
+          the Fibre Channel address identifier. A domain typically is
+          associated with a single Fibre Channel switch. 
+          ";
+      }
+      leaf switch-name {
+        when "../member-type=switch";
+        type string {
+          length "0..128";
+          pattern "[ -~]*";
+        }
+        config false;
+        description
+          "
+          A printable ASCII name for the switch.
+          ";
+      } 
+      container ports {
+        when "../member-type=device";
+        config false;
+        description
+          "Port Number list";
+        leaf-list port {
+          type fibrechannel:user-port-number-type;
+          description
+            "
+            Ports in the specified switch.
+            ";
+        }
+      }
+  }
+  typedef security-policy-action-type {
+    type enumeration {
+      enum "create" {
+        description
+          "Creates a security policy.";
+      }
+      enum "delete" {
+        description
+          "Deletes a security policy.";
+      }
+      enum "add" {
+        description
+          "Adds member(s) to an existing security policy.";
+      }
+      enum "remove" {
+        description
+          "Removes member(s) to an existing security policy.";
+      }
+      enum "fcs-move" {
+        description
+          "Moves a member in the FCS policy to the specified position.";
+      }
+      enum "activate" {
+        description
+          "Changes all defined policies into activated state.";
+      }
+    }
+    description
+      "Indicates the action that must be taken on security policies.";
+  }
+  typedef fabric-wide-consistency-policy-type {
+    type enumeration {
+      enum "tolerant-scc" {
+        description
+          "Switch Connection Control policy in tolerant mode.";
+      }
+      enum "strict-scc" {
+        description
+          "Switch Connection Control policy in strict mode.";
+      }
+      enum "tolerant-dcc" {
+        description
+          "Device Connection Control policy in tolerant mode.";
+      }
+      enum "strict-dcc" {
+        description
+          "Device Connection Control policy in strict mode.";
+      }
+      enum "tolerant-fcs" {
+        description
+          "Fabric Configuration Server policy in tolerant mode.";
+      }
+      enum "strict-fcs" {
+        description
+          "Fabric Configuration Server policy in strict mode.";
+      }
+      enum "clear" {
+        description
+          "
+          Empty policy. Clears out all existing fabric wide set policy
+          This should not be specified with other policies.
+          ";
+      }
+    }
+    description
+      "Policy types for fabric wide consistency policy.";
+  }
+  typedef security-policy-distribute-permission-type {
+    type enumeration {
+      enum "accept" {
+        description
+          "
+          Configures switch to accept distributions of the specified policy.
+          ";
+      }
+      enum "reject" {
+        description
+          "
+          Configures switch to reject distributions of the specified policy.
+          However, a database cannot be rejected if it is specified in the
+          fabric-wide consistency policy.
+          ";
+      }
+    }
+    description
+      "Switch can be locally configured to allow or reject a security policy.";
+  }
+  typedef distribute-policy-type {
+    type enumeration {
+      enum "scc" {
+        description
+          "Switch Connection Control policy.";
+      }
+      enum "dcc" {
+        description
+          "Device Connection Control policy.";
+      }
+      enum "fcs" {
+        description
+          "Fabric Configuration Server policy.";
+      }
+      enum "password" {
+        description
+          "Password policy.";
+      }
+      enum "authentication" {
+        description
+          "
+          Fabric Element Authentication policy.
+          ";
+      }
+    }
+    description
+      "Policy names for distribution.";
+  }
+  typedef chassis-distribute-policy-type {
+    type enumeration {
+      enum "ipfilter" {
+        description
+          "
+          IP filter policy database.
+          ";
+      }
+    }
+    description
+      "Policy names for chassis distribution.";
+  }
+  typedef chassis-distribute-domain-type {
+    type union {
+      type fibrechannel:domain-id-type;
+      type string {
+        length "1";
+        pattern "'*'";
+      }
+    }
+    description
+      "
+      Input for distributing IP filter chassis wide in the specified switch in
+      the fabric. Fabric ID or Domain ID.
+      A wildcard (*) may be specified to include all switches in the fabric.
+      Not Applicable for GET instance.
+      ";
+  }
+  typedef security-violation-statistics-type {
+    type enumeration {
+      enum "telnet-policy" {
+        description
+          "Telnet policy violation statistics.";
+      }
+      enum "http-policy" {
+        description
+          "HTTP policy violation statistics.";
+      }
+      enum "scc-policy" {
+        description
+          "SCC policy violation statistics.";
+      }
+      enum "dcc-policy" {
+        description
+          "DCC policy violation statistics.";
+      }
+      enum "login" {
+        description
+          "Login violation statistics.";
+      }
+      enum "authentication-fail" {
+        description
+          "Authentication failure statistics.";
+      }
+      enum "ts-out-sync" {
+        description
+          "Time server out of sync statistics.";
+      }
+      enum "illegal-command" {
+        description
+          "Illegal command execution statistics.";
+      }
+      enum "all" {
+        description
+          "Include all the above mentioned statistics.";
+      }
+    }
+    description
+      "Name of the security violation statistics.";
+  }
+  typedef authentication-secret-type {
+    type string {
+      length "12..40";
+      pattern "[ -~]+";
+      pattern ":" {
+        modifier invert-match;
+      }
+    }
+    description
+      "
+      Specifies a shared secrets for DH-CHAP authentication on F_Port, N_Port
+      in Access Gateway mode and E, EX_Port and F_Port on Fabric. Spaces are
+      not allowed.
+      ";
+  }
+  typedef authentication-secret-action-type {
+    type enumeration {
+      enum "set" {
+        description
+          "Sets the shared secret pair.";
+      }
+      enum "remove" {
+        description
+          "
+          Removes the DH-CHAP shared secret pair.
+          Supply asterisk (*) for removing all secrets
+          ";
+      }
+    }
+    description
+      "Manages the DH-CHAP shared secret key information.";
+  }
+  typedef authentication-protocol-type {
+    type enumeration {
+      enum "fcap" {
+        description
+          "Specifies FCAP as only authentication protocol.";
+      }
+      enum "dh-chap" {
+        description
+          "Specifies DH-CHAP as only authentication protocol.";
+      }
+      enum "all" {
+        description
+          "Specifies both FCAP and DH-CHAP authentication protocol.";
+      }
+    }
+    description
+      "Authentication Protocol.";
+  }
+  typedef dh-group-type {
+    type enumeration {
+      enum "dh-group-null" {
+        description
+          "Specifies NULL DH algorithm.";
+      }
+      enum "dh-group-1024" {
+        description
+          "Specifies DH group 1024.";
+      }
+      enum "dh-group-1280" {
+        description
+          "Specifies DH group 1280.";
+      }
+      enum "dh-group-1536" {
+        description
+          "Specifies DH group 1536.";
+      }
+      enum "dh-group-2048" {
+        description
+          "Specifies DH group 2048.";
+      }
+      enum "dh-group-all" {
+        description
+          "Specifies all the DH groups";
+      }
+    }
+    description
+      "Diffie-Hellman (DH) group.";
+  }
+  typedef authentication-hash-type {
+    type enumeration {
+      enum "sha256" {
+        description
+          "Specifies SHA-256 hash function.";
+      }
+      enum "sha1" {
+        description
+          "Specifies SHA-1 hash function.";
+      }
+      enum "md5" {
+        description
+          "Specifies MD5 hash function.";
+      }
+      enum "sha1-md5" {
+        description
+          "Specifies both SHA-1 and MD5 hash function.";
+      }
+      enum "all" {
+        description
+          "Specifies all the supported hash function.";
+      }
+    }
+    description
+      "Authentication hash type.";
+  }
+  typedef authentication-operation-type {
+    type enumeration {
+      enum "authentication-init" {
+        description
+          "Reinitiates authentication on selected ports.";
+      }
+    }
+    description
+      "Modifies the authentication configuration.";
+  }
+  typedef authentication-policy-mode-type {
+    type enumeration {
+      enum "off" {
+        description
+          "
+          Turns the authentication policy off, and the switch rejects any
+          authentication requests.
+          ";
+      }
+      enum "passive" {
+        description
+          "
+          Sets the authentication policy to passive mode (default).
+          Authentication is not initiated but participates in authentication,
+          if the connecting switch/device initiates it.
+          ";
+      }
+      enum "active" {
+        description
+          "
+          Sets the authentication policy to active mode. During switch
+          initialization, authentication is initiated on all E_Ports, but the
+          port is not disabled if the connecting switch does not support
+          authentication or the authentication policy is turned off.
+          Applicable only for switch authentication policy.
+          ";
+      }
+      enum "on" {
+        description
+          "
+          Authentication is mandatory. If the attached device is not capable of
+          doing authentication, the corresponding port is disabled.
+          ";
+      }
+    }
+    description
+      "Authentication policy modes.";
+  }
+  typedef authentication-initiation-type {
+    type enumeration {
+      enum "all-e-ports" {
+        description
+          "Specifies all E_Ports in the switch.";
+      }
+    }
+    description
+      "Input for initiating authentication in specified type of ports.";
+  }
+  typedef authentication-initiation-parameter-type {
+    type union {
+      type fibrechannel:slot-port-name-type;
+      type authentication-initiation-type;
+    }
+    description
+      "
+      Input for intitiating authentication.
+      ";
+  }
+  typedef certificate-hexdump-type {
+    type string {
+      length "0|1..max";
+      pattern '[\r\n -~]*';
+    }
+    description
+      "
+      The CSR, CA or switch certificate contents
+      in raw hexadecimal format, including beginning and end markers,
+      installed on the switch.
+      ";
+  }
+  typedef rbac-context-type {
+    type enumeration {
+      enum "chassis" {
+        description
+          "chassis context.";
+      }
+      enum "vf" {
+        description
+          "virtual fabric context.";
+      }
+      enum "both" {
+        description
+          "In virtual fabric context and chassis context";
+      }
+      enum "disallowed" {
+        description
+          "Disallowed in non virtual fabric context";
+      }
+    }
+    description
+      "Specifies context permission.";
+  }
+  typedef rbac-permission-type {
+    type enumeration {
+      enum "N" {
+        description
+          "no permission.";
+      }
+      enum "O" {
+        description
+          "observe permission.";
+      }
+      enum "M" {
+        description
+          "modify only permission.";
+      }
+      enum "OM" {
+        description
+          "observe-modify permission.";
+      }
+    }
+    description
+      "Specifies RBAC permission type.";
+  }
+
+  typedef rbac-class-permission-type {
+    type string {
+      length "1..67";
+      pattern "[a-zA-Z]{1,64}=(OM|O)";
+    }
+    description
+      "
+      Class name with '=' separated class permission.
+      Example : LocalUserEnvironment=O
+      ";
+  }
+  typedef rbac-role-type {
+    type enumeration {
+      enum "system-defined" {
+        description "Default role";
+      }
+      enum "user-defined" {
+        description "User defined role";
+      }
+    }
+    description
+      "
+      Specifies the role type. system-defined or user-defined.
+      ";
+  }
+  typedef rbac-class-type {
+    type string {
+      length "1..64";
+      pattern "[a-zA-Z]+";
+    }
+    description
+      "The role based access control class name";
+  }
+  typedef security-compliance-action-type {
+    type enumeration {
+      enum "zeroize" {
+        description
+          "Zeroize compliance related configuration data.";
+      }
+      enum "self-test-all" {
+        description
+          "Run all Self Tests.";
+      }
+      enum "self-test-default" {
+        description
+          "Run default Self Tests.";
+      }
+      enum "self-test-dh" {
+        description
+          "Run DH Self Tests.";
+      }
+      enum "self-test-drbg" {
+        description
+          "Run DRBG Self Tests.";
+      }
+      enum "self-test-aes" {
+        description
+          "Run AES Self Tests.";
+      }
+      enum "self-test-aes-gcm" {
+        description
+          "Run AES-GCM Self Tests.";
+      }
+      enum "self-test-rsa" {
+        description
+          "Run RSA Self Tests.";
+      }
+      enum "self-test-rsa2048-sha256" {
+        description
+          "Run RSA2048_SHA256 Self Tests.";
+      }
+      enum "self-test-des" {
+        description
+          "Run DES Self Tests.";
+      }
+      enum "self-test-dsa" {
+        description
+          "Run DSA Self Tests.";
+      }
+      enum "self-test-sha1" {
+        description
+          "Run SHA1 Self Tests.";
+      }
+      enum "self-test-sha256" {
+        description
+          "Run SHA256 Self Tests.";
+      }
+      enum "self-test-sha384" {
+        description
+          "Run SHA384 Self Tests.";
+      }
+      enum "self-test-sha512" {
+        description
+          "Run SHA512 Self Tests.";
+      }
+      enum "self-test-hmac-sha1" {
+        description
+          "Run HMAC-SHA1 Self Tests.";
+      }
+      enum "self-test-hmac-sha224" {
+        description
+          "Run HMAC-SHA224 Self Tests.";
+      }
+      enum "self-test-hmac-sha256" {
+        description
+          "Run HMAC-SHA256 Self Tests.";
+      }
+      enum "self-test-hmac-sha384" {
+        description
+          "Run HMAC-SHA384 Self Tests.";
+      }
+      enum "self-test-hmac-sha512" {
+        description
+          "Run HMAC-SHA512 Self Tests.";
+      }
+      enum "self-test-sha3" {
+        description
+          "Run SHA3 Self Tests.";
+      }
+      enum "self-test-ecdsa" {
+        description
+          "Run ECDSA Self Tests.";
+      }
+      enum "self-test-ecdh" {
+        description
+          "Run ECDH Self Tests.";
+      }
+      enum "crypto-integrity-test" {
+        description
+          "Run crypto integrity test.";
+      }
+    }
+    description
+      "Specifies compliance configuration to apply.";
+  }
+  typedef crypto-version-type {
+    type enumeration {
+      enum "9.1.0" {
+            description
+            "Crypto version number for FOS v9.1.0 release";
+      }
+    }
+    description
+      "Specifies crypto version number.";
+  }
+
+  typedef boot-up-self-test-status-type {
+    type enumeration {
+      enum "pass" {
+        description
+          "boot-up Self Tests passed";
+      }
+      enum "fail" {
+        description
+          "boot-up Self Tests failed";
+      }
+      enum "not-run" {
+        description
+          "boot-up Self Tests not yet run";
+      }
+    }
+    description
+      "Status of boot-up Self Tests";
+  }
+
+  typedef known-host-type {
+    type string {
+      length "1..299";
+      pattern '[ -~]*';
+    }
+    description
+      "
+       The typedef for sshutil known-host-type which is of the format
+       [host]:port-number, the host type includes both IPv4/IPv6
+       address formats and also fully qualified domain name.
+       The port number includes only port number till 65535.
+      ";
+  }
+
+}

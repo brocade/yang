@@ -1,0 +1,1302 @@
+module brocade-chassis {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-chassis";
+  prefix brocade-chassis;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  import brocade-fru-types {
+    prefix fru;
+  }
+
+  import brocade-interface-types {
+    prefix brocade-interface-types;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-chassis', which
+    provides a detailed view of configuration and runtime
+    information of the chassis.
+     
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-24 {
+    description
+      "
+      Fabric OS 8.2.1
+      ---------------
+      Initial release (FOS 8.2.1).
+      Refine descriptions.
+
+      Fabric OS 8.2.3b
+      ---------------
+      Added entitlement-serial-number leaf
+
+      Fabric OS 9.1.0
+      ---------------
+      Added credit-recovery container.
+      Added management-interface-configuration.
+      Add chassis-enabled leaf in chassis container
+      Support for new typedef for product-name leaf in chassis.
+      Added usb-device-enabled and available-space.
+      Added management-ethernet-interface.
+      Added registered-organization-name leaf and
+      organization-registration-date leaf
+      in the chassis container for RON.
+      Added backplane-revision leaf.
+      Changed leaf name from 'available-space' to 'usb-available-space'.
+      Added support for motd, shell and session timeout.
+      Added management-port-track-configuration.
+      Added management-port-connection-statistics.
+      Used physical-interface-type in place of enum
+      Added lldp-enabled leaf under management-ethernet-interface list.
+      Update ip-prefix support.
+      Update type in chassis-user-friendly-name leaf
+      ";
+    reference "None";
+  }
+  grouping management-port-connection-group {
+    description
+      "
+      Management ethernet interface connection details.
+      ";
+    leaf cp-name {
+      type fibrechannel:cp-name-type;
+      description
+        "
+        Specifies the name of the CP to which the connection belongs to.
+        ";
+    }
+    leaf ip-family {
+      type inet:ip-version;
+      description
+        "
+        Specifies the internet protocol version that connection belongs to.
+        ";
+    }
+    leaf operational-status {
+      type enumeration {
+      enum "active" {
+        description
+          "
+          State of the connection is active.
+          ";
+        }
+        enum "inactive" {
+          description
+            "
+            State of the connection is inactive.
+            ";
+        }
+        enum "unknown" {
+          description
+            "
+            State of the connection is unknown.
+            ";
+        }
+      }
+      description
+        "
+        Specifies if the connection is currently active or not.
+        ";
+    }
+    leaf local-ip-address {
+      type inet:ip-address;
+      description
+        "
+        Specifies the local/source IPv4/IPv6 address of the network
+        connection.
+        ";
+    }
+    leaf local-port {
+      type inet:port-number;
+      description
+        "
+        Specifies the local/source port number of the network connection.
+        ";
+    }
+    leaf remote-ip-address {
+      type inet:ip-address;
+      description
+        "
+        Specifies the remote/destination IPv4/IPv6 address of the network
+        connection.
+        ";
+    }
+    leaf remote-port {
+      type inet:port-number;
+      description
+        "
+        Specifies the remote/destination port number of the network 
+        connection.
+        ";
+    }
+    leaf start-time {
+      type yang:date-and-time;
+      description
+        "
+        Timestamp when the socket connection was opened at the switch.
+        ";
+    }
+    leaf state-update-time {
+      type union {
+      type yang:date-and-time;
+      type fibrechannel:brocade-empty-string-type;
+      }
+      description
+        "
+        Timestamp when the socket connection state changed.
+        ";
+    }
+    leaf protocol {
+      type string {
+        length "3..6";
+        pattern "tcp|udp";
+      }
+      description
+        "
+        Represents the transport connection protocol used.
+        ";
+    }
+    leaf connection-state {
+      type brocade-interface-types:connection-state-type;
+      description
+        "
+        State of the connection. 
+        ";
+    } 
+    leaf process-name {
+      type string {
+        length "0..64";
+        pattern "[ -~]*";
+      }
+      description
+        "
+        Name of the process that opened the socket.
+        ";
+    }
+    leaf process-id {
+      type uint16 {
+        range "0..32768";
+      }
+      description
+        "
+        Process id of the program that is responsible for the connection.
+        ";
+    }
+  }
+  container brocade-chassis {
+    description
+      "
+      A detailed view of configuration and runtime information of the chassis,
+      including HA status information.
+      ";
+    container chassis {
+      description
+        "
+        The complete details of the chassis.
+        ";
+      leaf chassis-user-friendly-name {
+        type fibrechannel:chassis-user-friendly-name-type;
+        description
+          "
+          An ASCII name assigned to the switch chassis by the administrator.
+          A chassis name must begin with a letter and can consist of letters,
+          numbers, underscores (_) or hyphens (-) and is not case-sensitive.
+          In FICON mode, the name is limited to a maximum of 24 characters
+          plus hyphens (-) and underscores (_).
+          ";
+      }
+      leaf chassis-wwn {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "
+          The WWN of the chassis.
+          ";
+      }
+      leaf license-id {
+        type fibrechannel:wwn-type;
+        config false;
+        description
+          "
+          The WWN which is used for generating the license.
+          ";
+      }
+      leaf manufacturer {
+        type fru:manufacturer-type;
+        config false;
+        description
+          "
+          The manufacturer of the chassis.
+          ";
+      }
+      leaf registered-organization-name {
+        type string {
+          length "0..28";
+          pattern "[ -~]*";
+        }
+        config false;
+        description
+          "
+           Displays the registered organization name configured in the switch.
+          ";
+      }
+      leaf organization-registration-date {
+        type string {
+          length "8";
+          pattern '(jan|feb|mar|apr|may|jun|' +
+                  'jul|aug|sep|oct|nov|dec){1}' +
+                  ' (20){1}[0-9]{1}[0-9]{1}';
+        }
+        config false;
+        description
+          "
+           Displays the date of completion of the registration.
+           Registration date is of mmm 20YY format (Example: may 2015).
+          ";
+      }
+      leaf part-number {
+        type fru:part-number-type;
+        config false;
+        status deprecated;
+        description
+          "
+          The part number for the physical element assigned by
+          the manufacturer.
+
+          Deprecated: Please refer 'brocade-fru.yang' 'list wwn'
+          'part-number' leaf instead.
+          ";
+      }
+      leaf serial-number {
+        type fru:serial-number-type;
+        config false;
+        description
+          "
+          A printable ASCII string that specifies the factory serial
+          number of the chassis.
+          ";
+      }
+      leaf entitlement-serial-number {
+        type fru:serial-number-type;
+        config false;
+        description
+          "
+          A serial number which is used for entitlement support.
+          ";
+      }
+      leaf max-blades-supported {
+        type uint16 {
+          range "1|8|12";
+        }
+        config false;
+        description
+          "
+          The maximum number of blades that can fit in the physical chassis.
+          This number includes switch, control processor, application,
+          and core routing blades.
+          ";
+      }
+      leaf vendor-serial-number {
+        type string {
+          length "0..20";
+          pattern "[ -~]{0,20}";
+        }
+        config false;
+        status deprecated;
+        description
+          "
+          The serial number of the chassis assigned by the vendor.
+
+          Deprecated: Please refer 'brocade-fru.yang' 'list wwn'
+          'vendor-serial-number' leaf instead.
+          ";
+      }
+      leaf vendor-part-number {
+        type string {
+          length "0..20";
+          pattern "[ -~]{0,20}";
+        }
+        config false;
+        status deprecated;
+        description
+          "
+          The part number of the chassis assigned by the vendor.
+
+          Deprecated: Please refer 'brocade-fru.yang' 'list wwn'
+          'vendor-part-number' leaf instead.
+          ";
+      }
+      leaf vendor-revision-number {
+        type string {
+          length "0..4";
+          pattern "[ -~]{0,4}";
+        }
+        config false;
+        status deprecated;
+        description
+          "
+          The revision number of the chassis assigned by the vendor.
+
+          Deprecated: Please refer 'brocade-fru.yang' 'list wwn'
+          'vendor-revision-number' leaf instead.
+          ";
+      }
+      leaf product-name {
+        type fibrechannel:product-name-type;
+        config false;
+        description
+          "
+          The product name of the chassis.
+          ";
+      }
+      leaf vf-enabled {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        description
+          "
+          Whether Virtual Fabrics is enabled on the chassis.
+          Enabling Virtual Fabrics is a disruptive operation that
+          requires a reboot to take effect.
+
+             true  : Virtual Fabrics is enabled on the chassis.
+             false : Virtual Fabrics is not enabled on the chassis.
+          ";
+      }
+      leaf vf-supported {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        config false;
+        description
+          "
+          Whether Virtual Fabrics is supported on the chassis.
+
+             true  : Virtual Fabrics is supported on the chassis.
+             false : Virtual Fabrics is not supported on the chassis.
+          ";
+      }
+      leaf fcr-enabled {
+        when "../fcr-supported = true";
+        type boolean;
+        description
+          "
+          Indicates whether FCR is enabled or not.
+
+                true  : enabled
+                false : disabled
+          ";
+      }
+      leaf fcr-supported {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        type boolean;
+        config false;
+        description
+          "
+          Indicates whether FCR is supported on
+          the chassis or not.
+
+             true  : FCR is supported
+             false : FCR is not supported
+          ";
+      }
+      leaf date {
+        type string {
+          length "1..100";
+          pattern "[ -~]{1,100}";
+        }
+        config false;
+        description
+          "
+          The current date of the switch.
+          ";
+      }
+      leaf chassis-enabled {
+        type boolean;
+        description
+          "
+          Indicates whether chassis is in enabled or disabled state.
+
+             true  : chassis is enabled.
+             false : chassis is disabled.
+          ";
+      }
+      leaf message-of-the-day {
+        type string {
+          length "0..1022";
+          pattern "[ a-zA-Z0-9.,\"'*-]*";
+        }
+        description
+          "
+          Specifies the text string of alphanumeric characters to be
+          displayed as the banner on the chassis before login. The message
+          displays either before or after the login prompt. Fabric OS
+          does not control when the MOTD displays.
+          The maximum length is 1022 characters.
+          ";
+      }
+      leaf shell-timeout {
+        type uint32 {
+          range "0..99999";
+        }
+        units "minutes";
+        description
+          "
+          Bash timeout value.
+          Setting this to 0 disables bash timeout
+          ";
+      }
+      leaf session-timeout {
+        type uint32 {
+          range "0..99999";
+        }
+        units "minutes";
+        description
+          "
+          SSH Session timeout value.
+          Setting this to 0 disables ssh session timeout.
+	  ";
+      }
+      leaf usb-device-enabled {
+        type boolean;
+        description
+          "
+          Indicates whether USB is in enabled or disabled state.
+
+             true  : USB device is enabled.
+             false : USB device is disabled.
+          ";
+      }
+      leaf usb-available-space {
+        type uint32;
+        config false;
+        description
+          "
+          Available space on the USB connected device.
+          ";
+      }
+      leaf tcp-timeout-level {
+        type uint8 {
+          range "1..5";
+        }
+        description
+          "
+          Display or configure the timeout level for half open TCP IPv4 and
+          IPv6 connections in all the management ethernet interfaces
+          in switch. Approximate timeout value for each level is provided
+          as below:
+
+	  Timeout level   |  Timeout in seconds
+	       1          |        3
+	       2          |        7
+	       3          |        15
+	       4          |        31
+	       5          |        63
+           ";
+      }
+      leaf backplane-revision {
+        if-feature fibrechannel:fibrechannel_chassis_platform;
+        type fibrechannel:brocade-hex-string-type {
+          length "3..max";
+        }
+        config false;
+        description
+          "
+          The chassis backplane revision number.
+          ";
+      }
+    }
+    container ha-status {
+      config false;
+      description
+        "
+        The control processor (CP) status, which includes the following
+        information:
+        - Local CP state (slot number and CP ID) and warm or cold
+        - Remote CP state (slot number and CP ID)
+        - High Availability (enabled or disabled)
+        - Heartbeat (up or down)
+        - Health of the standby CP
+        - HA synchronization status
+        ";
+      leaf active-cp {
+        type string {
+          length "1..4";
+          pattern "cp0|cp1";
+        }
+        description
+          "The ID of the active CP.";
+      }
+      leaf standby-cp {
+        type string {
+          length "1..4";
+          pattern "cp0|cp1";
+        }
+        description
+          "The ID of the standby CP.";
+      }
+      leaf active-slot {
+        type uint16 {
+          range "0..12";
+        }
+        description
+          "The slot number of the active CP.";
+      }
+      leaf standby-slot {
+        type uint16 {
+          range "0..12";
+        }
+        description
+          "The slot number of the standby CP.";
+      }
+      leaf recovery-type {
+        type string {
+          length "1..7";
+          pattern "cold|warm";
+        }
+        description
+          "The recovery status of the switch.";
+      }
+      leaf standby-health {
+        type string {
+          length "1..20";
+          pattern "(healthy|faulted|unknown|non-redundant|not-available)";
+        }
+        description
+          "
+          The health status of the standby CP.
+          healthy :
+            The standby CP is running, and the background health
+            diagnostic has not detected any errors.
+          faulted :
+            The standby CP is running, but the background health
+            diagnostic has discovered a problem with the blade.
+            Check the logs to determine the appropriate action.
+            Failover is disabled until the standby CP is repaired.
+          unknown :
+            The standby CP health state is unknown because of one
+            of the following reasons: the standby CP does not
+            exist, the heartbeat is down, or the Health Monitor has
+            detected a configuration file error.
+          non-redundant :
+            There is no standby CP.
+          not-available :
+            The standby CP health status is not available.
+          ";
+      }
+      leaf ha-enabled {
+        type boolean;
+        description
+          "
+          Whether the Availability (HA) is enabled or disabled.
+
+            true  : HA is enabled.
+            false : HA is disabled.
+          ";
+      }
+      leaf heartbeat-up {
+        type boolean;
+        description
+          "
+          Whether the heartbeat to standby CP is up or down.
+            true  : The heartbeat to standby CP is up.
+            false : The heartbeat to standby CP is down.
+          ";
+      }
+      leaf ha-synchronized {
+        type boolean;
+        description
+          "
+          Whether HA is in a synchronized state. When HA is in a synchronized
+          state and a failover becomes necessary, it is nondisruptive.
+
+            true  : HA is synchronized.
+            false : HA is not synchronized.
+          ";
+      }
+    }
+
+    container management-interface-configuration {
+       description
+         "
+         Configures the maximum number of REST sessions, throttling
+         configurations for incoming REST requests, enable or disable
+         keep-alive connection.
+         ";
+
+       leaf rest-enabled {
+         type boolean;
+         description
+          "
+          This parameter is used to disable the REST interface.
+          If REST is already disabled, it can only be enabled through CLI.
+          ";
+       }
+       leaf https-protocol-enabled {
+         type boolean;
+         description
+          "
+          This parameter is used to enable HTTP protocol if certificates are
+          not installed and HTTPS is not effective. This configuration has no
+          effect if HTTPS is effective as shown by 'effective-protocol' below.
+          ";
+       }
+       leaf effective-protocol {
+         type enumeration {
+           enum "none" {
+             description "None";
+           }
+           enum "http" {
+             description "Hypertext Transfer Protocol";
+           }
+           enum "https" {
+             description "Hypertext Transfer Protocol Secure";
+           }
+         }
+         config false;
+         description
+          "
+          Protocol currently in effect for REST communication, HTTP or HTTPS.
+          ";
+       }
+       leaf max-rest-sessions {
+         type uint32 {
+           range "1..10";
+         }
+         description
+          "
+          Maximum number of REST sessions that are allowed.
+          The Default number of sessions is 3.
+          New logins denied, if the session count has reached maximum limit.
+          ";
+       }
+       leaf https-keep-alive-enabled {
+         type boolean;
+         description
+          "
+          This parameter is used to enable or disable keep-alive connection
+          in HTTPS.
+          ";
+       }
+       leaf https-keep-alive-timeout {
+         type uint32 {
+             range "1..15";
+         }
+         units "seconds";
+         config false;
+         description
+          "
+          The keep-alive connection expires after an idle time of 15 seconds.
+          ";
+       }
+     }
+
+    list management-ethernet-interface {
+      key "cp-name interface-name";
+      description
+        "
+        A list of management ethernet interface configurations
+        for fixed-port and chassis switches.
+        ";
+      leaf cp-name {
+        type fibrechannel:cp-name-type;
+	description
+	  "
+	  Identification of host CP in fixed-port and chassis switch.
+	  ";
+      }
+      leaf interface-name {
+	type enumeration {
+	  enum "eth0" {
+	    description
+	      "Physical ethernet interface eth0";
+	  }
+	  enum "eth3" {
+	    description
+	      "Physical ethernet interface eth3 applicable only for chassis.";
+	  }
+	  enum "bond0" {
+	    description
+	      "
+              Logical ethernet interface bond0 formed by bonding eth0 and eth3.
+              It is applicable only for chassis.
+              ";
+	  }
+	}
+        description
+          "
+          Name of the interface in CP for fixed-port and chassis switch.
+          Valid value for interface name in fixed-port switch is eth0.
+          Valid values for interface name in chassis are eth0, eth3 and bond0.
+          ";
+      }
+      leaf auto-negotiate {
+        type boolean;
+        must "../speed";
+        description
+          "
+          Enabled or disabled status of auto-negotiation feature for ethernet
+          link.
+          True - Auto-negotiation is/will be enabled.
+          False - Auto-negotiation is/will be disabled.
+
+          Note: To configure auto-negotiate, both auto-negotiate and speed
+          attributes have to be specified.
+          This is not a configurable parameter on certain platforms.
+          ";
+      }
+      leaf speed {
+        type enumeration {
+          enum "10BASE-T" {
+            description
+              "Maximum supported speed in ethernet link is 10 Mbps.";
+          }
+          enum "100BASE-TX" {
+            description
+              "Maximum supported speed in ethernet link is 100 Mbps.";
+          }
+          enum "1000BASE-T" {
+            description
+              "
+              Maximum supported speed in ethernet link is 1000 Mbps.
+              Graphite and Carbon platforms support only 1000 Mbps speed.
+              ";
+          }
+          enum "undetermined" {
+            description
+              "Speed of ethernet link is undetermined.";
+          }
+        }
+        must "../auto-negotiate";
+        description
+          "
+          Speed of the ethernet link in Mbps. When auto-negotiate is enabled,
+          the response includes this leaf only when the ethernet link
+          connection is established.
+
+          Note: To configure speed, both speed and auto-negotiate
+          attributes have to be specified.
+          This is not a configurable parameter on certain platforms.
+          ";
+      }
+      leaf duplex {
+	type enumeration {
+	  enum "full" {
+            description
+              "Full duplex capability of ethernet link";
+	  }
+          enum "half" {
+            description
+              "Half duplex capability of ethernet link";
+          }
+	  enum "undetermined" {
+            description
+              "Capability of ethernet link is undetermined.";
+          }
+	}
+        config false;
+	description
+	  "
+          Capability of the ethernet link. When auto-negotiate is enabled,
+          the response includes this leaf only when the ethernet link
+          connection is established.
+          ";
+      }
+      leaf connection-established-status {
+	type boolean;
+	config false;
+	description
+	  "Ethernet Link connection if established is true else false.";
+      }
+      leaf ethernet-mac-address {
+	type yang:mac-address;
+	config false;
+	description
+	  "MAC Address of ethernet link.";
+      }
+      leaf active-interface {
+	when "../interface-name = 'bond0'";
+	if-feature fibrechannel:fibrechannel_chassis_platform;
+	type union {
+	  type fibrechannel:physical-interface-type;
+	  type string {
+            length "4";
+	    pattern "none";
+          }
+	}
+	config false;
+	description
+	  "
+	  Current active interface in bond0. Applicable only for chassis
+	  switches.
+	  ";
+      }
+      container standby-interfaces {
+        when "../interface-name = 'bond0'";
+        if-feature fibrechannel:fibrechannel_chassis_platform;
+        config false;
+        description
+          "
+          List of one or two currently standby interfaces available in bond0.
+          ";
+        leaf-list interface {
+	  type fibrechannel:physical-interface-type;
+	  config false;
+	  description
+	    "
+	    Currently standby interface in bond0. Applicable only for chassis
+	    switches.
+	    ";
+        }
+      }
+      leaf inet-address {
+	type inet:ipv4-address;
+	config false;
+	description
+	  "
+          IPv4 address for the interface. The response includes this leaf
+          only for eth0 interface in fixed-port switches and bond0
+          interface in chassis switches.
+          ";
+      }
+      leaf broadcast-address {
+	type inet:ipv4-address;
+	config false;
+	description
+	  "
+          Broadcast address for the interface. The response includes this leaf
+          only for eth0 interface in fixed-port switches and bond0
+          interface in chassis switches.
+          ";
+      }
+      leaf subnet-mask {
+	type inet:ipv4-address;
+	config false;
+	description
+	  "
+          Network mask for the interface. The response includes this leaf
+          only for eth0 interface in fixed-port switches and bond0
+          interface in chassis switches.
+          ";
+      }
+      container global-inet6-addresses {
+	config false;
+	description
+	  "
+	  List of IPv6 addresses with global scope assigned to the
+	  ethernet interface of the switch. The response includes this
+          container only when global IPv6 addresses are configured for eth0
+          interface in fixed-port switches and bond0 interface in chassis
+          switches.
+	  ";
+	leaf-list global-inet6-address {
+          type union {
+            type inet:ipv6-address;
+            type inet:ipv6-prefix;
+          }
+	  config false;
+	  description
+	    "
+	    IPv6 address of global scope assigned to the ethernet interface.
+	    ";
+	}
+      }
+      leaf link-inet6-address {
+        type union {
+          type inet:ipv6-address;
+          type inet:ipv6-prefix;
+        }
+        config false;
+        description
+	  "
+          Link local address of the interface. The response includes this leaf
+          only for eth0 interface in fixed-port switches and bond0
+          interface in chassis switches.
+          ";
+      }
+      container ethernet-status-flags {
+	config false;
+	description
+	  "
+	  List of configuration flags for the ethernet interface.
+          ";
+	leaf-list flag {
+	  type enumeration {
+            enum "up" {
+              description
+                "Kernel modules related to interface have been loaded";
+            }
+            enum "running" {
+              description
+                "Interface is ready to accept data";
+            }
+            enum "broadcast" {
+              description
+                "Interface supports broadcasting";
+            }
+            enum "multicast" {
+              description
+                "Interface supports multicasting";
+            }
+            enum "master" {
+              description
+                "Interface has master status";
+            }
+            enum "slave" {
+              description
+                "Interface has slave status";
+            }
+	  }
+	  config false;
+	  description
+	    "
+	    Flags indicating the configuration status of ethernet interface.
+	    ";
+	}
+      }
+      leaf mtu {
+	type uint32 {
+	  range "576..1500";
+	}
+	units "bytes";
+	config false;
+	description
+	  "
+	  Maximum transmission unit in bytes for the ethernet interface.
+	  Normally it is 1500.
+	  ";
+      }
+      leaf metric {
+	type yang:gauge32;
+	config false;
+	description
+	  "Cost of using the interface.";
+      }
+      leaf rx-packets {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of packets received.";
+      }
+      leaf rx-errors {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of packets received with error.";
+      }
+      leaf rx-dropped {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of dropped packets during reception.";
+      }
+      leaf rx-overruns {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of received packets that faced fifo overruns.";
+      }
+      leaf rx-frame {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of misaligned packets received.";
+      }
+      leaf rx-bytes {
+	type yang:zero-based-counter64;
+	units "bytes";
+	config false;
+	description
+	  "Total number of bytes received from interface.";
+      }
+      leaf tx-packets {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of packets transmitted.";
+      }
+      leaf tx-errors {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of packets transmitted with error.";
+      }
+      leaf tx-dropped {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of dropped packets during transmission.";
+      }
+      leaf tx-overruns {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of transmitted packets that faced fifo overruns.";
+      }
+      leaf tx-carrier {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "Total number of packets that experienced loss of carriers.";
+      }
+      leaf tx-collisions {
+	type yang:zero-based-counter64;
+	units "packets";
+	config false;
+	description
+	  "
+	  Total number of transmitted packets that experienced
+	  ethernet collisions.
+	  ";
+      }
+      leaf tx-queue-length {
+	type uint32 {
+	  range "0..max";
+	}
+	units "packets";
+	config false;
+	description
+	  "Length of the transmission queue in unit of packets";
+      }
+      leaf tx-bytes {
+	type yang:zero-based-counter64;
+	units "bytes";
+	config false;
+	description
+	  "Total number of bytes transmitted over interface.";
+      }
+      leaf start-memory-address {
+        when "../interface-name != 'bond0'";
+        type fibrechannel:brocade-hex-string-type {
+	  length "10";
+	}
+        config false;
+	description
+	  "
+	  Start address of memory segment that onboard memory segment
+	  of NIC is mapped into. It is optional and may be absent in
+          certain platforms.
+	  ";
+      }
+      leaf end-memory-address {
+        when "../interface-name != 'bond0'";
+        type fibrechannel:brocade-hex-string-type {
+	  length "10";
+	}
+        config false;
+	description
+	  "
+	  End address of memory segment that onboard memory segment
+	  of NIC is mapped into. It is optional and may be absent in
+          certain platforms.
+	  ";
+      }
+      leaf lldp-enabled {
+        when "../connection-established-status = true and " +
+             "(../interface-name = 'eth0' or " +
+             "../interface-name = 'eth3')";
+        type boolean;
+        description
+        "
+        LLDP state of the port. Default state is true.
+        Possible values are:
+          true  - LLDP is enabled on the port
+          false  - LLDP is disabled on the port
+        ";
+      }
+    }
+    container management-port-track-configuration {
+      description
+        "
+        Ethernet connections management port tracker configuration.
+        ";
+      leaf tracking-enabled {
+        type boolean;
+        description
+          "
+          Specifies if the management port tracking is enabled or disabled.
+          true: enabled
+          false: disabled
+          ";
+      }
+      leaf scan-interval {
+        when "../tracking-enabled = true";
+        type uint16 {
+          range "30..300";
+        }
+        units seconds;
+        description
+          "
+          Specifies the interval at which the kernel is queried for the active
+           network connection at the switch;
+        ";
+      }
+    }
+    list management-port-connection-statistics {
+      config false;
+      description
+        "
+        Details regarding the ethernet connections on management port.
+        This list supports the following query parameter combinations:
+
+        cp-name
+        protocol
+        local-port
+        remote-port
+        ip-family
+        operational-status
+        ";
+      uses management-port-connection-group;
+    }
+
+    container credit-recovery {
+      if-feature fibrechannel:fibrechannel_chassis_platform;
+      description
+        "
+        The credit loss detection and recovery for backend ports
+        in the Director chassis.
+        ";
+      leaf mode {
+        type enumeration {
+          enum "off" {
+            description
+              "
+              Internal port credit recovery is disabled.
+              ";
+          }
+          enum "link-reset-only" {
+            description
+              "
+              Internal port credit recovery is enabled with
+              Link Reset only.
+              ";
+          }
+          enum "link-reset-threshold" {
+            description
+              "
+              Internal port credit recovery is enabled with
+              Link Reset Threshold only.
+              ";
+          }
+       }
+       description
+         "
+         Internal port credit recovery configuration modes.
+         ";
+      }
+
+      leaf link-reset-threshold {
+        type uint16 {
+          range "2..10";
+        }
+        units "number of link resets";
+        description
+          "
+          When the number of Link Reset per hour reaches the
+          configured threshold and if the mode is Link Reset
+          Threshold, the action to fault the blade based on
+          fault option will be executed.
+          ";
+      }
+
+      leaf fault-option {
+        type enumeration {
+          enum "edge-blade" {
+            description
+              "
+              Fault Edge blade when Backend failure happens
+              on Edge or code on both single and Dual Active core.
+              ";
+          }
+          enum "core-blade" {
+            description
+              "
+              Fault Edge blade when Backend failure happens for
+              single Active core. Fault Core blade when Backend
+              failure on Edge or core blade happens for Dual
+              Active core Director.
+              ";
+          }
+          enum "edge-core-blade" {
+            description
+              "
+              Fault edge blade when Backend failure happens on core or
+              edge blade when core chip fault count is less than 2.
+              Fault core blade when Backend failure happens on core or
+              edge blade when core chip fault count is greater than 2.
+              ";
+          }
+       }
+       description
+         "
+         Fault option for Backend Link failure.
+         ";
+      }
+
+      leaf backend-credit-loss-enabled {
+        type boolean;
+        description
+          "
+          Enable or Disable link reset for credit loss alone.
+          True enables link reset when loss of credit happens and
+          False disables the link reset recovery when loss of credit.
+          ";
+     }
+
+      leaf backend-loss-of-sync-enabled {
+        type boolean;
+        description
+          "
+          Enable or Disable link reset for loss of sync alone.
+          True enables link reset for loss of sync and False
+          disables the link reset recovery for loss of sync.
+          ";
+      }
+    }
+  }
+}

@@ -1,0 +1,435 @@
+module brocade-supportlink {
+
+    yang-version 1.1;
+    namespace "urn:brocade.com:mgmt:brocade-supportlink";
+    prefix brocade-supportlink;
+
+    import ietf-inet-types {
+      prefix inet;
+    }
+
+    import ietf-yang-types {
+      prefix yang;
+    }
+
+    import brocade-security-yang-types {
+      prefix brocade-security-type;
+    }
+
+   organization
+    "Broadcom Inc.";
+
+    contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+    description
+    "
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+    revision 2020-05-08 {
+      description
+      "
+      FOS 9.0.1
+      ---------
+      Added history support
+ 
+      FOS 9.0.0
+      ---------
+      Initial release.
+      ";
+        reference
+          "
+          SupportLink feature support.
+          ";
+
+  }
+
+
+  container brocade-supportlink {
+
+    description
+      "
+      Configures SupportLink to collect and upload critical device information
+      to a server module over a secured channel.
+      ";
+
+    container supportlink-profile {
+      description
+        "
+        The SupportLink profile is used to specify the configuration that need
+        to be collected/uploaded to the destination server.
+        ";
+
+      leaf supportlink-enabled {
+        type boolean;
+        description
+          "
+          Specifies whether SupportLink feature is enabled or not.
+          true  : Indicates that automatic transfer of support data to Broadcom
+                  has been enabled. By enabling this function the admin
+                  agrees that data, which is not intended to transfer personal
+                  data, however personal data could be included,
+                  will be automatically transferred to Broadcom.
+          false : Indicates that automatic transfer of support data to Broadcom
+                  has been disabled.
+          ";
+      }
+      leaf server {
+        type inet:host;
+        description
+          "
+          Destination server address or domain name.
+          ";
+      }
+      leaf port {
+        type inet:port-number;
+        description
+          "
+          The HTTPS port number of the destination server.
+          ";
+      }
+      leaf user-name {
+        type union {
+          type string {
+            length "1..64";
+            pattern "^[a-zA-Z0-9-_]+";
+          }
+          type string {
+            length "1..64";
+            pattern '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}';
+          }
+        }
+        description
+          "
+          The existing user name or an email address configured on the server.
+          ";
+      }
+      leaf start-date {
+        type union {
+          type enumeration {
+            enum "Sun" {
+              description "Sunday";
+            }
+            enum "Mon" {
+              description "Monday";
+            }
+            enum "Tue" {
+              description "Tuesday";
+            }
+            enum "Wed" {
+              description "Wednesday";
+            }
+            enum "Thu" {
+              description "Thursday";
+            }
+            enum "Fri" {
+              description "Friday";
+            }
+            enum "Sat" {
+              description "Saturday";
+            }
+          }
+          type string {
+            length "8..10";
+            pattern '^\d{1,2}/\d{1,2}/\d{4}';
+          }
+        }
+        description
+          "
+          The start date is in weekday [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+          or exact date [MM/DD/YYYY] format.
+          ";
+      }
+      leaf period {
+        type uint32 {
+          range "1..30";
+        }
+        units "days";
+        description
+          "
+          The frequency in which the service must be triggered.
+          For example, if Sunday is configured for start date, the
+          period must be set to 7 days to make it as
+          weekly runs. If the exact date is configured, 
+          for example 07/30/2018, the period must be set to any 
+          value as per the maximum and minimum timer configuration.
+          ";
+      }
+      leaf start-time {
+        type uint32 {
+          range "0..23";
+        }
+        units "hours";
+        description
+          "
+          The start time of the support data upload. Specified exact time
+          in 24 hour format. For example, 1 means 01:00 AM.
+          ";
+      }
+      leaf end-time-period {
+        type uint32 {
+          range "0..12";
+        }
+        units "hours";
+        description
+          "
+          The maximum time period from the start time of the upload service.
+          Actual upload time is random time computed by device at every reboot,
+          between start time and end time.
+          ";
+      }
+      leaf random-start-time {
+        type string {
+          length "16..24";
+          pattern '^(\d{2}/\d{2}/\d{4}|^[a-zA-z]{3})\s([0-9]|[0-1][0-9]|'
+                + '[2][0-3]):[0-5][0-9]';
+        }
+        config false;
+        description
+          "
+          The random upload time that is calculated from start time and end
+          time period of support data service.
+          ";
+      }
+      leaf retry-time {
+        type uint32 {
+          range "0..22";
+        }
+        units "hours";
+        description
+          "
+          The upload service starts again after an hour(s) elapsed from the
+          failure, if a non-zero value is set.
+          ";
+      }
+      leaf collection-time {
+        type string {
+          length "4..5";
+          pattern '^([0-9]|[0-1][0-9]|[2][0-3]):[0-5][0-9]';
+        }
+        description
+          "
+          The collection time of the support data. Specified in HH:MM
+          in 24 hour format.
+          ";
+      }
+      leaf proxy-user {
+        type string {
+          length "0..64";
+          pattern '^[a-zA-Z0-9-_]*';
+        }
+        description
+          "
+          The username setup on the proxy server.
+          This parameter is required only in proxy server environment.
+          ";
+      }
+      leaf proxy-password {
+        type brocade-security-type:base64-string-type;
+        description
+          "
+          The proxy server password for the user. The password
+          should be base64 encoded. Refer to RFC 3414.
+          This parameter is required only in proxy server environment.
+          ";
+      }
+      leaf proxy-server {
+        type union {
+          type inet:host;
+          type string {
+            length "0";
+          }
+        }
+        description
+          "
+          The proxy server address or domain name.
+          This parameter is required only in proxy server environment.
+          Response doesn't include proxy-server attribute, if it is not
+          configured.
+          ";
+      }
+      leaf proxy-port {
+        type inet:port-number;
+        description
+          "
+          The proxy server port number.
+          This parameter is required only in proxy server environment.
+          Response doesn't include proxy-port attribute, if it is not
+          configured.
+          ";
+      }
+      leaf proxy-protocol {
+        type enumeration {
+          enum "http" {
+            description "Hyper Text Transfer Protocol.";
+          }
+          enum "https" {
+            description "Hypertext Transfer Protocol Secure.";
+          }
+          enum "socks4" {
+            description "Socket Secure is an Internet protocol which was
+                         developed to route packets through client-server
+                         applications.";
+          }
+          enum "socks4a" {
+            description "Socket Secure version 4a allows domain
+                         names as well.";
+          }
+          enum "socks5" {
+            description "Socket Secure version 5 allows strong
+                         authentication schemes.";
+          }
+          enum "socks5h" {
+            description "Socket Secure version 5h allows strong
+                         authentication schemes and domain names.";
+          }
+        }
+        description
+          "
+          The protocols used to communicate with proxy server.
+          This parameter is required only in proxy server environment.
+          Response doesn't include proxy-protocol attribute, if it is not
+          configured.
+          ";
+      }
+      leaf group-tag {
+        type string {
+          length "0..64";
+        }
+        description
+          "
+          The organizational group of switches.
+          ";
+      }
+      leaf next-collection-time {
+        type union {
+          type yang:date-and-time;
+          type string {
+            length "8..9";
+            pattern '^[a-zA-z]{3}\s([0-9]|[0-1][0-9]|[2][0-3]):'
+                + '[0-5][0-9]';
+          }
+        }
+        config false;
+        description
+          "
+          The next support data collection time in the switch.
+          ";
+      }
+      leaf next-service-start-time {
+        type union {
+          type yang:date-and-time;
+          type string {
+            length "8..9";
+            pattern '^[a-zA-z]{3}\s([0-9]|[0-1][0-9]|[2][0-3]):'
+                + '[0-5][0-9]';
+          }
+        }
+        config false;
+        description
+          "
+          The next support data upload time to the server.
+          ";
+      }
+      leaf next-service-retry-time {
+        type yang:date-and-time;
+        config false;
+        description
+          "
+          The next support data upload retry time to the server.
+          ";
+      }
+      leaf last-collection-time {
+        type yang:date-and-time;
+        config false;
+        description
+          "
+          The last successful support data collection time in the switch.
+          ";
+      }
+      leaf last-upload-time {
+        type yang:date-and-time;
+        config false;
+        description
+          "
+          The last successful support data upload time to the server.
+          ";
+      }
+    }
+    list supportlink-history {
+      config false;
+      description
+        "
+        The supportLink history is used to retrieve the failures
+        occurred during the inventory upload operations.
+        ";
+
+      leaf index {
+        type uint16 {
+          range "1..20";
+        }
+        description
+          "
+          The index of the specific upload failure entry and it is used
+          as a label for this object.
+          ";
+      }
+      leaf time-stamp {
+        type yang:date-and-time;
+        description
+          "
+          The time when supportLink upload operation failed.
+          ";
+      }
+      leaf server {
+        type inet:host;
+        description
+          "
+          SupportLink destination server address or domain name.
+          ";
+      }
+      leaf port {
+        type inet:port-number;
+        description
+          "
+          The HTTPS port number of the destination server.
+          ";
+      }
+      leaf error-code {
+        type int32;
+        description
+          "
+          It indicates the exact failure occurred during
+          supportLink upload operation.
+          ";
+      }
+      leaf error-message {
+        type string {
+          length "0..1024";
+        }
+        description
+          "
+          The error message provides the reason for the supportLink
+          upload operation failures.
+          ";
+      }
+    }
+  }
+}

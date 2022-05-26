@@ -1,0 +1,525 @@
+module brocade-access-gateway {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-access-gateway";
+  prefix brocade-access-gateway;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+  
+  import brocade-access-gateway-types {
+    prefix access-gateway-type;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+  description
+    "
+    This module defines the YANG module 'brocade-access-gateway',
+    which provides a detailed view of configuration and runtime
+    information of the Access Gateway.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-10-18 {
+    description
+      "
+      FOS 8.2.0a
+      -----
+        Initial release
+
+      FOS 8.2.1
+      -----
+        Refine descriptions
+        Refine 'attached-switch-user-friendly-name' regular expression
+        Formatting
+        Organization information
+
+      FOS 9.0.0
+      -----
+        Update if-feature statements for access gateway mode
+        Formatting
+
+      FOS 9.1.0
+      ----
+        Refactoring changes for the 'online-status' in the 'f-port-list'
+        and 'n-port-map' leafs,
+        And changes for the 'reliable-status' in the 'n-port-map' leaf.
+        Refine description for auto policy.
+        Refine 'reliable-status' in the 'n-port-map' leaf.
+
+      ";
+    reference "None";
+  }
+
+  container brocade-access-gateway {
+    description
+      "Configuration and runtime information of the Access Gateway.";
+
+    list port-group {
+      when "../policy/port-group-policy-enabled = 1";
+      if-feature fibrechannel:access_gateway_platform;
+      key "port-group-id";
+      description
+        "
+        The port group configuration. 
+        
+        The port group defines a set of N_Ports to be included in the Port
+        Grouping policy. The factory default port group is '0', which includes 
+        all N_Ports. The default port group cannot be removed or renamed.
+        ";
+      leaf port-group-id {
+        type uint8 {
+          range "0..max";
+        }
+        description
+          "
+          The port group ID. The maximum number of port groups that can be 
+          created is equal to the total number of ports available on the given 
+          platform. For instance, on a 64-port platform, there can be 64 port 
+          groups with the port-group ID ranging from 0 to 63.
+          ";
+      }
+      leaf port-group-name {
+        type string {
+          length "1..63";
+          pattern "([0-9a-zA-Z]{1,63})";
+        }
+        description
+          "
+          The port group name. The name must be alphanumeric. The default port 
+          group name uses the format pg<port-group-id>.
+          ";
+      }
+      container port-group-n-ports {
+        description
+          "List of N_Ports that are in the port group.";
+        leaf-list n-port {
+          type fibrechannel:slot-port-name-type;
+          min-elements 1;
+          description
+            "List of N_ports that are in the port group.";
+        }
+      }
+      container port-group-f-ports {
+        when "../port-group-mode/load-balancing-mode-enabled = 1";
+        description
+          "List of F_Ports that are in the port group.";
+        leaf-list f-port {
+          type fibrechannel:slot-port-name-type;
+          description
+            "
+            List of F_Ports that are in the port group.
+            To update the configuration, you must enable load-balancing mode 
+            for the port group.
+            ";
+        }
+      }
+      container port-group-mode {
+        description
+          "Different modes of operation of the port-group";
+        leaf load-balancing-mode-enabled {
+          type uint8 {
+            range "0..1";
+          }
+          default "0";
+          description
+            "
+            Enables or disables load-balancing mode for the specified 
+            port group.
+
+              0 : Load-balancing mode disabled.
+              1 : Load-balancing mode enabled.
+            ";
+        }
+        leaf multiple-fabric-name-monitoring-mode-enabled {
+          type uint8 {
+            range "0..1";
+          }
+          default "0";
+          description
+            "
+            Enables or disables multiple fabric name monitor mode for the 
+            specified port group.
+
+              0 : Multiple fabric name monitor mode disabled.
+              1 : Multiple fabric name monitor mode enabled.
+            ";
+        }
+      }
+    }
+
+    list n-port-map {
+      if-feature fibrechannel:access_gateway_platform;
+      key "n-port";
+      description
+        "Defines the N_Port to F_Port mappings.";
+      leaf n-port {
+        type fibrechannel:slot-port-name-type;
+        description
+          "Enables mapping F_Ports to an N_Port.";
+      }
+      leaf failover-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables failover for an N_Port.
+
+            0 : Failover disabled.
+            1 : Failover enabled.
+          ";
+      }
+      leaf failback-enabled {
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables failback for an N_Port.
+
+            0 : Failback disabled.
+            1 : Failback enabled.
+          ";
+      }
+      leaf online-status {
+        type uint8 {
+          range "0..1";
+        }
+        config false;
+        status deprecated;
+        description
+          "
+          Whether the N_Port is online or offline.
+
+            0 : Offline.
+            1 : Online.
+
+         Deprecated: For read operations, this leaf will be returned
+         in responses with valid data comparable to the 'operational-status'
+         leaf.
+         ";
+      }
+      leaf operational-status {
+        type access-gateway-type:operational-status-type;
+        config false;
+        description
+          "
+          Whether the N_Port is online or offline.
+
+          ";
+      }
+      leaf reliable-status {
+        when "../policy/auto-policy-enabled = 0";
+        type int8 {
+          range "-1|0..1";
+        }
+        config false;
+        status deprecated;
+        description
+          "
+          The reliable status of the N_Port.
+
+            -1 : Not applicable.
+             0 : Unreliable.
+             1 : Reliable.
+
+         Deprecated: For read operations, this leaf will be returned
+         in responses with valid data comparable to the 'reliable-status-string'
+         leaf.
+          ";
+      }
+      leaf reliable-status-string {
+        when "../policy/auto-policy-enabled = 0";
+        type access-gateway-type:reliable-type;
+        config false;
+        description
+          "
+          The reliable status of the N_Port.
+          ";
+      }
+
+      container n-port-info {
+        when "../online-status = 1";
+        config false;
+        leaf attached-fabric-name {
+          type fibrechannel:wwn-type;
+          description
+            "The WWN of the fabric attached to the N_Port.";
+        }
+        leaf attached-port-wwn {
+          type fibrechannel:wwn-type;
+          description
+            "The WWN of the port attached to the N_Port.";
+        }
+        leaf n-port-fcid {
+          type fibrechannel:fcid-hex-string-type;
+          description
+            "The Fibre Channel ID of the N_Port.";
+        }
+        leaf attached-switch-user-friendly-name {
+          type string {
+            length "0..30";
+            pattern "([0-9a-zA-Z][0-9a-zA-Z-._]{2,30})|" +
+                    "([0-9][0-9a-zA-Z-._]{2,30})";
+          }
+          description
+            "
+            The ASCII name assigned to the switch by the administrator.
+            
+            1 to 30 alphanumeric characters plus hyphens, periods, and 
+            underscores. Spaces are not allowed. A switch name can begin with 
+            a letter or number, but a switch name that begins with a numeric 
+            character (0-9) must also have at least an underscore (_), 
+            hyphen (-), period (.), or alphabetic character (A-Z, a-z). 
+            A switch name with only numeric characters is not valid.
+            ";
+        }
+        leaf attached-switch-f-port {
+          type fibrechannel:slot-port-name-type;
+          description
+            "The fabric switch port number of the port attached to the N_Port";
+        }
+        leaf attached-switch-ip-address {
+          type inet:ip-address;
+          description
+            "The out-of-band IP address of the attached switch.";
+        }
+        description
+          "The N_Port login information and the attached switch details.";
+      }
+      container configured-f-port-list {
+        leaf-list f-port {
+          type fibrechannel:slot-port-name-type;
+          min-elements 1;
+          description
+            "
+            List of F_Ports that are mapped to the N_Port. The list can be 
+            empty when there is no F-Port mapped to the N_Port. Once you enable 
+            Access Gateway mode in the switch, F_Ports are mapped to the 
+            default N_Port. You must clear the existing mapping before you map 
+            an F_Port to another N_Port.
+            ";
+        }
+        description
+          "
+          The N_Port to F_Port mappings.
+          Note that configured and static port mapping cannot overlap.
+          ";
+      }
+      container static-f-port-list {
+        leaf-list f-port {
+          type fibrechannel:slot-port-name-type;
+          min-elements 1;
+          description
+            "
+            List of F_Ports that are statically mapped to the N_Port. The list
+            can be empty when no F-Port is statically mapped to the N_Port.
+            ";
+        }
+        description
+          "
+          The static F_Port to N_Port mappings.
+          Note that configured and static port mapping cannot overlap.
+          ";
+      }
+      container preferred-f-ports {
+        leaf-list preferred-f-port {
+          type fibrechannel:slot-port-name-type;
+          description
+            "
+            List of F-Ports for which this port is secondary N-Port.
+            If the N-port to which the F-port is mapped via configured-f-port
+            is offline then the F-port shall use this N-port
+            (secondary N-port) to login.
+            The list can be empty when this N_Port is not mapped as
+            secondary N-port for any F-port.
+            ";
+        }
+        description
+          "
+          The preferred F_Port to N_Port mappings.
+          Configured and preferred port mapping cannot overlap.
+          ";
+        }
+    }
+
+    list f-port-list {
+      if-feature fibrechannel:access_gateway_platform;
+      key "f-port";
+      config false;
+      description
+        "List of all F_Ports present on the Access Gateway.";
+      leaf f-port {
+        type fibrechannel:slot-port-name-type;
+        description
+          "The F_Port for which information is being fetched.";
+      }
+      leaf online-status {
+        type uint8 {
+          range "0..1";
+        }
+        status deprecated;
+        description
+          "
+          Whether the F_Port is online or offline.
+
+            0: Offline.
+            1: Online.
+
+         Deprecated: For read operations, this leaf will be returned
+         in responses with valid data comparable to the 'operational-status'
+         leaf.
+          ";
+      }
+
+      leaf operational-status {
+        type access-gateway-type:operational-status-type;
+        description
+          "
+          Whether the F_Port is online or offline.
+
+          ";
+      }
+      container f-port-info {
+        when "../online-status = 1";
+        description
+          "The F_Port login information.";
+        leaf n-port {
+          type fibrechannel:slot-port-name-type;
+          description
+            "The N_Port to which this F_Port is mapped.";
+        }
+        leaf login-exceeded {
+          type uint8 {
+            range "0..1";
+          }
+          description
+            "
+            The login exceeded state of the F_Port.
+
+              0 : Login limit not exceeded.
+              1 : Login limit exceeded.
+            ";
+        }
+      }
+    }
+
+    container policy {
+      if-feature fibrechannel:access_gateway_platform;
+      description
+        "
+        The Access Gateway policy configuration. To enable or disable any of 
+        the AG policies, the switch must be in a disabled state.
+        ";
+      leaf port-group-policy-enabled {
+        when "auto-policy-enabled = 0";
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables the port group policy.
+
+          0 : Disabled.
+          1 : Enabled.
+          ";
+      }
+      leaf auto-policy-enabled {
+        when "port-group-policy-enabled = 0";
+        type uint8 {
+          range "0..1";
+        }
+        description
+          "
+          Enables or disables the auto policy.
+
+          0 : Disabled.
+          1 : Enabled.
+
+	  Disabling auto policy will enable port-group-policy as default.
+          ";
+      }
+    }
+
+    container n-port-settings {
+      if-feature fibrechannel:access_gateway_platform;
+      description
+        "The N_Port-related configuration parameters.";
+      leaf reliability-counter {
+        when "../policy/auto-policy-enabled = 0";
+        type yang:zero-based-counter64 {
+          range "0|10..100";
+        }
+        description
+          "
+          The reliability counter configuration for N_Ports.
+
+            0      : Disabled.
+            10-100 : Enabled.
+          ";
+      }
+    }
+
+    list device-list {
+      if-feature fibrechannel:access_gateway_platform;
+      key "wwn";
+      config false;
+      description
+        "
+        A list of devices logged in via the Access Gateway and their F_Port, 
+        N_Port, and FCID mapping.
+        ";
+      leaf wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The port world wide name (WWN) of the connected device.";
+      }
+      leaf fcid {
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "The Fibre Channel ID (FCID) of the connected device.";
+      }
+      leaf f-port {
+        type fibrechannel:slot-port-name-type;
+        description
+          "The F_Port to which the device is connected.";
+      }
+      leaf n-port {
+        type fibrechannel:slot-port-name-type;
+        description
+          "The N_Port through which the device logged in.";
+      }
+    }
+  }
+}

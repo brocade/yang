@@ -1,0 +1,77 @@
+module brocade-operation-usb-delete-file {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-usb-delete-file";
+  prefix brocade-operation-usb-delete-file;
+
+  import "brocade-operation-types" {
+    prefix operation-types;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module of 'usb', which manages the files
+    and folders on the attached USB device.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-22 {
+    description
+      "
+      Fabric OS 9.1.0
+      ----------------
+      Initial release (FOS 9.1.0).
+      Added usb-path-type and usb-filename-types.
+      ";
+    reference
+      "None";
+  }
+
+  rpc usb-delete-file {
+    description
+      "
+      The RPC command definition for usb operation.
+      ";
+    input {
+      container usb-operation-parameters {
+        description
+          "
+          Input container to perform usb related operation.
+          ";
+        leaf path {
+          type operation-types:usb-path-type;
+          description
+            "Path to the file.";
+        }
+        leaf name {
+          type operation-types:usb-filename-type;
+          description
+            "Name of file in the USB device.";
+        }
+      }
+    }
+  }
+}

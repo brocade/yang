@@ -1,0 +1,612 @@
+module brocade-license {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-license";
+  prefix brocade-license;
+ 
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+  import brocade-fru-types {
+    prefix fru;
+  }
+
+ 
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module brocade-license.
+    The 'brocade-license' YANG module provides a detailed
+    view of the licenses installed on the switch.
+    It provides the means for monitoring and managing the
+    licenses on the switch.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-03 {
+    description
+      "
+      Fabric OS 9.0.1
+      ---------------
+        Added license-format leaf
+
+      Fabric OS 9.0.0
+      ---------------
+        Updated description of name leaf and added 
+        generation-date, active-firmware-version, target-firmware-version
+        leafs to the license list.
+        Added pod license feature support. 
+
+      Fabric OS 8.2.1b
+      ---------------
+        Initial release
+        Refined descriptions.
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-license {
+    config false;
+    description
+      "The container for the licenses installed on the switch.";
+    list license {
+      key "name";
+      description
+        "A list of licenses installed on the switch.";
+      leaf name {
+        type string {
+          length "20..128";
+          pattern "([a-zA-Z0-9-])+";
+        }
+        description
+          "
+          The representation of the license would be either license key or
+          serial number. The license key is a string with alpha numeric
+          characters and the License serial number is a string with the
+          format of 'FOS-XX-X-XX-XXXXXXXX'. Example of a license key and
+          serial number mentioned below.
+          License key: 'HP9ttZNSgmB4MCD3NmNWgQDWtAKBFtXtBSFJF'
+          Serial number: 'FOS-00-0-02-11201234'
+          ";
+      }
+      container features {
+        description
+          "A list of features that are integrated in a single license key";
+          leaf-list feature {
+            type string {
+              length "1..128";
+              pattern "[ -~]+";
+            }
+            description
+              "The name of the feature.";
+          }
+      }
+      leaf capacity {
+        type uint32 {
+          range "0..max";
+        }
+        description
+          "
+          The capacity for the license installed on the switch. This 
+          parameter is displayed only for a capacity-based license.
+          ";
+      }
+      leaf consumed {
+        type uint32 {
+          range "1..32";
+        }
+        description
+          "
+          The number of slots configured to use the license installed on the 
+          switch.  This leaf is displayed only for a slot-based 
+          license.
+          "; 
+      }
+      container configured-blade-slots {
+        description
+          "
+          A list of slot numbers of the configured blade slots for the license 
+          installed on the switch.
+          ";
+          leaf-list configured-blade-slot {
+            type uint32 {
+              range "1..32";
+            }
+            description
+              "
+              The configured blade slot details. This leaf is displayed  
+              only for a slot based license.
+              ";
+          }
+      }
+      leaf expiration-date {
+        type string {
+          length "10";
+          pattern "(([0][1-9]|[1][0-2])[/]([0][1-9]|[1|2][0-9]|[3][0|1])[/]" +
+                  "([0-9]{4}))";
+        }
+        description
+          "
+          The expiration date for the license installed on the switch.
+          The expiration date for the license in 'MM/DD/YYYY' format.
+          This attribute is displayed only when the time based license 
+          installed on the system.
+          ";
+      }
+      leaf generation-date {
+        type string {
+          length "10";
+          pattern "(([0][1-9]|[1][0-2])[/]([0][1-9]|[1|2][0-9]|[3][0|1])[/]" +
+                  "([0-9]{4}))";
+        }
+        description
+          "
+          The generation date for the license installed on the switch.
+          The generation date for the license in 'MM/DD/YYYY' format.
+          This leaf is valid only for serial number based licenses. 
+          ";
+      }
+      leaf active-firmware-version {
+        type fru:firmware-version-type;
+        description
+          "
+          A human readable string identifying the running firmware version
+          for the Trusted FOS (TruFOS) Certificate license installed on
+          a switch. Example of running firmware version mentioned below.
+          '9.0.0','9.0.0+','9.0.0++','9.1.0-','9.0.0--','9.0.0*,9.1.0+'
+          ";
+      }
+      leaf target-firmware-version {
+        type fru:firmware-version-type;
+        description
+          "
+          A human readable string identifying the target firmware version
+          for the Trusted FOS (TruFOS) Certificate license installed on
+          a switch. Example of target firmware version mentioned below.
+          '9.0.0','9.0.0+','9.0.0++','9.1.0-','9.0.0--','9.0.0*,9.1.0+'
+          ";
+      }
+      leaf license-format {
+        type enumeration {
+          enum "certificate-based-license" {
+            description
+              "
+              This type can be used to identify the certificate based license.
+              ";
+          }
+          enum "key-based-license" {
+            description
+              "
+              This type can be used to identify the key based license.
+              ";
+          }
+        }
+        description
+          "To determine the specified license is certificate or key based.";
+      }
+    }
+    container end-user-license-agreement {
+      config false;
+      description
+        "
+        Detailed view of End User License Agreement.
+        ";
+      leaf text {
+        type string {
+          length "1..max";
+          pattern '[\r\n -~]+';
+        }
+        description
+          "
+          Contents of accepted Brocade EULA
+          (End User License Agreement).
+          ";
+      }
+    }
+    container ports-on-demand-license-info {
+      config false;
+      description
+        "
+        Contains information related to ports-on-demand license
+        reservations. 
+        ";
+
+      leaf sfp-port-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Total count of SFP based ports available on the switch.
+          ";
+      }
+      leaf qsfp-port-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Total count of QSFP based ports available on the switch.
+          ";
+      }
+      leaf sfp-dd-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Total count of SFP Double Density (dd) based ports available
+          on the switch.
+          ";
+      }
+      leaf port-on-demand-license {
+        type boolean;
+        description
+          "
+          Specifies if ports on demand license is installed or not.
+
+          true  : Ports on demand license is installed.
+          false : Ports on demand license is not installed.
+          ";
+      } 
+      leaf qflex-port-on-demand-license {
+        type boolean;
+        description
+          "
+          Specifies if Q-flex ports on demand license is installed.
+
+          true  : Q-flex ports on demand license installed.
+          false : Q-flex ports on demand license is not installed.
+          ";
+      } 
+      leaf sfp-dd-port-on-demand-license {
+        type boolean;
+        description
+          "
+          Specifies if Double Density (dd) ports on demand license is installed.
+
+          true  : Double Density ports on demand license installed.
+          false : Double Density ports on demand license is not installed.
+          ";
+      }
+      leaf provisioned-sfp-port-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Total number of SFP based ports provisioned for use in the switch.
+          ";
+      }
+      leaf sfp-port-base-switch-allowance-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates port assignments provisioned by base switch allowance.
+          ";
+      }
+      leaf sfp-port-license-allowance-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates maximum assignments provisioned by SFP based ports on
+          demand license.
+          ";
+      }
+      leaf sfp-port-assigned-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Total number of SFP based ports assigned to base switch allowance or
+          installed licenses.
+          ";
+      }
+      leaf sfp-port-base-switch-assigned-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates number of SFP ports assigned to base switch allowance.
+          ";
+      }
+      leaf licensed-sfp-port-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates number of SFP ports assigned to the ports on demand license.
+          ";
+      }
+      leaf sfp-port-license-reservation-available-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates license reservations available for use by unassigned SFP 
+          ports.
+          ";
+      }
+      container sfp-port-base-switch-members {
+        description
+          "
+          Contains list of SFP based ports assigned to base switch allowance.
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            SFP based port assigned to base switch allowance.
+            ";
+        }
+      }  
+      container licensed-sfp-port-members {
+        description
+          "
+          Contains list of SFP ports assigned to ports-on-demand license.
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            SFP based port assigned to port on demand license. 
+            ";
+        }
+      }
+      container unassigned-sfp-port-members {
+        description
+          "
+          Contains list of SFP ports not assigned to base switch or ports on 
+          demand license. 
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            SFP based port not assigned to base switch or port on demand 
+            license.
+            ";
+        }
+      }
+      container licensed-offline-sfp-port-members {
+        description
+          "
+          Contains list of licensed SFP ports that are offline.
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            Licensed SFP port that is offline.
+            ";
+        }
+      }
+      leaf provisioned-qsfp-port-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Total number of QSFP based ports provisioned for use in the switch.
+          ";
+      }
+      leaf qsfp-base-switch-allowance-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates port assignments provisioned by base switch allowance.
+          ";
+      }
+      leaf qsfp-license-allowance-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates maximum assignments provisioned by QSFP ports on demand
+          license.
+          ";
+      }
+      leaf qsfp-port-assigned-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Total number of QSFP based ports assigned to base switch allowance or
+          installed licenses.
+          ";
+      }
+      leaf qsfp-port-base-switch-assigned-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates number of QSFP ports assigned to base switch allowance
+          ";
+      }
+      leaf licensed-qsfp-port-count{
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates number of QSFP ports assigned to the ports on demand
+          license.
+          ";
+      }
+      leaf qsfp-port-license-reservation-available-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates license reservations available for use by unassigned QSFP 
+          ports.
+          ";
+      }
+      container qsfp-port-base-switch-members {
+        description
+          "
+          Contains list of QSFP based ports assigned to base switch allowance.
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            QSFP based port assigned to base switch allowance.
+            ";
+        }
+      }  
+      container licensed-qsfp-port-members {
+        description
+          "
+          Contains list of QSFP ports assigned to port on demand license.
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            QSFP based port assigned to port on demand license. 
+            ";
+        }
+      }
+      container unassigned-qsfp-port-members {
+        description
+          "
+          Contains list of QSFP ports not assigned to base switch or ports on 
+          demand license. 
+          ";
+        leaf-list port{
+          type fibrechannel:port-number-type;
+          description
+            "
+            QSFP based port member not assigned to base switch or ports on 
+            demand license.
+            ";
+        }
+      }
+      container licensed-offline-qsfp-port-members {
+        description
+          "
+          Contains list of licensed QSFP ports that are offline.
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            Licensed QSFP port that is offline.
+            ";
+        }
+      }
+      leaf provisioned-sfp-dd-port-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Total number of SFP-DD based ports provisioned for use in the switch.
+          ";
+      }
+
+      leaf sfp-dd-base-switch-allowance-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates port assignments provisioned by base switch allowance.
+          ";
+      }
+      leaf sfp-dd-license-allowance-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates maximum assignments provisioned by SFP-DD ports on demand
+          license.
+          ";
+      }
+      leaf sfp-dd-port-assigned-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Total number of SFP-DD based ports assigned to base switch allowance
+          or installed licenses.
+          ";
+      }
+      leaf sfp-dd-port-base-switch-assigned-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates number of SFP-DD ports assigned to base switch allowance
+          ";
+      }
+      leaf licensed-sfp-dd-port-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates number of SFP-DD ports assigned to the ports on demand
+          license.
+          ";
+      }
+      leaf sfp-dd-port-license-reservation-available-count {
+        type fibrechannel:port-number-type;
+        description
+          "
+          Indicates license reservations available for use by unassigned SFP-DD 
+          ports.
+          ";
+      }
+      container sfp-dd-port-base-switch-members {
+        description
+          "
+          Contains list of SFP-DD based ports assigned to base switch allowance.
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            SFP-DD based port member assigned to base switch allowance.
+            ";
+        }
+      }  
+      container licensed-sfp-dd-port-members {
+        description
+          "
+          Contains list of SFP-DD ports assigned to ports-on-demand license.
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            SFP-DD based port member assigned to ports-on-demand license. 
+            ";
+        }
+      }
+      container unassigned-sfp-dd-port-members {
+        description
+          "
+          Contains list of SFP-DD ports not assigned to base switch or ports on 
+          demand license. 
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            SFP-DD based port member not assigned to base switch or ports on 
+            demand license.
+            ";
+        }
+      }
+      container licensed-offline-sfp-dd-port-members {
+        description
+          "
+          Contains list of licensed SFP-DD ports that are offline.
+          ";
+        leaf-list port {
+          type fibrechannel:port-number-type;
+          description
+            "
+            Licensed SFP-DD port that is offline.
+            ";
+        }
+      }
+    }
+  }
+}  

@@ -1,0 +1,498 @@
+module brocade-snmp {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-snmp";
+  prefix snmp;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import brocade-snmp-types {
+    prefix snmp-types;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    The data model for SNMP and its related configurations. This
+    module provides a detailed view of the SNMP configurations to monitor 
+    the switch through SNMP queries and trap notifications.
+    This module supports SNMPv1 and SNMPv3 queries and the traps.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+        
+  revision 2020-08-20 {
+      description
+        "
+	FOS 9.0.1
+	----------
+	Updated description of the leaf community-group and user-group.
+
+		FOS 9.0.0
+      	---------
+		Updated range value for the leaf index in the list v3-account and
+		usm-index in the list v3-trap.
+		The community-group and user-group is modified as configurable.
+
+        Fabric OS 8.2.1b
+        ----------------
+          Initial release
+          Refined descriptions.
+        ";
+        reference 
+          "
+          RFC 1157 Simple Network Management Protocol
+          RFC 3411 An Architecture for Describing SNMP Management Frameworks
+          RFC 3412 Message Processing and Dispatching
+          RFC 3414 User-based Security Model
+          RFC 3415 View-based Access Control Model
+          ";
+  }
+  container brocade-snmp {
+    description
+      "The container for SNMP query and trap notification configuration.";
+      container system {
+        description
+          "The system-wide SNMP configurations";
+        leaf description {
+          type string {
+            length "4..255";
+            pattern "[ -~]*";
+          }
+          description
+            "
+            A printable ASCII string that describes the entity. The parameter
+            should include the full name and version identification of 
+            the system's hardware type, software operating-system, and 
+            networking software. It is mandatory that this only 
+            contain printable ASCII characters. Refer to RFC 1213.
+            ";
+        }
+        leaf location {
+          type string {
+            length "4..255";
+            pattern "[ -~]*";
+          }
+          description
+            "The physical location of this node. Refer to RFC 1213.";
+        }
+        leaf contact {
+          type string {
+            length "4..255";
+            pattern "[ -~]*";
+          }
+          description
+            "
+            The contact person for this managed node, together with 
+            how to contact this person. Refer to RFC 1213. 
+            ";
+        }
+        leaf informs-enabled {
+          type boolean;
+          description
+            "
+            Indicates whether informs is enabled or disabled in the switch.
+            There must be at least one user in the v3-account list
+            in order to configure informs.
+
+            true : Enabled.
+            false: Disabled.
+            ";
+        }
+        leaf encryption-enabled {
+          type boolean;
+          description
+            "
+            Indicates whether the password encryption flag is enabled 
+            or disabled. If password encryption is enabled, the
+            authentication and privacy passwords are stored as encrypted.
+            If password encryption is disabled, the authentication and 
+            privacy passwords are stored as plain text.
+            There must be at least one user in the v3-account list
+            in order to configure encryption.
+ 
+            true : Enabled.
+            false: Disabled.
+            ";
+        }
+        leaf audit-interval {
+          type uint16 {
+            range "1..1440";
+      }
+          units "minutes";
+          description
+            "The SNMP Audit interval.";
+        }
+        container default-config {
+          leaf-list default-control {
+            type snmp-types:default-control-type;
+            description
+              "
+              This list is a write only container that is utilized
+              to default SNMP configuration
+              (such as snmpv1, snmpv3, access control,
+              system group, mib capability, and audit interval). 
+              ";
+          }
+          description "A list of default SNMP configurations.";
+        }
+        leaf security-get-level {
+            type snmp-types:security-level;
+            status deprecated;
+            description
+              "The SNMP security access level for the GET operation.
+            Deprecated: Please use 'security-get-level-string' leaf instead.
+              ";
+        }
+        leaf security-set-level {
+            type snmp-types:security-level;
+            status deprecated;
+            description
+              "The SNMP security access level for the SET operation.
+            Deprecated: Please use 'security-set-level-string' leaf instead.
+              ";
+        }
+        leaf security-get-level-string {
+            type snmp-types:security-level-string-type;
+            description
+              "The SNMP security access level for the GET operation.";
+        }
+        leaf security-set-level-string {
+            type snmp-types:security-level-string-type;
+            description
+              "The SNMP security access level for the SET operation.";
+        }
+        leaf snmpv1-enabled {
+          type boolean;
+          description
+            "Indicates whether snmpv1 is enabled or disabled in the switch.
+              true : Enabled.
+              false: Disabled.
+            ";
+            }
+      }
+      list mib-capability {
+        key "mib-name";
+        description
+          "
+          The MIBs or traps to enable or disable in 
+          the MIB capability.
+          ";
+        leaf mib-name {
+          type snmp-types:mibs-name;
+          description
+            "The MIB name.";
+        }
+        leaf is-mib-enabled-state {
+          type boolean;
+          description
+            "Indicates whether MIB is enabled or disabled.
+            true : Enabled.
+            false: Disabled.
+            ";
+        }
+      }
+      list trap-capability {
+        key "trap-name";
+        description
+          "
+          A list of traps to enable or disable in the MIB capability. 
+          The traps t11ZsRequestRejectNotify,
+          t11ZsMergeFailureNotify, t11ZsMergeSuccessNotify,
+          t11ZsDefZoneChangeNotify and t11ZsActivateNotify
+          are read-only and write operation for MIB
+          capability is not supported.
+          ";
+        leaf trap-name {
+          type snmp-types:traps-name;
+          description "The trap name.";
+        }
+        leaf is-trap-enabled-state {
+          type boolean;
+          description "Indicates whether the trap is enabled or disabled.
+          true : Enabled.
+          false: Disabled.
+          ";
+        }
+        leaf severity {
+          when "../trap-name=swEventTrap";
+          type snmp-types:severity-level;
+          description
+            "
+            The trap recipient severity level. When an event occurs and its 
+            severity level is at or below the set value (none, critical, 
+            error, warning, information, and debug), the Event Trap 
+            traps (swEventTrap) are sent to configured 
+            trap recipients.
+            ";
+        }
+      }
+        list v1-account {
+        key "index";
+        description
+          "
+          The SNMPv1 user account to access the system resource via SNMP.
+          It also contains the snmpv1 host recipients to receive the 
+          SNMPv1 traps. Refer to RFC 1157.
+          ";
+        leaf index {
+          type uint16 {
+            range "1..6";
+          }
+          description
+            "The label for this object.";
+        }
+        leaf community-name {
+          type string {
+            length "2..20";
+            pattern "[ -~]*";
+          }
+          description
+            "The community name.";
+        }
+        leaf community-group {
+          type snmp-types:group-name;
+          description
+            "
+            Indicates whether the SNMPv1 community belongs to
+            read-only or read-write group. The community group is
+            mandatory in case of POST operation to create a v1 account.
+            ";
+        }
+      }
+      list v1-trap {
+        key "index";
+        description
+          "The SNMPv1 trap notification. Refer to RFC 3413.";
+        leaf index {
+          type uint16 {
+            range "1..6";
+          }
+          description
+            "The label for this object.";
+        }
+        leaf host {
+          type inet:host;
+          description
+            "The IP address of the trap recipient system.";
+        }
+        leaf trap-severity-level {
+          type snmp-types:severity-level;
+            description
+              "
+              The trap recipient severity level. When an event occurs and its 
+              severity level is at or below the set value (none, critical, 
+              error, warning, information, and debug), the Event Trap 
+              traps (swEventTrap) are sent to configured 
+              trap recipients. 
+              ";
+        }
+        leaf port-number {
+          type inet:port-number;
+          description
+            "The UDP port where SNMP traps are received.";
+        }
+      }
+      list v3-account {
+        key "index";
+        description
+          "
+          The SNMPv3 user account. This parameter is used to accesses system 
+          via SNMPv3 in a secured manner by means of authentication 
+          and privacy. This parameter is also used to receive the traps and 
+          informs notifications for the configured host recipient. 
+          Refer to RFC 3414.
+          ";
+        leaf index {
+          type uint16 {
+            range "1..12";
+          }
+          description
+            "The label for this object.";
+        }
+        leaf user-name {
+          type string {
+            length "2..32";
+            pattern "[ -~]*";
+          }
+          description
+            "
+            The name of the user that connects to the agent.
+            ";
+        }
+        leaf user-group {
+          type snmp-types:group-name;
+          description
+            "
+            Indicates whether the SNMPv3 user belongs to a
+            read-only or a read-write group. The user group is
+            mandatory in case of POST operation to create a v3 account.
+            ";
+        }
+        leaf authentication-protocol {
+          type snmp-types:authentication-protocol-type;
+          description
+            "
+            The authorization protocol(MD5 or SHA) for the SNMPv3 user.
+            Refer to RFC 3414.
+            ";
+        }
+        leaf privacy-protocol{
+          type snmp-types:privacy-protocol-type;
+          description
+            "
+            The privacy protocol (DES or AES-128) for the SNMPv3 user.
+            Refer to RFC 3414.
+            ";
+        }
+        leaf authentication-password {
+          type string {
+            length "8..32";
+            pattern "[ -~]*";
+          }
+          description
+            "
+            This is write-only leaf and it defines the
+            authentication password for the SNMPv3 user to access
+            the system resources. The password should be 
+            base64 encoded. Refer to RFC 3414.
+            ";
+        }
+        leaf privacy-password {
+          type string {
+            length "8..32";
+            pattern "[ -~]*";
+          }
+          description
+            "
+            This is write-only leaf and it defines the
+            privacy password for the SNMPv3 user to access the
+            system resources. The password should be 
+            base64 encoded. Refer to RFC 3414.
+            ";
+        }
+        leaf manager-engine-id {
+          when "../system/informs-enabled";
+          type string {
+            length "5..32";
+            pattern '(([0-9a-fA-F]){2})(:([0-9a-fA-F]){2}){4,31}';
+          }
+          description
+            "
+            The user-defined engine ID for the SNMP manager which is used to 
+            receive the SNMPv3 informs notifications. This parameter is 
+            applicable only when informs is enabled.
+            ";
+        }
+      }
+      list v3-trap {
+        key "trap-index";
+        description
+           "the SNMPv3 trap notification. Refer to RFC 3413.";
+        leaf trap-index {
+          type uint16 {
+            range "1..6";
+          }
+          description
+            "The label for this object.";
+        }
+        leaf usm-index {
+          type uint16 {
+            range "1..12";
+          }
+          description
+            "
+            The index of the user account associated with the trap 
+            recipient index.
+            ";
+        }
+        leaf host {
+          type inet:host;
+          description
+            "The IP address of the trap recipient system.";
+        }
+        leaf trap-severity-level {
+          type snmp-types:severity-level;
+          description
+            "
+            The trap recipient severity level. When an event occurs and its 
+            severity level is at or below the set value none, critical, error,
+            warning, informational, and debug)the Event Trap traps (swEventTrap)
+            are sent to the configured trap recipients.
+            ";
+        }
+        leaf port-number {
+          type inet:port-number;
+          description
+            "
+            The UDP port number where SNMP traps are received.
+            ";
+        }
+        leaf informs-enabled {
+          type boolean;
+          description
+            "Indicates whether the informs is enabled or disabled.
+              true : Enabled.
+              false: Disabled.
+            ";
+        }
+      }
+      list access-control {
+        key "index";
+		 status deprecated;
+        description
+          "
+          The SNMP access control list is to restrict SNMP GET,
+          SET, and trap operations to the hosts under an host subnet area.
+		   Deprecated : Please use ipfilter-policy list instead.
+          ";
+        leaf index {
+          type uint16 {
+            range "0..5";
+          }
+          description
+            "The label for this object.";
+        }
+        leaf host {
+          type inet:ip-address;
+            description
+              "
+              The subnet area of the access host. The IP address, for which SNMP
+              operations works only for the hosts configured in ACL list.
+              The IP address supports both IPv4 and IPv6 addresses.
+              ";
+        }
+        leaf access-level {
+          type snmp-types:access-permission;
+          description
+            "
+            The access level of the SNMP access control entry.  The access 
+            level can be either read-only or read-write.
+            ";
+        }
+      }
+   }
+}

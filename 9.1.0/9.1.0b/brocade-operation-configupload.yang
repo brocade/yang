@@ -1,0 +1,97 @@
+module brocade-operation-configupload {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-configupload";
+  prefix brocade-configupload;
+
+  import "brocade-operation-types" {
+    prefix operation-types;
+  }
+ 
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for restoring  
+    the configuration on a switch.
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-04-12 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  rpc configupload {
+    description
+      "
+      The RPC command definition for the configuration upload operation
+      on a Brocade switch.
+      ";
+    input {
+      container configupload-parameters {
+        description
+          "The configuration upload operation input parameters.";
+        uses operation-types:config-upload-download-parameters;
+      
+      }
+    }
+    output {
+      container configupload-operation-status {
+        description
+          "The status of the configration upload operation.";
+        leaf status-message {
+          type string {
+            length "1..1024";
+            pattern "[ -~]+";
+          }
+          description 
+            "
+            The status message. This is an information message 
+            about the configuration upload operation.
+            ";
+        }
+        leaf config-output-buffer {
+          type string {
+            length "1..max";
+              pattern "[ -~]+";
+          }
+          description
+            "
+            Retrieves the entire configuration for the specified
+            configuration upload option. The output is encoded 
+            to base 64 format.
+            Refer to RFC 3414 for more details about the base64 encode method.
+            ";
+        }
+      }
+    }
+  }
+}

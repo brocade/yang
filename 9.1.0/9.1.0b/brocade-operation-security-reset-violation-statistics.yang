@@ -1,0 +1,88 @@
+module  brocade-operation-security-reset-violation-statistics {
+
+  yang-version 1.1;
+  namespace
+  "urn:brocade.com:mgmt:brocade-operation-security-reset-violation-statistics";
+  prefix brocade-operation-security-reset-violation-statistics;
+  
+  import "brocade-security-yang-types" {
+    prefix brocade-security-type;
+  }
+  
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for resetting
+    security violation statistics on a switch.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-19 {
+    description
+      "
+      
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      
+      ";
+    reference
+      "None";
+  }
+  rpc security-reset-violation-statistics {
+    description
+      "
+      The RPC command definition for resetting security violation statistics.
+      ";
+    input {
+      container violation-statistics {
+        description
+          "
+          Parameters for resetting the security violation statistic(s).
+          ";
+        leaf domain-id {
+          type fibrechannel:domain-id-type;
+          description 
+            "
+            The highest level in a three-level addressing hierarchy used in the
+            Fibre Channel address identifier. A domain typically is associated
+            with a single Fibre Channel switch.
+            ";
+        }
+        leaf statistics-name {
+          type brocade-security-type:security-violation-statistics-type;
+          description
+            "
+            Name of the security violation statistics to be reset.
+            ";
+        }
+      }
+    }
+  }
+}

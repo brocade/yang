@@ -1,0 +1,88 @@
+module brocade-usb {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-usb";
+  prefix brocade-usb;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  import "brocade-operation-types" {
+    prefix operation-types;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module of 'usb', which manages the files
+    and folders on the attached USB device.
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-04-15 {
+    description
+      "
+      Fabric OS 9.1.0
+      ----------------
+      Initial release (FOS 9.1.0).
+      Added usb-path-type and usb-filename-types.
+      ";
+    reference
+      "None";
+  }
+
+  container brocade-usb {
+    config false;
+    description
+      "
+      The top-level container for all the usb devices connected on the switch
+      ";
+    list usb-file {
+      description
+         "To display files or folders for corresponding folder name";
+      leaf path {
+        type operation-types:usb-path-type;
+        description
+          "Path to the file.";
+      }
+      leaf name {
+        type operation-types:usb-filename-type;
+        description
+          "Name of file in the USB device.";
+      }
+      leaf size {
+        type uint32;
+        description
+          "The size of the file, in bytes.";
+      }
+      leaf date {
+        type yang:date-and-time;
+        description
+          "The creation date of the file.";
+      }
+    }
+  }
+}

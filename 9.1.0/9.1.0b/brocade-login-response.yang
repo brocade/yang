@@ -1,0 +1,189 @@
+module brocade-login-response {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-login-response";
+
+  prefix brocade-login;
+  import brocade-security-yang-types {
+    prefix brocade-security-type;
+  }
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This yang module defines login response definitions. 
+          
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-05-05 {
+    description
+      "
+      FOS 9.1.0
+      -----
+      Initial release for login response container. 
+      ";
+    reference
+      "None";
+  }
+
+  rpc login {
+    description 
+      "
+      The RPC command definition to get the login response.
+      ";
+
+    output {
+      container switch-parameters {
+        description
+          "
+          Contains switch and user details. Upon login success,
+          application can use them to initialize the session.
+          ";
+
+        leaf user-name {
+          type brocade-security-type:user-config-login-user-name-type;
+          description
+            "
+            The name of the account used at login.
+            ";
+        }
+        leaf user-role {
+          when "../virtual-fabric-enabled = false";
+          type brocade-security-type:user-config-role-type;
+          description
+            "
+            The user role for the switch in non-VF mode.
+            ";
+        }
+        leaf chassis-access-role {
+          when "../virtual-fabric-enabled = true";
+          type brocade-security-type:user-config-role-type;
+          description
+            "
+            Specifies the account's access permissions regarding chassis-level
+            commands.
+            ";
+        }
+        leaf home-virtual-fabric {
+          when "../virtual-fabric-enabled = true";
+          type brocade-security-type:home-virtual-fabric-type;
+          description
+            "
+            Specifies the account's home Virtual Fabric.
+            If the value is not configured in ldap-role-map, it will
+            return '0' value.
+            ";
+        }
+        container virtual-fabric-role-ids {
+          when "../virtual-fabric-enabled = true";
+          description
+            "
+            The Virtual Fabrics roles and IDs assigned to the user account.
+            ";
+          leaf-list role-id {
+            type brocade-security-type:virtual-fabric-role-id-type;
+            description
+              "The Virtual Fabrics assigned to the user account.";
+          }
+        }
+        leaf virtual-fabric-enabled {
+          when "../virtual-fabric-supported = true";
+          type boolean;
+          description
+            "
+            Whether Virtual Fabrics is enabled on the chassis.
+  
+               true  : Virtual Fabrics is enabled on the chassis.
+               false : Virtual Fabrics is not enabled on the chassis.
+            ";
+        }
+        leaf virtual-fabric-supported {
+          type boolean;
+          description
+            "
+            Whether Virtual Fabrics is supported on the chassis.
+
+               true  : Virtual Fabrics is supported on the chassis. 
+               false : Virtual Fabrics is not supported on the chassis. 
+            ";
+        }
+        container virtual-fabric-ids {
+          when "../virtual-fabric-enabled = true";
+          description
+            "
+            The virtual fabric list available in the switch for the
+            logged in user.
+            ";
+          leaf-list fabric-id {
+            type fibrechannel:fabric-id-type;
+            description
+              "
+              The virtual fabric identification (VFID) of the
+              logical switch.
+              ";
+          }
+        }
+        leaf days-to-user-password-expiration {
+          type uint32 {
+            range "1..999";
+          }
+          units "days";
+          description
+            "
+            The time before expiration for the user to receive 
+            a warning message. Response does not include this leaf,
+            if logged in user's password never expires.
+            ";
+        }
+        leaf firmware-version {
+          type string {
+            length "1..256";
+            pattern "[ -~]+";
+          }
+          description
+            "
+            A human readable string identifying the active 
+            firmware version running on the switch.
+            ";
+        }
+        leaf model {
+          type string {
+            length "1..10";
+            pattern "[ -~]+";
+          }
+          description
+            "
+            The model name of the switch.
+            ";
+        }
+      }
+    }
+  }
+}

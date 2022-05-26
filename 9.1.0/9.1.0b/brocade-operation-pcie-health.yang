@@ -1,0 +1,114 @@
+module brocade-operation-pcie-health {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-pcie-health";
+  prefix brocade-operation-pcie-health;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains the collection of YANG definitions for PCIe health.
+     
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-09-14 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Refine descriptions
+
+      Fabric OS 9.0.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+  
+  rpc pcie-health-test {
+    description
+      "
+      The RPC command definition for Brocade PCIe health operations.
+      ";
+
+    input {
+      container slot-test {
+        if-feature fibrechannel:fibrechannel_chassis_platform;
+        description
+          "
+          The input parameters for the PCIe health slot test query.
+          ";
+        leaf slot-id {
+          type uint8 {
+            range "0..255";
+          }
+          description
+            "
+            The physical slot number in the chassis where the
+            blade is inserted.
+
+            A value of 255 specifies all slots in the chassis.
+            ";
+        }
+      }
+    }
+
+    output {
+      list slot-test {
+        description
+          "
+          The response parameters for the PCIe slot health test.
+          ";
+        leaf slot-id {
+          type uint8 {
+            range "0..255";
+          }
+          description
+            "
+            The physical slot number in the chassis where the
+            blade is inserted.
+            ";     
+        }
+        leaf status {
+          type string {
+            length "1..128";
+            pattern "[ -~]+";
+          }
+          description
+            "
+            The status (sucess or failure) of testing the PCIe links
+            between the non-transparent ports of the PCIe switch
+            in the blades and the standby CP.
+            ";
+        }
+      }
+    }
+  }
+}

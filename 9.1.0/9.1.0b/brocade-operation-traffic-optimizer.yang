@@ -1,0 +1,107 @@
+module brocade-operation-traffic-optimizer {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-traffic-optimizer";
+  prefix brocade-traffic-optimizer;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    The 'brocade-operation-traffic-optimizer' YANG module provides the means
+    for following traffic optimizer operations for a give profile
+    1. Activate traffic Optimizer profile
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-08-09 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  rpc traffic-optimizer {
+    description
+      "
+      The RPC command definition for traffic optimizer operations
+      on a Brocade switch.
+      ";
+    input {
+      container traffic-optimizer-parameters {
+        if-feature fibrechannel:fibrechannel_traffic_optimizer_platform;
+        description
+          "traffic optimizer actions container";
+
+        leaf name {
+          type string { 
+            length "1..64";
+            pattern "([a-zA-Z0-9][0-9a-zA-Z-._])";
+          }
+          description
+            "Traffic Optimizer profile name";
+        }
+
+        leaf delay {
+          when "../action=schedule";
+          type uint16 {
+            range "1..60";
+          }
+          description
+            "
+            This will schedule the time to activate the profile
+            1 to 60 - Activate the profile after given num of days
+            ";
+        }
+
+        leaf action {
+          type enumeration {
+            enum "activate-all-vf" {
+              description
+                "Activate Traffic Optimizer profile";
+            }
+            enum "schedule" {
+              description
+                "To scheduled Traffic Optimizer profile activation with delay";
+            }
+            enum "abort" {
+              description
+                "To abort the scheduled Traffic Optimizer profile activation";
+            }
+          }
+          description
+            "Traffic Optimizer actions for the given profile";
+        }
+      } 
+    }
+  }
+}

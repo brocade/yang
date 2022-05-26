@@ -1,0 +1,94 @@
+module brocade-operation-reboot {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-reboot";
+  prefix brocade-operation-reboot;
+
+  import brocade-operation-types {
+    prefix brocade-operation-types;
+  }
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for
+    reboot a switch.
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-03-03 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      
+      ";
+    reference
+      "None";
+  }
+
+  rpc reboot {
+    description
+      "
+      The RPC command definition for different reboot operations on a Brocade
+      switch.
+      ";
+    input {
+      container reboot-operation-parameters {
+        description
+          "
+          The option to perform different reboot operations
+          on a specified switch.
+          ";
+        leaf action {
+          type brocade-operation-types:reboot-types;
+          description
+            "
+            Specify particular way to reboot the switch.
+            ";
+          }
+        }
+      }
+    output {
+      container reboot-operation-status {
+        description
+          "
+          reboot operation status.
+          ";
+        leaf status-message {
+          type string {
+            length "1..1024";
+            pattern "[ -~]+";
+          }
+          description
+          "
+            This is status message to user for the errors or
+            success of reboot operation.
+          ";
+        }
+      }
+    }
+  }
+}

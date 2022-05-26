@@ -1,0 +1,156 @@
+module brocade-firmware {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-firmware";
+  prefix brocade-firmware;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-firmware' which provides
+    all details about the firmware operations.
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+
+  revision 2021-05-19 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release.
+        Added the firmware-config interface.
+        Refined descriptions.
+      ";
+    reference
+      "None";
+  }
+
+
+  container brocade-firmware {
+    description 
+      "
+      The top-level container for firmware funtionalities 
+      provided by the switch.
+      ";
+
+    list firmware-history {
+      config false;
+      description
+        "
+        The firmware versions and the download history.
+        For each firmware download record, displays the date and time,
+        the switch name, the slot number, the process ID, and the
+        firmware version.
+        ";
+
+        leaf sequence-number {
+          type uint16 {
+            range "1..1680";
+          }
+          description
+            "
+            The sequence number in the order in which the firmwares
+            were installed on the switch.
+            ";
+        }
+
+        leaf time-stamp {
+          type yang:date-and-time;
+          description
+            "
+            The date and time when the firmware was installed on
+            the switch.
+            ";
+        }
+
+        leaf switch-name {
+          type string {
+            length "0..128";
+            pattern "[ -~]*";
+          }
+          description
+            "
+            A printable ASCII name for the switch.
+            ";
+        }
+
+        leaf slot-number {
+          type uint16 {
+            range "0..12";
+          }
+          description
+            "
+            The slot number.
+            ";
+        }
+
+        leaf process-id {
+          type uint32 {
+            range "1..4096";
+          }
+          description
+            "
+            The process ID which installed the firmware on the switch.
+            ";
+        }
+
+        leaf firmware-version {
+          type string {
+            length "0..255";
+            pattern "[ -~]+";
+          }
+          description
+            "
+            A human readable string identifying the firmware version running
+            on the switch.
+            ";
+        }
+      }
+
+    container firmware-config {
+      description
+        "
+        The firmware check switch-level config and operational parameters.
+        This is used to check the integrity of software image that is stored
+        on a switch.
+        ";
+      leaf firmware-check-enabled-state {
+        type boolean;
+          description
+            "
+            The firmwarecheck state of the switch.
+            The possible values are:
+              true  : Enables firmware integrity check on every reboot.
+              false : Disables firmware integrity check on every reboot.
+            ";
+        }
+      }
+    }
+}

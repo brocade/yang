@@ -1,0 +1,165 @@
+module brocade-operation-extension {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-extension";
+  prefix brocade-operation-extension;
+  
+  import "brocade-extension-types" {
+    prefix extension;
+  }
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for Extension
+    operations on a switch.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-09-13 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Refined descriptions.
+
+      Fabric OS 9.0.0
+      ---------------
+        Initial release.
+      ";
+    reference
+      "None";
+  }
+
+  rpc extension {
+    description
+      "
+      The RPC command definition for Extension operation on a Brocade
+      switch.
+      ";
+    input {
+      container extension-operation-parameters {
+        if-feature fibrechannel:fibrechannel_extension_platform;
+        description
+          "The extension operation input container.";
+        leaf slot {
+          type uint16 {
+            range "0..12";
+          }
+          description
+            "
+            The slot number for the data path processor.
+            ";
+        }
+        leaf config-clear {
+          when "not(../config-default) and not(../global-lan-statistics-reset)";
+          type boolean;
+          description
+          "
+          Clears the extension configuration on the extension switch
+          or blade.
+
+          Note that the config-clear operation may be disruptive.
+            For extension switches, you must reboot the switch after the
+            config-clear operation; otherwise, configuration operations
+            are blocked.
+            For extension blades, you must power off the blade before you
+            clear the slot's corresponding configuration.
+
+          Supported values:
+
+          false: No operation.
+          true : Clears the extension configuration.
+          ";
+        }
+        leaf config-default {
+          when "not(../config-clear) and not(../global-lan-statistics-reset)";
+          type boolean;
+          description
+          "
+          Resets the default configuration on the extension switch or blade.
+          Note that the config-default operation is disruptive.
+            For extension switches, the extension switch reboots automatically
+            after a successful config-default operation.
+            For extension blades, make sure the blade is in an online state
+            for the default-config operation. You may need to power off and on
+            the blade slot to apply different extension modes correctly.
+
+          Supported values:
+            false: No operation.
+            true : Resets the default configuration on the extension device.
+            ";
+        }
+        leaf global-lan-statistics-reset {
+          when "not(../config-clear) and not(../config-default)";
+          type boolean;
+          description
+          "
+          Resets the global LAN statistics on a data processor (DP).
+
+          Supported values:
+            false: No operation.
+            true : Resets the global LAN statistics on a DP.
+          ";
+        }
+        leaf dp-id {
+          when "../global-lan-statistics-reset = true";
+          type extension:dp-id-type;
+          description
+            "
+            The extension data path processor ID. Depending on the extension
+            platform, the device may have a single DP or dual DP. A single DP
+            supports DP0 only. A dual DP supports both DP0 and DP1.
+
+            0 : DP0
+            1 : DP1.
+            ";
+        }
+
+      }
+    }
+    output {
+      container extension-operation-status {
+        if-feature fibrechannel:fibrechannel_extension_platform;
+        description
+          "The container for the status of the extension operation.";
+        leaf  status-message {
+          type string {
+            length "1..1024";
+            pattern "[ -~]+";
+          }
+          description 
+            "
+            The status message (success or fail) for the operation.
+            ";
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,130 @@
+module brocade-operation-security-certificate {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-security-certificate";
+  prefix brocade-operation-security-certificate;
+
+  import brocade-security-yang-types {
+    prefix brocade-security-type;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains the collection of YANG definitions for
+    Security Certificate.
+     
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-08-12 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  rpc security-certificate {
+    description
+      "
+      The RPC command definition for Brocade security certificate operations.
+      ";
+
+    input {
+      container security-certificate-parameters {
+        description
+          "
+          The use of third-party certificates on a switch,
+          including Public Key Infrastructure (PKI) based certificates,
+          Lightweight Directory Access Protocol (LDAP) certificates, RADIUS
+          certificates, syslog CA certificates and extension certificates.
+          ";
+        leaf certificate-entity {
+          type brocade-security-type:certificate-entity-type;
+          description
+            "
+            The certificate entity (Switch, CA, CA Client, or
+            Server certificate).
+            ";
+        }
+        leaf certificate-type {
+          type brocade-security-type:certificate-application-type;
+          description
+            "
+            The certificate type (commoncert, https, radius, ldap, syslog, 
+            fcap or extension).
+            ";
+        }
+        leaf certificate-name {
+          when "../certificate-type = extension";
+          type string {
+            length "5..128";
+            pattern "[0-9a-zA-Z_.-]+";
+          }
+          description "The certificate name.";
+        }
+        leaf ca-certificate {
+          when "../certificate-type = extension";
+          type string {
+            length "5..128";
+            pattern "[0-9a-zA-Z_.-]+";
+          }
+          description "The preimported local CA certificate name.";
+        }
+        leaf keypair-tag {
+          when "../certificate-type = extension";
+          type string {
+            length "1..31";
+            pattern "[a-zA-Z0-9~@%_+:-]+";
+          }
+          description
+            "
+            The keypair tag is a user-defined name used to identify a local
+            certificate uniquely.
+            ";
+        }
+        leaf action {
+          type brocade-security-type:seccertmgmt-action-type;
+          description 
+            "
+            The security certificate operations (such as import or export).
+            ";
+        }
+        leaf certificate-hexdump {
+          type brocade-security-type:certificate-hexdump-type;
+          description
+            "
+            The CA-client, CA-server, or switch certificate contents
+            in raw hexadecimal format, including beginning and end markers,
+            used on the switch.
+            ";
+        }
+      }
+    }
+  }
+}

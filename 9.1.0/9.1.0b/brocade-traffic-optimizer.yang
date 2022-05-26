@@ -1,0 +1,281 @@
+module brocade-traffic-optimizer {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-traffic-optimizer";
+  prefix traffic-optimizer;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'traffic optimizer', which provides
+    a view of all of the switches in the fabric that are operational.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-10-13 {
+    description
+      "
+      Fabric OS 9.1.0
+      ----------------
+        Added traffic Optimizer module
+      ";
+    reference
+      "None";
+  }
+
+  typedef performance-group-id-type {
+    type string {
+      length "4..64";
+      pattern "([a-zA-Z0-9][0-9a-zA-Z-._]{3,63})";
+    }
+    description
+      "The Performance Group name to identify PG";
+  }
+  typedef virtual-channel-type {
+    type int32 {
+      range "0..128";
+    }
+    description
+      "Virtual Channel number";
+  }
+  container brocade-traffic-optimizer {
+    description
+      "
+      Traffic Optimizer parameters. Currently, requests are made to get  
+      Traffic Optimizer parameters and associated flows, flow counters.
+      ";
+    list performance-group-profile {
+      if-feature fibrechannel:fibrechannel_traffic_optimizer_platform;
+      key "name";
+      config false;
+      description
+        "The list of profile to configured in the
+         Traffic optimizer
+        ";
+      leaf name {
+        type string {
+          length "1..64";
+          pattern "([a-zA-Z0-9][0-9a-zA-Z-._]{0,63})";
+        }
+        description
+          "Traffic Optimizer profile Name.";
+      }
+      leaf profile-activated {
+        type boolean;
+        description
+          "Indicate whether profile is active or not.
+
+           true: Active
+           false: InActive
+          ";
+      }
+      leaf profile-scheduled-to-activate {
+        type boolean;
+        description
+          "Indicate whether profile is scheduled to activate.
+
+           true: Scheduled
+           false: Not Scheduled
+          ";
+      }
+      leaf delay-days {
+        when "../profile-scheduled-to-activate=true";
+        type uint32 {
+          range "0..60";
+        }
+        units "days";
+        description
+          "Time to activate the scheduled profile in days";
+      }
+      leaf delay-minutes {
+        when "../profile-scheduled-to-activate=true";
+        type uint32 {
+          range "0..1440";
+        }
+        units "minutes";
+        description
+          "
+           Time to activate the scheduled profile in minutes on
+           top of delay-days value
+          ";
+      }
+
+      leaf profile-description {
+        type string {
+          length "4..2000";
+          pattern "[ -~]+";
+        }
+        config false;
+        description
+        "
+          A printable ASCII string that describes the performace
+          group Profile.
+        ";
+      }
+      container performance-groups {
+        description
+          "List of performance group assigned to the profile";
+        leaf-list identifier {
+          type performance-group-id-type;
+          description
+            "The Performance Group name identifier";
+        }
+      }
+    }
+
+    list performance-group {
+      if-feature fibrechannel:fibrechannel_traffic_optimizer_platform;
+      key "identifier stats-duration io-category";
+      config false;
+      description
+        "
+        A Performance Group (PG) is a high level software construct to group
+        the traffic flows based on predefined attributes, such as the flows
+        destination speed, frame size, priority, protocols, etc. This list the
+        PG associated with the active profile
+        Performance Group statistics will be skipped if number of active flows
+        exceeded the limit for the number of flows monitored by the flow
+        vision or number of flow supported by Traffic optimizer for this
+        plarform and FOS version
+        ";
+      leaf identifier {
+          type performance-group-id-type;
+          description
+            "Performance Group name to identify PG";
+        }
+      leaf stats-duration {
+        type enumeration {
+          enum "5-minute" {
+            description "Last 5 minutes aggregated statistics"; 
+          }
+          enum "24-hour" {
+            description "Last 1 day aggregated statistics";
+          }
+        }
+        description
+          "
+          The elapsed time the statistics for a performance group taken
+          ";
+      }
+      leaf io-category {
+        type enumeration {
+          enum "read" {
+            description "Read statistics for a PG";
+          }
+          enum "write" {
+            description "write statistics for a PG";
+          }
+          enum "read-write" {
+            description "Aggregated read and write statistics for PG";
+          }
+        }
+        description
+          "
+          Read or write or aggregated read and write statistics
+          for a performance group
+          ";
+      }
+      leaf performance-group-description {
+        type string {
+          length "4..2000";
+          pattern "[ -~]+";
+        }
+        config false;
+        description
+          "
+          A printable ASCII string that describes the Performance
+          Group entity.
+          ";
+      }
+      container virtual-channels {
+        description
+          "List of virtual channel assigned to this performance group";
+        leaf-list virtual-channel {
+          type virtual-channel-type;
+          description "VC number associated with PG";
+        }
+      }
+      leaf aggregate-throughput {
+        type yang:gauge64;
+        units "Bps";
+        description "Aggregated throughput counter on PG";
+      }
+      leaf aggregate-iops {
+        type yang:gauge64;
+        units "IOPS";
+        description "Aggregated I/O operation counter on PG";
+      }
+      leaf max-io-latency {
+        type yang:gauge64;
+        units "microseconds";
+        description "Maximum I/O Latency counter on PG";
+      }
+      leaf io-errors {
+        type yang:gauge64;
+        description "I/O errors counter on PG";
+      }
+      leaf flow-count {
+        type yang:gauge64;
+        description "Number of flows associated with the PG";
+      }
+      leaf aggregate-violations {
+        type yang:gauge64;
+        description "High Latency flow count on PG";
+      }
+    }
+
+    list performance-group-flows {
+      if-feature fibrechannel:fibrechannel_traffic_optimizer_platform;
+      config false;
+      description
+        "This lists all the flows and associated PGs";
+      leaf identifier {
+        type performance-group-id-type;
+        description
+          "The Performance Group ID";
+      }
+      leaf source-pid {
+        type fibrechannel:fcid-hex-string-type;
+        description "The source PID of the flow";
+      }
+      leaf destination-pid {
+        type fibrechannel:fcid-hex-string-type;
+        description "The destination PID of the flow";
+      }
+      leaf virtual-channel {
+        type virtual-channel-type;
+        description "VC number associated with the flow";
+      }
+    }
+  }
+}
+

@@ -1,0 +1,158 @@
+module brocade-operation-zone {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-zone";
+  prefix zone-operation;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import brocade-zone {
+    prefix zone;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines YANG module for zone configuration
+    related operation.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2020-12-01 {
+    description
+      "
+      FOS 9.0.0
+      -----
+      Initial release for zone operations.
+
+      FOS 9.1.0
+      -----
+      Added 'rename' RPC support.
+
+      ";
+    reference
+      "None";
+  }
+
+  typedef zone-operation-action-type {
+    type enumeration {
+      enum "expunge" {
+        description
+          "
+          Use this action type to expunge a zone object. In addition to
+          deleting the object, the expunge operation will also remove the
+          object from the member lists of all other objects. Expunge
+          operations can be performed on cfgs, zones, aliases, WWNs,
+          or 'D,I' members.
+
+          This action stages the modifications in the defined-configuration.
+          For the staged modifications to become persistent, the user must
+          save the changes using one of the following brocade-zone module
+          leafs that reside under the effective-configuration container:
+
+             'cfg-action': Specify a '1' to save the pending changes.
+             'cfg-name':   Specify the name of configuration to become enabled.
+
+          It is recommended that the save be performed within the configured
+          fabric-lock-timeout duration specified in the
+          brocade-fibrechannel-configuration module under the
+          zone-configuration container.
+          ";
+      }
+      enum "rename" {
+        description
+          "
+          Use this action type to rename a zone object. In addition to
+          renaming the object, this action will also replace all occurrences
+          of the renamed zone object in the entire defined zone database.
+          Rename operations can be performed on cfgs, zones, aliases.
+
+          This action stages the modifications in the defined-configuration.
+          For the staged modifications to become persistent, the user must
+          save the changes using one of the following brocade-zone module
+          leafs that reside under the effective-configuration container:
+
+             'cfg-action': Specify a '1' to save the pending changes.
+             'cfg-name':   Specify the name of configuration to become enabled.
+
+          It is recommended that the save be performed within the configured
+          fabric-lock-timeout duration specified in the
+          brocade-fibrechannel-configuration module under the
+          zone-configuration container.
+          ";
+      }
+    }
+    description
+      "
+      The zone operation action type field. This field must be supplied for any
+      RPC zone operation.
+      ";
+  }
+
+  rpc fibrechannel-zone {
+    description
+      "
+      The RPC command definition for zone operations.
+      ";
+
+    input {
+      list zone-operation-parameters {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "
+        Input list of parameters specifying what type of zone operations to
+        perform.
+        ";
+        leaf action {
+          type zone-operation-action-type;
+          description
+            "
+            The type of RPC zone action operation to perform.
+            ";
+        }
+        leaf zone-object {
+          when "../action = 'expunge' or ../action = 'rename'";
+          type zone:zone-member-type;
+          description
+            "
+            The zone object upon which the RPC zone action will be
+            performed.
+            ";
+        }
+        leaf new-zone-object {
+          when "../action = 'rename'";
+          type zone:zone-member-type;
+          description
+            "
+            The new zone object that will be the result of the RPC
+            zone action.
+            ";
+        }
+      }
+    }
+  }
+}

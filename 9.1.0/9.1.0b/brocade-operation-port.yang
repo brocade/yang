@@ -1,0 +1,131 @@
+module brocade-operation-port {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-port-operation";
+  prefix port-ops;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for managing port
+    operations.
+     
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-07-20 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  typedef port-operation-type {
+    type enumeration {
+      enum port-address-bind {
+        description 
+          "
+          Bind operation for port address.
+          ";
+      }
+      enum port-address-unbind {
+        description 
+          "
+          Unbind operation for port address.
+          ";
+      }
+      /* for future port-operations */
+    }
+    description 
+      "
+      It enumerates port operations supported. 
+      ";
+  }
+
+  rpc port {
+    description
+      "
+      The RPC command definition for port operations. 
+      ";
+
+    input {
+      list port-operation-parameters {
+      description
+        "
+        The parameters required for port operations. 
+        .
+        ";
+     
+        leaf name {
+          type fibrechannel:slot-port-name-type;
+          description
+            "
+            The port name in slot/port.
+            ";
+        }
+      leaf operation-type {
+        type port-operation-type;
+        description
+          "
+          The operation being performed for the port.
+          ";
+      }
+      leaf user-port-address {
+        when "operation-type = 'port-address-bind'";
+        type fibrechannel:area-address-type;
+        description
+          "
+          Port address to be bound/unbound in hex format.
+          ";
+      }
+      leaf auto-bind {
+         when "operation-type = 'port-address-bind'";
+         type boolean;
+         description
+           "
+            true:
+            Enables autobinding on the specified port. If the auto feature
+            is enabled, the entire area field of the N_Port ID is bound to a
+            single port. With 10-bit routing, up to 4 ports can share the same
+            8-bit area field of the N_Port ID. This address assignment mode
+            dedicates all four unique routes to a single port.
+            
+            false:
+            Auto-binding disabled
+          ";
+      }
+
+     }
+
+    } 
+  }
+}

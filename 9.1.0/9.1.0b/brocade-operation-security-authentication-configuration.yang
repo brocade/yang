@@ -1,0 +1,100 @@
+module brocade-operation-security-authentication-configuration {
+
+  yang-version 1.1;
+  namespace 
+    urn:brocade.com:mgmt:brocade-operation-security-authentication-configuration
+    ;
+  prefix brocade-operation-security-authentication-configuration;
+  
+  import "brocade-security-yang-types" {
+    prefix brocade-security-type;
+  }
+  
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for configuring and
+    managing authentication related policies and configurations on a switch.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-19 {
+    description
+      "
+      
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      
+      ";
+    reference
+      "None";
+  }
+  rpc security-authentication-configuration {
+    description
+      "
+      The RPC command definition for modifying authentication settings.
+      Equivalent to the CLI authutil.
+      ";
+    input {
+      container authentication-configuration-parameters {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        description
+          "
+          Performs the authentication operations.
+          ";
+        leaf action {
+          type brocade-security-type:authentication-operation-type;
+          description
+            "Operations pertaining to authentication";
+        }
+        container authentication-init-slot-ports {
+          description
+            "
+            Reinitiates authentication on selected ports after changing the
+            DH-CHAP group, hash type and shared secret between a pair of
+            switches. This operation does not work on private, loop, NPIV, and
+            FICON devices. This operation may bring down the E_Ports if the
+            DH-CHAP shared secrets are not installed correctly. This operation
+            is not supported on encrypted ports. This option is not supported
+            in AG mode. This operation does not initiate authentication on
+            disabled ports.
+            ";
+          leaf-list port {
+            type brocade-security-type:authentication-initiation-parameter-type;
+            description
+              "
+              Specifies the slot port for initiating authentication.
+              ";
+          }
+        }
+      }
+    }
+  }
+}

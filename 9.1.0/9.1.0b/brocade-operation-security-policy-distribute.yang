@@ -1,0 +1,138 @@
+module brocade-operation-security-policy-distribute {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-security-policy-distribute";
+  prefix brocade-operation-security-policy-distribute;
+  
+  import "brocade-security-yang-types" {
+    prefix brocade-security-type;
+  }
+  
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for 
+    managing security related policies and configurations on switch(es).
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-19 {
+    description
+      "
+      
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      
+      ";
+    reference
+      "None";
+  }
+  rpc security-policy-distribute {
+    description
+      "
+      The RPC command definition for security policy distribution on Brocade
+      switch(es).
+      ";
+    input {
+      container policy-distribute-parameters {
+        description
+          "
+          Parameters for distributing security database.
+           ";
+        container distribute-policy-types {
+          description
+            "
+            List of policy sets, also called as security databases, to be
+            distributed.
+            ";
+          leaf-list type {
+            type brocade-security-type:distribute-policy-type;
+            description
+              "
+              Policy name of the security databases to be distributed. 
+              ";
+          }
+        }
+        container destination-names {
+          description
+            "
+            List of switches that should receive the data distribution.
+            ";
+          leaf-list name {
+            type brocade-security-type:security-input-type;
+            description
+              "
+              Switch that should receive the data distribution.
+              Values can be switch name or switch WWN or domain ID.
+              A wildcard (*) may be specified to include all switches in the
+              fabric.
+              ";
+          }
+        }
+      }
+    }
+    output {
+      container distribute-operation-status {
+        description
+          "distribution operation status";
+        leaf  status-message {
+          type string {
+            length "1..1024";
+            pattern "[ -~]+";
+          }
+          description 
+            "
+            The status message. This message is an information for the user 
+            that the Distribution operation succeeded for the mentioned
+            domain(s).
+            ";
+        }
+        container access-gateway-nodes {
+          description
+            "
+            When Password Policy is distributed to an AG or switch connected
+            to an AG, the list of AG's to which the Policy is distributed are.
+            listed. Distribution of other policies or combination of Password
+            Policy along with other policy will not list AG information.
+            ";
+          leaf-list node {
+            type string {
+              length "1..54";
+              pattern "[ -~]*@([0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){7})?";
+            }
+            description
+              "
+              Name and wwn of the AG switch.
+
+              Example:
+                myAccessGateway@11:22:33:44:55:66:77:88
+              ";
+          }
+        }
+      }
+    }
+  }
+}

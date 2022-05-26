@@ -1,0 +1,473 @@
+module brocade-operation-types {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-types";
+  prefix brocade-operation;
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module for the Remote 
+    Procedure Call (RPC) operations.
+          
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-10 {
+    description
+      "
+      Fabric OS 9.1.0
+      -----
+      Added configdownload status details.
+      Added grouping of config-upload-download-parameters 
+      Added factoryreset operation details.
+      Added reboot operation types.
+      Added usb-path-type and usb-filename-types.
+      Refined descriptions.
+      Updated pattern and description details in status leaf.
+
+      Fabric OS 8.2.1b
+      -----
+      Refine descriptions.
+      
+      FOS 8.2.1
+      -----
+      Initial release for operations support.
+      ";
+    reference
+      "None";
+  }
+
+  typedef message-id-type {
+    type uint32 {
+      range 1..max;
+    }
+    description 
+      "
+      The Remote Procedure Call (RPC) message. When asynchronous
+      operation is triggered, it returns the random message identifier 
+      to associate with the operation being triggered. 
+      The application uses this identifier to get
+      the status of the operation in subsequent requests. 
+      ";
+  }
+
+  typedef protocol {
+    type enumeration {
+      enum scp {
+        description
+          "The Secure Copy Protocol (from or to a remote host.";
+      }
+      enum ftp {
+        description
+          "The File Transfer Protocol.";
+      }
+      enum sftp {
+        description
+          "The Secure File Transfer Protocol.";
+      }
+      enum http {
+        description
+          "The HyperText Transfer Protocol.";
+      }
+    }
+    description
+      "The protocol (FTP, SCP, SFTP, or HTTP).";
+  }
+
+  typedef eula-action-type {
+    type enumeration {
+      enum accept-eula {
+        description
+          "
+          A confirmation of the user’s acceptance of the EULA
+          (Brocade End User License Agreement). Firmware download progresses
+          only after you accept the EULA.
+          ";
+      }
+      enum decline-eula {
+        description
+          "
+          A confirmation of the user’s denial of the EULA.
+          Firmware download aborts with an error when you decline
+          the EULA.
+          ";
+      }
+      enum display-eula {
+        description
+          "
+          Displays the latest EULA. The highest version of the  EULA
+          displays.
+          Example: If switch is running FOS 9.0, and upgrading
+          to FOS 9.0.1, then the 9.0.1 EULA displays. 
+          This principle also applies during downgrade.
+          ";
+      }
+    }
+    description
+      "The actions supported for EULA.";
+  }
+
+  grouping show-status-group {
+    description 
+      "
+      The group of leafs associated with the operation. 
+      ";
+
+    container show-status {
+      description
+        "
+        The RPC operation status based on the specified message-id.
+        ";
+
+      leaf message-id {
+        type message-id-type;
+        description 
+          "
+          The random message-id required to retrieve the associated
+          operation status. 
+          ";
+      }
+
+      leaf operation {
+        type string { 
+          length "1..64";
+          pattern "supportsave|firmwaredownload|configdownload" +
+                  "|portdecommission|portoperation";
+        }
+        description 
+          "
+          The operation name (such as supportsave). The show-status is common
+          across all the operations supported in the yang RPC feature.
+          It identifies the exact operation status when the application
+          queries the status based on the message-id.  
+          ";
+      }
+
+      leaf status {
+        type string {
+          length "1..32";
+          pattern "queued|in-progress|done|delivered|purge";
+        }
+        description 
+          "
+          The exact state of the REST operation (supportSave, firmware
+          download, and configuration download). When an operation is
+          triggered, the 'queued' status displays. While the operation
+          is running the 'in-progress' status displays until all input
+          operations are complete in the backend modules.
+          When the input operation is complete, the 'done' status displays.
+          After the completion status, the 'delivered' status displays
+          until it is purged from the queue. 
+          If any operational-level errors or application-level
+          errors occur, the system returns the standard error structure.
+          When the input operation is removed from the queue, the 'purge'
+          status displays.
+          ";
+      }
+
+      leaf application-name {
+        type string {
+          length "1..64";
+          pattern "[ -~]{1,64}";
+        }
+        description 
+          "
+          The name of the application which is used to trigger the operation.
+          This is parsed from the HTTP USER_AGENT standard header. 
+          ";
+      }
+
+      leaf percentage-complete {
+        type uint8 {
+          range 0..100;
+        }
+        description 
+          "
+          The operation completion in a percentage. 
+          ";
+      }
+   
+      container firmwaredownload {
+        when "../operation = firmwaredownload";
+        description
+          "
+          A list of firmware download status messages or the EULA.
+          ";
+        leaf-list message {
+          when "not(../eula-text)";
+          type string {
+          length "1..10000";
+              pattern "[ -~]*";
+          }
+          description
+            "
+            The status messages, depicting all stages of the
+            firmware download progress.
+            ";
+        }
+        leaf eula-text {
+          when "not(../message)";
+          type string {
+          length "1..max";
+              pattern "[ -~]+";
+          }
+          description
+            "
+            The contents of the latest EULA
+            (Brocade End User License Agreement).
+            ";
+        }
+      }
+      container configdownload {
+        when "../operation = configdownload";
+        description
+          "
+          A list of configuration download status messages or the EULA.
+          ";
+        leaf-list message {
+          type string {
+          length "1..10000";
+              pattern "[ -~]*";
+          }
+          description
+            "
+            The status messages of a configuration download.
+            ";
+        }
+      }
+    }
+  }
+  grouping config-upload-download-parameters {
+    description
+      "
+      The common parameters for configuration upload and download.
+      ";
+
+    leaf config-upload-download-option {
+      type enumeration {
+        enum "chassis" {
+          description
+            "
+            The configuration upload or download can be performed on a chassis
+            configuration.
+            ";
+        }
+        enum "switch" {
+          description
+            "
+            The configuration upload or download can be performed on a switch
+            configuration.
+            ";
+        }
+        enum "virtual-fabric" {
+          description
+            "
+            The configuration upload or download can be performed on a
+            virtual fabric configuration.
+            ";
+        }
+        enum "fabric-id" {
+          description
+            "
+            The configuration upload or download can be performed on a
+            specified fabric ID configuration.
+            ";
+        }
+        enum "all" {
+          description
+            "
+            The configuration upload or download can be performed on all
+            configurations on a switch.
+            ";
+        }
+      }
+      mandatory true;
+      description
+        "
+        The supported configuration upload or download options.
+        ";
+    }
+    leaf port-to-area {
+      when "((../config-upload-download-option = 'all') or
+           (../config-upload-download-option = 'fabric-id'))";
+      type boolean;
+      description
+        "
+        The port-to-area addressing mode configuration files.
+        This leaf is optional and it can be used only for the 
+        port-to-area related configdownload or upload operations.
+        ";
+    }
+    leaf vf-id {
+      type fibrechannel:fabric-id-type;
+      must "(../config-upload-download-option = 'fabric-id')";
+      description
+        "
+        The fabric ID for the switch configuration to download from
+        a switch. This leaf is valid only when you select fabric-id as the
+        configuration upload option.
+        ";
+    }
+  }
+  typedef month-type {
+    type enumeration {
+      enum jan {
+        description
+          "January";
+      }
+      enum feb {
+        description
+          "February";
+      }
+      enum mar {
+        description
+          "March";
+      }
+      enum apr {
+        description
+          "April";
+      }
+      enum may {
+        description
+          "May";
+      }
+      enum jun {
+        description
+          "June";
+      }
+      enum jul {
+        description
+          "July";
+      }
+      enum aug {
+        description
+          "August";
+      }
+      enum sep {
+        description
+          "September";
+      }
+      enum oct {
+        description
+          "October";
+      }
+      enum nov {
+        description
+          "November";
+      }
+      enum dec {
+        description
+          "December";
+      }
+    }
+    description
+      "The month of the year.";
+  }
+  typedef keep-feature-type {
+    type enumeration {
+      enum "ip" {
+        description
+          "The IP address of the switch.";
+      }
+    }
+    description
+      "
+      The specified feature is not cleared during
+      the factory reset operation.
+      ";
+  }
+
+  typedef clear-feature-type {
+    type enumeration {
+      enum "eula" {
+        description
+          "The End User License Agreement for a switch.";
+      }
+    }
+    description
+      "
+      Specifies the features to clear during the factory reset operation.
+      ";
+  }
+  typedef reboot-types {
+    type enumeration {
+      enum "reboot" {
+        description
+          "
+          Performs a cold reboot (power off/restart) of the
+          control processor.
+          This operation may be disruptive. When you reboot a
+          switch connected to a fabric, all traffic to and
+          from that switch stops. All Fibre Channel ports on
+          that switch including E_Ports become inactive until
+          the switch comes back online.
+          The behavior of this command depends on the platform,
+          refer to the command reference manual for additional
+          detail about the reboot command.
+          ";
+      }
+      enum "sysshutdown" {
+        description
+          "
+          Provides a graceful shutdown to protect the
+          switch file systems.
+          On standalone platforms, use sysShutDown to shut down
+          the switch operating system.
+          On enterprise-class platforms, when sysShutDown is
+          called on the active control processor (CP), the
+          command shuts down the active CP, standby CP, and any
+          AP blades.
+          After executing this command, manually power off the system.
+          To reboot the system, manually turn the power switch on.
+          Note : This command is not supported on the standby CP.
+          See Using Fabric OS Commands and Command Availability
+          in the command reference manual for details.
+          ";
+      }
+    }
+    description
+      "
+      Specifies how to reboot the system.
+      ";
+  }
+  typedef usb-path-type {
+    type string {
+      length "1..128";
+      pattern '[a-zA-Z0-9_./\s-]+';
+    }
+    description
+      "The path to the file.";
+  }
+  typedef usb-filename-type {
+    type string {
+      length "0..128";
+      pattern "[a-zA-Z0-9_.-]*";
+    }
+    description
+      "The name of file on the USB device.";
+  }
+}

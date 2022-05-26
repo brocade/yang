@@ -1,0 +1,88 @@
+module brocade-operation-lldp {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-lldp";
+  prefix brocade-lldp;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    The 'brocade-operation-lldp' YANG module provides the means for following
+    lldp port-related operations
+    1. Clearing lldp neighbor 
+    2. Resetting lldp statistics
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-10-30 {
+    description
+      "
+      Fabric OS 9.0.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  rpc lldp {
+    description
+      "
+      The RPC command definition for LLDP port operations
+      on a Brocade switch.
+      ";
+    input {
+      container lldp-operations {
+        if-feature "fibrechannel:fibrechannel_chassis_platform or " +
+                   "fibrechannel:fibrechannel_extension_platform";
+        description
+          "LLDP actions container";
+        leaf slot-port {
+          type fibrechannel:slot-port-name-type;
+          description
+            "Port name";
+        }
+        leaf action {
+          type enumeration {
+            enum "clear-neighbor" {
+              description
+                "Clear LLDP neighbor details of the given port";
+            }
+            enum "reset-statistics" {
+              description
+                "Reset LLDP related statistics of the given port";
+            }
+          }
+          description
+            "LLDP actions on the given port";
+        }  
+      } 
+    }
+  }
+}

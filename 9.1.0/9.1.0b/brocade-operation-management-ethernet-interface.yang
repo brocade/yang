@@ -1,0 +1,104 @@
+module brocade-operation-management-ethernet-interface {
+
+  yang-version 1.1;
+  namespace
+    "urn:brocade.com:mgmt:brocade-operation-management-ethernet-interface";
+  prefix brocade-operation-management-ethernet-interface;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for resetting
+    the error statistics of the Ethernet interface on switch.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-03 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+        Refine descriptions
+      
+      ";
+    reference
+      "None";
+  }
+
+  rpc management-ethernet-interface {
+    description
+      "
+      The RPC command definition for operations on the management
+      Ethernet interface of switch.
+      ";
+    input {
+      container ethernet-interface-parameters {
+        description
+          "
+           The input container for the management Ethernet interface operation.
+          ";
+        leaf physical-interface {
+	  type fibrechannel:physical-interface-type;
+          description
+            "
+            The name of the physical management Ethernet interface on which
+            to perform the operation.
+            For a fixed-port switch, the valid value  is eth0.
+            For a chassis switch, the valid values are eth0 and eth3.
+            ";
+        }
+        leaf cp-name {
+          type fibrechannel:cp-name-type;
+          description
+            "
+            The host CP name that identifies the CP on which to perform the
+            action on its management Ethernet interface.
+            ";
+        }
+        leaf action {
+          type enumeration {
+            enum "reset-error" {
+              description
+                "
+                Resets the error statistics of the management Ethernet interface
+                on a switch.
+                ";
+            }
+          }
+          description
+            "
+            The action (such as, reset-error) to perform on the management
+            Ethernet interface.
+            ";   
+        }
+      }
+    }
+  }
+}

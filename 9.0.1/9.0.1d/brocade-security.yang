@@ -1,0 +1,1868 @@
+module brocade-security {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-security";
+  prefix security;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import brocade-security-yang-types {
+    prefix brocade-security-type;
+  }
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'Security', commands.
+          
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2020-07-01 {
+    description
+      "
+      Fabric OS 8.2.1
+      ---------------
+        Initial release.
+        Refine descriptions.
+      
+      Fabric OS 9.0.0
+      ---------------
+        Added auth-token-present leaf
+        Support extension certificates
+        Support SSH known host updates
+        Update if-feature conditions
+        
+      Fabric OS 9.0.1
+      ---------------
+        Added tls-mode leaf
+      ";
+
+    reference
+      "None";
+  }
+
+  container brocade-security {
+    description
+      "The container for the security commands.";
+
+    list ipfilter-policy {
+      key "name";
+      description
+        "
+        The IP filter policies. You use this container to manage the IP filter 
+        policies.
+    
+        The IP filter policy sets up a packet filtering firewall to provide
+        access control on the management IP interface. The IPv4 and IPv6
+        policies are either in the defined configuration or in the active
+        configuration.
+    
+        There can be maximum of eight IP filter policies on the switch,
+        including the two default policies(default_ipv4 and default_ipv6).
+
+        The active policy must be the default policy or one of the policies in
+        the defined configuration. Note that only active policies are enforced.
+        ";
+      leaf name {
+        type brocade-security-type:ipfilter-name-type;
+        description
+          "
+          The IP filter policy name. The policy name can be up to 
+          20 alphanumeric or underscore characters and must be unique. Note that
+          policy names are case-insensitive and are always stored as lower case.
+          
+          The default_ipv4 and default_ipv6 names are reserved for the default
+          IP filter policies. 
+          ";
+      }
+      leaf ip-version {
+        type brocade-security-type:ipfilter-ip-version-type;
+        description
+          "The IP filter policy version type (IPv4 or IPv6).";
+      }
+      leaf is-policy-active {
+        type boolean;
+        config false;
+        description
+          "
+          The current status of the policy (defined or active).
+          true : Active. 
+          false: Defined. 
+          ";
+      }
+      leaf is-default-policy {
+        type boolean;
+        config false;
+        description
+          "
+          Whether the policy is a default or user-defined policy.
+          true : Default policy.
+          false: User-defined policy.
+          ";
+      }
+      leaf action {
+        type brocade-security-type:ipfilter-action-type;
+        description
+          "
+          Write-only leaf that you can set with PATCH request; however, a GET 
+          request does not fetch this leaf.
+          The action to take on the IP filter policy.
+          IP filter configurations are saved automatically after any change.
+          Available actions include: 
+          o activate
+          o clone
+          ";
+      }
+      leaf clone-destination-policy-name {
+        when "../action=clone";
+        type brocade-security-type:ipfilter-name-type;
+        description
+          "
+          Write-only leaf that you can set with PATCH request; however, a GET 
+          request does not fetch this leaf.
+          The destination IP filter policy name for the clone operation.
+          The policy name can be up to 20 alphanumeric or underscore characters 
+          and must be unique.
+          ";
+      }
+    }
+  
+    list ipfilter-rule {
+      key "policy-name index";
+      description
+        "The IP filter rule configurations.";
+      leaf policy-name {
+        type brocade-security-type:ipfilter-name-type;
+        description
+          "
+          The IP filter policy name. The policy name can be up to 
+          20 alphanumeric or underscore characters and must be unique. Note that
+          policy names are case-insensitive and are always stored as lower case.
+          
+          The default_ipv4 and default_ipv6 names are reserved for the default
+          IP filter policies.
+          ";
+      }
+      leaf index {
+        type uint16 {
+          range "1..max";
+        }
+        description
+          "
+          The position of the IP filter entry in the IP filter table.
+          The rule number must be between 1 and the current maximum rule
+          number plus one.
+          ";
+      }
+      leaf source-ip { 
+        type brocade-security-type:host-type;
+        description
+          "
+          The source IP address.
+
+          For IPv4 filters, the address must be a 32-bit address in
+          dot notation or a CIDR-style IPv4 prefix. 
+          For IPv6 filters, the address must be a 12-bit IPv6 address in any 
+          format specified by RFC3513 or a CIDR-style IPv6 prefix.
+
+          Note that the source IP option is optional for FORWARD traffic.
+          If the source IP leaf is not specified, the leaf is automatically 
+          given the default value 'any'.
+          ";
+      }
+      leaf destination-start-port {
+        type inet:port-number {
+          range "1..65535";
+        }
+        mandatory true;
+        description
+          "
+          The destination port number or the starting destination port number 
+          for a port number range.
+          The blocking or permitting of port from 1 through 65535 is allowed.
+          ";
+      }
+      leaf destination-end-port {
+        type inet:port-number {
+          range "1..65535";
+        }
+        description
+          "
+          The ending destination port number of the port number range.
+          If no destination-end-port is specified during IP filter rule 
+          creation (POST), the destination end port is equal to
+          destination start port.
+          ";
+      }
+      leaf protocol {
+        type brocade-security-type:ipfilter-protocol-type;
+        default "udp";
+        description
+          "The protocol type (tcp or udp).";
+      }
+      leaf permission {
+        type brocade-security-type:ipfilter-permission-type;
+        mandatory true;
+        description
+          "
+          The permit or deny action associated with this rule. You can permit
+          or deny (block)ports from 1 through 65535.
+          ";
+      }
+      leaf traffic-type {
+        type brocade-security-type:ipfilter-traffic-type;
+        default "INPUT";
+        status obsolete;
+        description
+          "
+          The type of traffic that allowed for the specified IP address.
+
+          The input traffic type manages traffic on IP management interfaces. 
+          The forward traffic type manages bidirectional traffic between the 
+          external Ethernet interface (eth0/bond0) and the inband management 
+          interface (inbd+).
+          ";
+      }
+      leaf destination-ip {
+        type brocade-security-type:host-type;
+        description
+          "
+          The destination IP address.
+
+          For IPv4 filters, the address must be a 32-bit address in
+          dot notation or a CIDR-style IPv4 prefix. 
+          For IPv6 filters, the address must be a 12-bit IPv6 address in any 
+          format specified by RFC3513 or a CIDR-style IPv6 prefix.
+
+          Note that the destination IP address is optional for INPUT traffic.
+          If the destination IP leaf is not specified, the leaf is 
+          automatically given the default value 'any'.
+          ";
+      }
+    }
+
+    list user-specific-password-cfg {
+      key "user-name";
+      description
+        "The password policy configuration for a specific user.";
+      leaf user-name {
+        type brocade-security-type:user-config-user-name-type;
+        description
+          "The user name for a specific user account.";
+      }
+      leaf minimum-password-age {
+        type int32 {
+          range "0..999";
+        }
+        units "days";
+        default 0;
+        description
+          "          
+          The minimum number of days that must elapse before a password can be 
+          changed. When the maximum-password-age is set to a non-zero value, 
+          the minimum-password-age value must be set to a value that is 
+          less than or equal to the maximum password age.
+          If a minimum password age value is not configured, a GET request does
+          not fetch this leaf.
+          ";
+      } 
+      leaf maximum-password-age {
+        type int32 {
+          range "0..999";
+        }
+        units "days";
+        default 0;
+        description
+          " 
+          The maximum number of days that can elapse before a password must
+          be changed. This is the password expiration period.
+  
+          Setting this parameter to 0 disables password expiration.
+
+          If a maximum password age value is not configured, a GET request does
+          not fetch this leaf.
+          ";
+      }
+      leaf warn-on-expire {
+        type int32 {
+          range "0..999";
+        }
+        units "days";
+        default 0;
+        description
+          "
+          The number of days prior to password expiration that a warning about 
+          password expiration displays. 
+          If a warn on expire value is not configured, a GET request does not 
+          fetch this parameter.
+          ";
+      }
+      leaf enforce-expire {
+        type boolean;
+        description
+          "
+          Write-only leaf that you can set only to TRUE with a PATCH request;
+          however, a GET request does not fetch this leaf.
+          When activated (set to true), the password for the specified user 
+          expires. The user is prompted to  change the password on the next
+          successful login. The default value of this leaf will depend on
+          the leaf '../user-config/password-change-enforced'.
+          
+          true : Activated.
+          false: Not supported.
+          ";
+      }
+      leaf hash-type {
+        type brocade-security-type:hash-algorithm-type;
+        config false;
+        description
+          "The hash type (md5, sha256, or sha512).";
+      }
+    }
+
+    container password-cfg {
+      description
+        "The generic password policy configuration for all user accounts.";
+      leaf minimum-length {
+        type int32 {
+          range "8..40";
+        }
+        description
+          "
+          The minimum length of the password.
+  
+          The minimum can be set between 8 and 40 characters.
+          ";
+      }
+      leaf character-set {
+        type int32 {
+          range "0..40";
+        }
+        description
+          "
+          The minimum length on the character set (upper and lowercase letters 
+          and special characters) to use in the password. The value must be 
+          less than or equal to minimum-length leaf.
+          ";
+      }
+      leaf user-name-allowed {
+        type boolean;
+        description
+          "
+          The validation check to determine if the username is used in the 
+          password. If activated, the username (in both forward and reverse 
+          direction) cannot be used in the password.
+          For example, if username is 'testuser', then the password 
+          'testuser123' or 'resutset567' is not allowed.
+          
+          true : Activated.
+          false: Deactivated.
+          ";
+      }
+      leaf minimum-lower-case-character {
+        type int32 {
+          range "0..40";
+        }
+        description
+          "
+          The minimum number of lowercase alphabetic characters that must
+          appear in the password. This value must be less than or 
+          equal to the minimum-length leaf.
+          ";
+      }
+      leaf minimum-upper-case-character {
+        type int32 {
+          range "0..40";
+        }
+        description
+          "
+          The minimum number of uppercase alphabetic characters that
+          must appear in the password. This value must be less than or
+          equal to the minimum-length leaf.
+          ";
+      }
+      leaf minimum-numeric-character {
+        type int32 {
+          range "0..40";
+        }
+        description
+          "
+          The minimum number of numeric digits that must appear in the
+          password. This value must be less than or equal to the 
+          minimum-length leaf.
+          ";
+      }
+      leaf minimum-special-character {
+        type int32 {
+          range "0..40";
+        }
+        description
+          "
+          The minimum number of punctuation characters that must appear
+          in the password. This value must be less than or equal to the 
+          minimum-length leaf.
+  
+          All displayable, non-alphanumeric punctuation characters, except the
+          colon (:), are allowed.
+          ";
+      }
+      leaf past-password-history {
+        type int32 {
+          range "0..24";
+        }
+        description
+          "
+          The number of past password values that are disallowed
+          when setting a new password.
+          ";
+      }
+      leaf minimum-password-age {
+        type int32 {
+          range "0..999";
+        }
+        units "days";
+        description
+          "
+          The minimum number of days that must elapse before a
+          password can be changed. When the maximum-password-age leaf is set to 
+          non-zero value, the minimum-password-age value must be set to a
+          value less than or equal to the maximum-password-age value.
+          ";
+      }
+      leaf maximum-password-age {
+        type int32 {
+          range "0..999";
+        }
+        units "days";
+        description
+          "
+          The maximum number of days that can elapse before a
+          password must be changed. This is the password expiration period.
+  
+          Setting this parameter to 0 disables password expiration.
+          ";
+      }
+      leaf warn-on-expire {
+        type int32 {
+          range "0..999";
+        }
+        units "days";
+        description
+          "
+          The number of days prior to password expiration that a
+          warning about password expiration displays.
+          ";
+      }
+      leaf lock-out-threshold {
+        type int32 {
+          range "0..999";
+        }
+        description
+          "
+          The number of times a user can specify an incorrect
+          password during login before the account is locked.
+  
+          The number of failed login attempts is counted from the last
+          successful login.
+          Setting this parameter to 0 disables the lockout mechanism.
+          ";
+      }
+      leaf lock-out-duration {
+        type int32 {
+          range "0..99999";
+        }
+        units "minutes";
+        description
+          "
+          The time after which a previously locked account automatically 
+          unlocks.
+  
+          Setting this to 0 disables lockout duration, and requires an
+          administrative action to unlock the account.
+          ";
+      }
+      leaf admin-lock-out-enabled {
+        type boolean;
+        description
+          "
+          Whether the lockout policy is enabled for the admin account.
+          
+          true : Enabled.
+          false: Disabled.
+          ";
+      }
+      leaf repeat-character-limit {
+        type int32 {
+          range "1..40";
+        }
+        description
+          "
+          The length of repeated character sequences that are disallowed.
+  
+          For example, if the 'repeat' value is set to 3, a password
+          'passAAAword' is disallowed because it contains the repeated sequence
+          'AAA'. However, a password 'passAAword' is allowed because no 
+          repeated character sequence exceeds two characters.
+          ";
+      }
+      leaf sequence-character-limit {
+        type int32 {
+          range "1..40";
+        }
+        description
+          "
+          The length of sequential character sequences that are disallowed.
+  
+          In a character sequence, the ASCII value of each contiguous character
+          differs by one. The ASCII value for the characters in the sequence
+          must all be increasing or decreasing.
+          
+          For example, if the 'sequence' value is set to 3, a password
+          'passABCword' is disallowed because it contains the sequence 'ABC'.
+          ";
+      }
+      leaf password-config-changed {
+        type boolean;
+        config false;
+        description
+          "
+          The account password policy status.
+          true : Configuration changed.
+          false: Default configuration.
+          ";
+      }
+      leaf reverse-user-name-allowed {
+        type boolean;
+        description
+          "
+          The validation check to determine whether the password is an exact 
+          reverse string of the username.
+          
+          true : Activated.
+          false: Deactivated.
+          ";
+      }
+      leaf hash-type {
+        when "../password-action=hash-config";
+        type brocade-security-type:hash-algorithm-type;
+        description
+          "The hash type (md5, sha256, or sha512).";
+      }
+      leaf manual-hash-enabled {
+        when "../hash-type";
+        type boolean;
+        description
+          "
+          A password change due to hash type change can be manual and
+          is not enforced at login.
+          true : Enabled.
+          false: Disabled.
+          ";
+      }
+      leaf enforce-expire {
+        type boolean;
+        description
+          "
+          Write-only leaf that you can set with a PATCH request; however, a GET 
+          request does not fetch this leaf.
+          The expiration of the password for all users except the root account.
+          If activated, the user is prompted for a password change on the
+          next successful login.
+          
+          true : Activated.
+          false: Deactivated.
+          ";
+      }
+      leaf minimum-difference {
+        type uint16 {
+          range "0..40";
+        }
+        description
+          "
+          The number of character differences expected between
+          the old and new password.
+          ";
+      }
+      leaf password-action {
+        type brocade-security-type:password-cfg-operation-type;
+        description
+          "
+          Write-only leaf that you can set with a PATCH request; however a GET 
+          request does not fetch this leaf.
+          The configuration  or deletion of password policies. 
+          Valid actions include:
+          o hash-config
+          o default
+          o delete-all
+          ";
+      }
+    }
+
+    list user-config {
+      key "name";
+      description
+        "
+        The user accounts on a switch.
+    
+        In a Virtual Fabric-enabled environment, you can configure the account's
+        username, its role, and the logical fabrics that the account may access.
+    
+        An account can have different roles for different logical fabrics.
+        An account can access multiple logical fabrics, but only one logical 
+        fabric at a time.
+    
+        In a logical fabric environment, you can additionally define access to
+        chassis-level commands. An account can have one role in the logical 
+        fabric, and another role regarding chassis commands.
+        ";
+      leaf name {
+        type brocade-security-type:user-config-user-name-type;
+        description
+          "
+          The login name of the account to be created or modified.
+          The name must be unique and must begin with an alphabetic character.
+          User names are case-sensitive and can contain up to 32 alphanumeric
+          characters, including periods (.) and underscores (_).
+          ";
+      }
+      leaf password {
+        type brocade-security-type:user-password-type;
+        description
+          "
+          Write-only leaf that you can set with a POST request; 
+          however, a GET request does not fetch this leaf.
+          A password for the account. Note that the password must be encoded 
+          with the Base64 encoding scheme.
+          ";
+      }
+      leaf role {
+        type brocade-security-type:user-config-role-type;
+        description
+          "
+          The account's role for the switch in non VF mode.
+
+          You can assign any role (user-defined or default) to the account.
+          ";
+      }
+      leaf account-description {
+        type string {
+          length "0|1..32";
+          pattern "[ -~]{0,32}";
+          pattern ":" {
+            modifier invert-match;
+          }
+        }
+        description
+          "
+          A printable ASCII string that specifies the description for the 
+          new account.
+
+          The maximum length is 32 printable ASCII characters.
+          Colons are not permitted.
+          ";
+      }
+      leaf account-enabled {
+        type boolean;
+        default true;
+        description
+          "
+          Whether the account is enabled or disabled.
+          Once an account is disabled, the sessions associated with the account
+          are terminated.
+          
+          true : Enabled.
+          false: Disabled.
+          ";
+      }
+      leaf password-change-enforced {
+        type boolean;
+        default false;
+        description
+          "
+          Whether password is enforced by admin to be expired and must be
+          changed first time the user logs into a new or modified account.
+
+          true : Enforced.
+          false: Not enforced.
+          ";
+      }
+      leaf account-locked {
+        type boolean;
+        default false;
+        description
+          "
+          Whether the user account is locked after several attempts to login 
+          with an invalid password. 
+          User accounts can be locked after several attempts to log
+          in with an invalid password. You can unlock the specified user 
+          account, by changing the value to unlocked (false).
+          
+          true : Locked.
+          false: Unlocked.
+          ";
+      }
+      leaf access-start-time {
+        type string {
+          length "0|1..32";
+          pattern "(([0-1][0-9]|[2][0-3]):[0-5][0-9])?";
+        }
+        units "time";
+        description
+          "
+          The start time (in 24 hour format) during which users can access 
+          the switch through Telnet, SSH, console, or Web.
+          ";
+      }
+      leaf access-end-time {
+        when "../access-start-time";
+        type string {
+          length "0|1..32";
+          pattern "(([0-1][0-9]|[2][0-3]):[0-5][0-9])?";
+        }
+        units "time";
+        description
+          "
+          The end time (in 24 hour format) during which users can access 
+          the switch through Telnet, SSH, console, or Web.
+          ";
+      }
+
+      uses brocade-security-type:virtual-fabric-configuration-group {
+        if-feature fibrechannel:fibrechannel_virtual_fabric_platform;
+      }
+
+      container virtual-fabric-role-id-list {
+        description
+          "
+          The Virtual Fabrics roles and IDs to be added to the user account.
+          Note that the role leaf is required in case of VF enabled switch.
+          ";
+        leaf-list role-id {
+          type brocade-security-type:virtual-fabric-role-id-type;
+          description
+            "The Virtual Fabrics to be added to the user account.";
+        }
+      }
+      leaf auth-token-present {
+        type boolean;
+        config false;
+        description
+          "
+          It indicates that whether the auth-token is generated for this user
+          or not.
+          
+          true : Auth-token is available for this user.
+          false: Auth-token is not generated for this user.
+          ";
+      }
+    }
+
+    container auth-spec {
+      description
+        "Replaces the configuration with the specified AAA service.";
+      leaf authentication-mode {
+        type brocade-security-type:aaa-authspec-type;
+        description
+          "
+          The authentication mode for RADIUS, TACACS+, and LDAP.
+          MODE               Descriptions
+
+          local               Default setting. Authenticates management
+                              connections against the local database only.
+
+          radius              Authenticates management connections against any
+                              RADIUS databases only.
+
+          ldap                Authenticates management connections against any
+                              LDAP databases only.
+
+          tacacs+             Authenticates management connections against any
+                              TACACS+ databases only.
+
+          radius;local        Authenticates management connections against any
+                              RADIUS databases first.
+                              If RADIUS fails for any reason , authenticates
+                              against the local user database.
+
+          radius;localbackup  Authenticates management connections against any
+                              RADIUS databases. If RADIUS fails because the
+                              service is not available, it then authenticates
+                              against the local user database. This option
+                              directs the service to try the secondary
+                              authentication database only if the primary
+                              authentication database is not available.
+
+          tacacs+;local       Authenticates management connections against any
+                              TACACS+ databases first.
+                              If TACACS+ fails for any reason, it then
+                              authenticates against the local user database.
+
+          tacacs+;localbackup Authenticates management connections against any
+                              TACACS+ databases first. If TACACS+ fails for
+                              any reason, it then authenticates against the
+                              local user database. This option directs the 
+                              service to try the secondary authentication 
+                              database only if the primary authentication 
+                              database is not available.
+
+          ldap;local          Authenticates management connections against
+                              any LDAP databases first.
+                              If LDAP fails for any reason, it then
+                              authenticates against the local user database.
+
+          ldap;localbackup    Authenticates management connections against
+                              any LDAP databases first. If LDAP fails for any
+                              reason it then authenticates against the local
+                              user database. This option directs the 
+                              service to try the secondary authentication 
+                              database only if the primary authentication 
+                              database is not available.
+          ";
+      }
+      leaf activate-no-log-out {
+        when "../authentication-mode";
+        type boolean;
+        description
+          "
+          Write-only leaf that you can set with a PATCH request; however, a GET 
+          request does not fetch this leaf.
+          Whether a change in the authentication mode results in existing 
+          sessions being logged out automatically.
+          
+          true : There is no effect on existing sessions regardless
+                 of the chosen authentication mode.
+          false: Terminates all existing sessions if the new authentication 
+                 mode is one of the following: RADIUS only, LDAP only, 
+                 TACACS+ only or Local.
+          ";
+      }
+      leaf primary-auth-log-messages {
+        when "../authentication-mode";
+        type boolean;
+        description
+          "
+          Whether log messages for authentication failure display.
+          true : Display log messages.
+          false: Suppress log messages.
+          ";
+      }
+    }
+
+    list radius-server {
+      key "server";
+      description
+        "The RADIUS server configuration.";
+      leaf server {
+        type inet:host;
+        description
+          "
+          The IP address or server name in dot-decimal notation.
+
+          If the specified server IP address or name already exists in the
+          current configuration, the command fails and generates an error.
+          However, the command does not validate the server name against the
+          IP address in the configuration. Make sure to avoid duplicate
+          configuration of the same server, one specified by the name, the
+          other specified by the IP address
+          ";
+      }
+      leaf port {
+        type inet:port-number;
+        default 1812;
+        description
+          "
+          The RADIUS server port number.
+          ";
+      }
+      leaf secret {
+        type string {
+          length "8..40";
+          pattern "[!-~]{8,40}";
+        }
+        default "sharedsecret";
+        description
+          "
+          Write-only leaf that you can set with a PATCH or post request; 
+          however, a GET request does not fetch this leaf.
+          the common secret between the switch and the RADIUS server.
+          The secret must be encoded with the Base64 encoding scheme.
+          ";
+      }
+      leaf timeout {
+        type brocade-security-type:aaa-timeout-type;
+        description
+          "
+          The response timeout for the RADIUS server.
+          ";
+      }
+      leaf authentication {
+        type union {
+          type brocade-security-type:aaa-protocols-type;
+          type string {
+            length "1..32";
+            pattern "peap-mschapv2";
+          }
+        }
+        default chap;
+        description
+          "
+          The remote authentication protocol for the RADIUS server.
+          Valid protocols are,
+          o pap
+          o chap
+          o peap-mschapv2
+          ";
+      }
+      leaf encryption-type {
+        type brocade-security-type:aaa-encryption-algorithm-type;
+        default none;
+        description
+          "
+          The encryption algorithm type for the RADIUS server.
+          Valid algorithm include:
+          o none
+          o aes256
+          ";
+      }
+      leaf position {
+        type uint16 {
+          range "1..5";
+        }
+        description
+          "
+          The position to which you want to move the RADIUS server.
+          For example, if you change the server position to 2 (old position 
+          was 5), the server  is moved to position 2 and any existing server at 
+          position 2 is moved to  position 3.
+          ";
+      }
+    }
+
+    list tacacs-server {
+      key "server";
+      description
+        "The TACACS+ server configurations";
+      leaf server {
+        type inet:host;
+        description
+          "
+          The IP address or server name in dot-decimal notation.
+
+          If the specified server IP address or name already exists in the
+          current configuration, the command fails and generates an error.
+          However, the command does not validate the server name against the
+          IP address in the configuration. Make sure to avoid duplicate
+          configuration of the same server, one specified by the name, the
+          other specified by the IP address
+          ";
+      }
+      leaf port {
+        type inet:port-number;
+        default 49;
+        description
+          "
+          The TACACS+ server port number.
+          ";
+      }
+      leaf secret {
+        type string {
+          length "1..40";
+          pattern "[!-~]{1,40}";
+        }
+        default "sharedsecret";
+        description
+          "
+          Write-only leaf that you can set with a PATCH or POST request; 
+          however, a GET request does not fetch this leaf.
+          The common secret between the switch and the TACACS+ server.
+          The secret must be 1 to 40 characters for TACACS+ server and must be
+          encoded with the Base64 encoding scheme.
+          ";
+      }
+      leaf timeout {
+        type brocade-security-type:aaa-timeout-type;
+        description
+          "
+          The response timeout for the TACACS+ server.
+          ";
+      }
+      leaf authentication {
+        type brocade-security-type:aaa-protocols-type;
+        default chap;
+        description
+          "
+          The remote authentication protocol for the TACACS+ server.
+          Valid protocols include:
+          o pap
+          o chap
+          ";
+      }
+      leaf encryption-type {
+        type brocade-security-type:aaa-encryption-algorithm-type;
+        default none;
+        description
+          "
+          The encryption algorithm type for the TACACS+ server.
+          Valid algorithm include:
+          o none
+          o aes256
+          ";
+      }
+      leaf position {
+        type uint16 {
+          range "1..5";
+        }
+        description
+          "
+          The position to which TACACS+ server needs to be moved.
+          If the server position is set to 2 (old position was 5), the server
+          is moved to position 2 and any existing server at position 2 is moved
+          to position 3
+          ";
+      }
+    }
+
+    list ldap-server {
+      key "server";
+      description
+        "The LDAP server configuration.";
+      leaf server {
+        type inet:host;
+        description
+          "
+          The  IP address or a server name in dot-decimal notation.
+
+          If the specified server IP address or name already exists in the
+          current configuration, the command fails and generates an error.
+          However, the command does not validate the server name against the
+          IP address in the configuration. Make sure to avoid duplicate
+          configuration of the same server, one specified by the name, the
+          other specified by the IP address
+          ";
+      }
+      leaf port {
+        type inet:port-number;
+        default 389;
+        description
+          "
+          The LDAP server port number.
+          ";
+      }
+      leaf domain {
+        type inet:domain-name;
+        default "local";
+        description
+          "The name of the active directory domain.
+           For example, brocade.com";
+      }
+      leaf timeout {
+        type brocade-security-type:aaa-timeout-type;
+        description
+          "
+          The response timeout for the LDAP server.
+          ";
+      }
+      leaf tls-mode {
+        type brocade-security-type:ldap-tls-mode-type;
+        default "starttls";
+        description
+          "
+          The configuration that defines whether to use StartTLS or LDAPS.
+          starttls : use StartTLS
+          ldaps : use LDAPS
+          ";
+      }
+      leaf position {
+        type uint16 {
+          range "1..5";
+        }
+        description
+          "
+          The position to which you want to move the LDAP server.
+          If the server position is set to 2 (old position was 5), the server
+          is moved to position 2 and any existing server at position 2 is moved 
+          to position 3.
+          ";
+      }
+    }
+
+    list ldap-role-map {
+      key "ldap-role";
+      description
+        "
+        A list of the LDAP AD server role to default switch role mappings.
+        
+        Used to map a Lightweight Directory Access Protocol (LDAP)
+        Active Directory (AD) server role to one of the default
+        roles available on a switch.
+        ";
+      leaf ldap-role {
+       type string {
+          length "1..64";
+          pattern "[ -~]+";
+          pattern '[/\[\]:;|=,+*?<>]+' {
+            modifier invert-match;
+          }
+       }
+       description
+          "
+          The LDAP role to be mapped to a switch role.
+          The role must be a valid AD server role.
+          The maximum length is 64 printable ASCII characters.
+          The following characters are not allowed '/[]:;|=,+*?<>'.
+          ";
+      }
+      leaf switch-role {
+        type string {
+          length "1..2048";
+          pattern "[a-zA-Z0-9;-=,]*";
+          pattern ":" {
+            modifier invert-match;
+          }
+    }
+        description
+          "
+          The default switch role to be mapped to an LDAP role.
+          The format is either a string containing switch user type or 
+          switch user type with virtual fabric role ID information separated by 
+          ';'.
+          Example strings include:
+          o user
+          o user=1-10;admin=11-128
+          ";
+      }
+
+      uses brocade-security-type:virtual-fabric-configuration-group;
+
+    }
+
+    container sec-crypto-cfg-template-action {
+      description
+        "
+        Allows you to perform actions on the crypto template files.
+        You cannot overwrite or delete the default templates; however, they
+        can be uploaded, edited, and then downloaded with a different name.
+        You can use the default or user defined templates to applying or
+        verifying crypto configurations.
+        ";
+      leaf template-name {
+        type brocade-security-type:sec-crypto-cfg-template-name-type;
+        description
+          "
+          The template name.
+          ";
+      }
+      leaf action {
+        type brocade-security-type:sec-crypto-cfg-actions-type;
+        description
+        "
+        The operation to perform.
+        Valid operations include:
+        o apply
+        o verify
+        o import
+        o export
+        The response should be empty content with status code 204 when the
+        requested action is successful.
+        ";
+      }
+      uses brocade-security-type:seccrypto-import-export-param-group {
+        description
+          "Importing and exporting configurations to/from host.";
+      }
+    }
+
+    list sec-crypto-cfg-template {
+      key "name";
+      config false;
+      description
+        "A list of available templates.";
+      leaf name {
+        type brocade-security-type:sec-crypto-cfg-template-name-type;
+        description
+          "
+          The template name.
+          ";
+      }
+      leaf template {
+        type string {
+          length "1..max";
+          pattern '[\r\n -~]*';
+        }
+        description
+          "The content of templates.";
+      }
+    }
+
+    container sec-crypto-cfg {
+      config false;
+      description
+        "The active sec-crypto configurations.";
+      leaf ssh-cipher {
+        type brocade-security-type:default-string-type;
+        description
+          "The active SSH cipher configuration.";
+      }
+      leaf ssh-kex {
+        type brocade-security-type:default-string-type;
+        description
+          "The active SSH kex configuration.";
+      }
+      leaf ssh-mac {
+        type brocade-security-type:default-string-type;
+        description
+          "The active SSH mac configuration.";
+      }
+      leaf https-cipher {
+        type brocade-security-type:default-string-type;
+        description
+          "The active HTTPS cipher configuration.";
+      }
+      leaf https-tlsv13-cipher {
+        type brocade-security-type:default-string-type;
+        description
+          "The active HTTPS TLSv1.3 cipher configuration.";
+      }
+      leaf radius-cipher {
+        type brocade-security-type:default-string-type;
+        description
+          "The active RADIUS cipher configuration.";
+      }
+      leaf ldap-cipher {
+        type brocade-security-type:default-string-type;
+        description
+          "The active LDAP cipher configuration.";
+      }
+      leaf syslog-cipher {
+        type brocade-security-type:default-string-type;
+        description
+          "The active Syslog cipher configuration.";
+      }
+      leaf https-tls-protocol {
+        type brocade-security-type:tls-protocol-type;
+        description
+          "The active HTTPS TLS protocol.";
+      }
+      leaf radius-tls-protocol {
+        type brocade-security-type:tls-protocol-type;
+        description
+          "The active RADIUS TLS protocol.";
+      }
+      leaf ldap-tls-protocol {
+        type brocade-security-type:tls-protocol-type;
+        description
+          "The active LDAP TLS protocol.";
+      }
+      leaf syslog-tls-protocol {
+        type brocade-security-type:tls-protocol-type;
+        description
+          "The active Syslog TLS protocol.";
+      }
+      leaf x509v3-validation-mode {
+        type brocade-security-type:validation-mode-type;
+        description
+          "
+          The X509v3 certificate validation mode type. X509v3 certificate 
+          validation permits Fabric OS to enable or disable certificate 
+          validation during certificate import and session establishment. 
+          The following identifies the differences between Basic mode and 
+          Strict mode for X509v3 certificate validation.
+          
+          Basic mode:
+          o 'Certificate Sign' is not mandatory for 'KeyUsage' in a CA
+            certificate.
+          o OCSP validation for identity certificates is not performed.
+          o 'BasicConstraints' field is not mandatory in a CA certificate.
+          o 'CA:True' value is not mandatory in a CA certificate.
+          o 'Digital Signature' is not mandatory for 'KeyUsage' in a identity
+            certificate.
+          o Audit logs for establishing and terminating TLS session are not
+            printed.
+          o SSH sessions with a switch, the 1GB data transfer limit is not
+            enforced for rekeying.
+          o For RADIUS, LDAP, or Syslog secure authentication using a
+            certificate, a hostname mismatch error is ignored.
+          o For RADIUS, LDAP, or Syslog secure authentication using a
+            certificate, hostname validation is not performed.
+          o For RADIUS, LDAP, or Syslog secure authentication over TLS using a
+            certificate, if there is a hostname mismatch error, no audit log
+            entry is generated.
+
+          Strict mode:
+          o 'Certificate Sign' is mandatory for 'KeyUsage' in a CA
+             certificate.
+          o OCSP validation for identity certificates is performed.
+          o 'BasicConstraints' field is mandatory in a CA certificate.
+          o 'CA:True' value is mandatory in a CA certificate.
+          o 'Digital Signature' is mandatory for 'KeyUsage' in a identity
+            certificate.
+          o Audit log for establishing and terminating TLS session is printed
+            for each TLS session established. In a switch this applies both as
+            client and as server.
+          o In SSH sessions with a switch, the 1GB data transfer limit is
+            enforced for rekeying.
+          o For RADIUS, LDAP, or Syslog secure authentication using a
+            certificate, a hostname mismatch error causes authentication failure
+          o For RADIUS, LDAP, or Syslog secure authentication, hostname
+            validation is enforced and a hostname mismatch error causes
+            authentication failure (hostname resolution failure also causes
+            authentication failure).
+          o For RADIUS, LDAP, or Syslog secure authentication over TLS using a
+            certificate, if there is a hostname mismatch error, an audit log
+            entry is generated.
+          ";
+      }
+    }
+
+    container sshutil {
+      description
+        "
+        The allowed user configuration. This container is used to configure or 
+        display the allowed user and to configure or display the SSH rekey 
+        interval.
+        ";
+        leaf allow-user-name {
+          type brocade-security-type:user-config-user-name-type;
+          description
+            "
+            The user name. User names are case-sensitive and can contain up to 
+            32 alphanumeric characters, including periods (.) and 
+            underscores (_).
+            For GET requests, this leaf is applicable only for default admin
+            user account.
+            ";
+        }
+        leaf rekey-interval {
+          type uint16 {
+             range "0|900..3600";
+          }
+          units "seconds";
+          description
+            "The rekey duration.";
+       }
+    }
+  
+    list sshutil-known-host {
+      key "remote-host-name";
+      description
+        "
+        Known host IP configuration. This container is used to
+        add/delete remote host keys to/from known hosts file.
+        This container is also used to display the remote host keys.
+        ";
+        leaf remote-host-name {
+          type inet:host;
+          description
+            "IP address or FQDN of the remote host";
+        }
+        leaf key-type {
+          type string {
+            length "1..512";
+            pattern "[ -~]+";
+          }
+          config false;
+          description
+            "Type of the key(rsa,dsa and ecdsa).";
+        }
+        leaf host-key {
+          type string {
+            length "1..2048";
+            pattern "[ -~]+";
+          }
+          config false;
+          description
+            "Remote host key in known hosts file.";
+        }
+        container fingerprint-list {
+          description
+            " A list of fingerprints.";
+          leaf-list fingerprint {
+            type string {
+              length "1..1024";
+              pattern "[ -~]+";
+            }
+            description
+              "
+              Fingerprint of the remote host key.
+              Maximum element allowed is 1 in a POST request,
+              while GET request will fetch 5 elements.
+              ";
+          }
+        }
+    }
+
+    list sshutil-key {
+      key "algorithm-type key-type";
+      description
+        "
+        A list of host, public, and private keys. This container is used to 
+        generate or delete host keys and public/private key pairs for outgoing 
+        SSH connections. This container is also used to display only the 
+        switch host keys.
+        ";
+        leaf algorithm-type {
+          type brocade-security-type:sshutil-algorithm-type;
+          description
+            "The algorithm type (rsa/dsa/ecdsa).";
+        }
+        leaf key-type {
+          type brocade-security-type:sshutil-key-type;
+          description
+            "The key type (public-private-key or host-key).";
+        }
+        leaf passphrase {
+          when "../key-type=public-private-key";
+          type string {
+            length "0|5..21242";
+            pattern "[ -~]*";
+          }
+          status obsolete;
+          description
+            "
+            Write-only leaf.
+            The password for generating a key. A strong passphrase
+            is 10-30 characters long, fairly complex and difficult to guess and
+            contains a mix of upper and lowercase letters, numbers, and 
+            non-alphanumeric characters. The passphrase must be encoded
+            with the Base64 encoding scheme.
+            ";
+        }
+        leaf size {
+          type uint16 {
+             range "0..2048";
+          }
+          config false;
+          description
+            "The host key size.";
+
+        }
+        leaf fingerprint {
+          type string {
+            length "0..1024";
+            pattern "[ -~]*";
+          }
+          config false;
+          description
+            "The host key fingerprint installed in the switch.";
+        }
+    }
+
+    list sshutil-public-key {
+      key "user-name";
+      description
+        "
+        A list of public keys. You can delete the public keys for a specified 
+        user or all users.
+        ";
+        leaf user-name {
+          type brocade-security-type:user-config-user-name-type;
+          description
+            "
+            The user name for the account for which you want to delete or 
+            display the SSH public keys. User names are case-sensitive and can 
+            contain up to 32 alphanumeric characters, including periods (.) and 
+            underscores (_). If you specify \"all\" as the user name, the 
+            public keys for all user accounts are deleted.
+            ";
+        }
+        leaf public-key {
+          type string {
+            length "1..2048";
+            pattern "[ -~]*";
+          }
+          config false;
+          description
+            "The public key installed in the switch.";
+        }
+    }
+
+    container sshutil-public-key-action {
+      description
+        "
+        Use to export or import a public key to or from a remote host.
+        ";
+        leaf action {
+          type brocade-security-type:sshutil-operation-type;
+          description
+            "
+            The import or export action to be performed on the public key. 
+            Imported public keys are used for passwordless incoming SSH 
+            connections. Exported public keys are used for passwordless 
+            outgoing SSH connections.
+            ";
+        }
+        leaf algorithm-type {
+          when "../action=export";
+          type brocade-security-type:sshutil-algorithm-type;
+          description
+            "The algorithm type (rsa/dsa/ecdsa).";
+        }
+        leaf user-name {
+          when "../action=import";
+          type brocade-security-type:user-config-user-name-type;
+          description
+            "
+            The user name.
+            User names are case-sensitive and can contain up to 32 alphanumeric 
+            characters, including periods (.) and underscores (_).
+            ";
+        }
+        uses brocade-security-type:import-export-param-group {
+          description
+            "Export public key to remote host.";
+        }
+        leaf public-key-name {
+          when "../action=import";
+          type string {
+            length "1..128";
+            pattern "[a-zA-Z0-9_.-]*";
+          }
+          description
+            "
+            The name of the file in which the public key is stored on the 
+            remote host. This is a user-generated file name that must have 
+            a .pub extension.
+            ";
+        }
+    }
+
+    container password {
+      description 
+        "The user account password container.";
+      leaf user-name {
+        type brocade-security-type:user-config-user-name-type;
+        description
+          "
+          The user name. User names are case-sensitive and can contain up to 
+          32 alphanumeric characters, including periods (.) and underscores (_).
+          Note that user name is mandatory parameter for changing the password.
+          ";
+      }
+      leaf old-password {
+        type brocade-security-type:user-password-type;
+        description
+          "
+          The old password. The password must be encoded with the 
+          Base64 encoding scheme.
+          ";
+      }
+      leaf new-password {
+        type brocade-security-type:user-password-type;
+        description 
+          "
+          The new password. The password must be encoded with the 
+          Base64 encoding scheme.
+          Note that new password is mandatory parameter for changing 
+          the password.
+          ";
+      }
+    }
+
+    container security-certificate-generate {
+      description
+        "
+          Generates a self-signed web certificate for HTTPS support and
+          self-signed certificate for Extension.
+          Creates Certificate Signing Requests (CSR) for HTTPS, FCAP,
+          Commoncert, LDAP, Radius, Syslog and Extension.
+        ";
+      leaf certificate-entity {
+        type brocade-security-type:gen-certificate-entity-type;
+        description
+           "The certificate entity.";
+      }
+      leaf certificate-type {
+        type brocade-security-type:certificate-application-type;
+        description
+           "
+           The certificate type (commoncert, https, radius, ldap, syslog, 
+           fcap, extension).
+           ";
+      }
+      leaf algorithm-type {
+        type brocade-security-type:sshutil-algorithm-type;
+        description
+          "
+          The algorithm type (rsa/dsa/ecdsa).
+
+          ecdsa is supported by https and extension only,
+          dsa is not supported by fcap.
+
+          For non-extension certificates, the default is rsa.
+          For extension certificates, the default is ecdsa.
+          ";
+      }
+      leaf key-size {
+        type brocade-security-type:keysize-type;
+        description
+           "
+           The size of the key.
+
+           For non-extension certificates, the default is 2048.
+           For extension certificates, the default is P384.
+           ";
+      }
+      leaf hash-type {
+        type brocade-security-type:seccertmgmt-hash-type;
+        description
+           "
+           The hash type.
+
+           For non-extension certificates, the default is sha256.
+           For extension certificates, the default is sha384.
+           ";
+      }
+      leaf years {
+        when "../certificate-entity=cert";
+        type uint16 {
+          range "0..50";
+        }
+        units "years";
+        default 5;
+        description
+          "The number of years that the certificate is valid.";
+      }
+      leaf keypair-tag {
+        when "../certificate-type = extension";
+        type string {
+          length "1..31";
+          pattern "[a-zA-Z0-9~@%_+:-]{1,31}";
+        }
+        description
+          "
+          The keypair tag is a user-defined name used to identify a local
+          certificate uniquely.
+          ";
+      }
+      uses brocade-security-type:certificate-details-group {
+        when "../certificate-entity=CSR";
+        description
+          "
+          Information to be provided to openssl for generating certificate/CSR.
+          ";
+      }
+    }
+
+    container security-certificate-action {
+      description
+        "
+          The import or export action of third-party certificates on a switch,
+          including Public Key Infrastructure (PKI) based certificates,
+          Lightweight Directory Access Protocol (LDAP) certificates, RADIUS
+          certificates, syslog CA certificates and extension certificates.
+        ";
+      uses brocade-security-type:import-export-param-group {
+        description "Import/export ca/csr/cert from/to remote host.";
+      }
+      leaf protocol {
+        type brocade-security-type:seccertmgmt-protocol-type;
+        description
+          "The protocol type for import or export. Example: scp or ftp.";
+      }
+      leaf certificate-entity {
+        type brocade-security-type:certificate-entity-type;
+        description
+           "
+           The certificate entity (CSR, switch, CA, CA Client, or
+           Server certificate).
+           ";
+      }
+      leaf certificate-type {
+        type brocade-security-type:certificate-application-type;
+        description
+           "
+           The certificate type (commoncert, https, radius, ldap, syslog, 
+           fcap or extension).
+           ";
+      }
+      leaf certificate-name {
+        type string {
+          length "5..128";
+          pattern "[0-9a-zA-Z_.-]{5,128}";
+        }
+        description "The certificate name.";
+      }
+      leaf ca-certificate {
+        when "../certificate-type = extension";
+        type string {
+          length "5..128";
+          pattern "[0-9a-zA-Z_.-]{5,128}";
+        }
+        description "The preimported local CA certificate name.";
+      }
+      leaf operation {
+        type brocade-security-type:seccertmgmt-operation-type;
+        description 
+          "
+          The security certificate operations (such as import or export).
+          ";
+      }
+      leaf keypair-tag {
+        when "../certificate-type = extension";
+        type string {
+          length "1..31";
+          pattern "[a-zA-Z0-9~@%_+:-]{1,31}";
+        }
+        description
+          "
+          The keypair tag is a user-defined name used to identify a local
+          certificate uniquely.
+          ";
+      }
+    }
+
+    list security-certificate {
+      key "certificate-entity certificate-type";
+      config false;
+      description
+        "
+        A list of security certificates on a switch, including Public Key
+        Infrastructure (PKI)-based certificates, Lightweight Directory Access
+        Protocol (LDAP) certificates, RADIUS certificates,
+        syslog CA certificates, and FCAP certificates.
+        This list does not include extension related certificates, please see
+        list security-certificate-extension.
+        ";
+      leaf certificate-entity {
+        type brocade-security-type:certificate-entity-type;
+        description
+           "The certificate entity (CSR, CA, or switch certificate).";
+      }
+      leaf certificate-type {
+        type union {
+           type brocade-security-type:certificate-application-type;
+           type string {
+               pattern "all";
+           }
+        }
+        description
+           "
+           The certificate type (commoncert, https, radius, ldap, syslog, 
+           and fcap.
+           ";
+      }
+      leaf certificate {
+        type string {
+          length "0|1..max";
+          pattern '[\r\n -~]*';
+        }
+        description
+          "
+          The CSR, CA-client, CA-server, or switch certificates installed 
+          on the switch.
+          ";
+      }
+      leaf certificate-hexdump {
+        type string {
+          length "0|1..max";
+          pattern '[\r\n -~]*';
+        }
+        description
+          "
+          The CSR, CA-client, CA-server, or switch certificates, in raw 
+          hexadecimal format, installed on the switch.
+          ";
+      }
+    }
+
+    list security-certificate-extension {
+      if-feature fibrechannel:fibrechannel_extension_platform;
+      config false;
+      description
+        "
+        A list of Extension related security certificates on a switch.
+        ";
+      leaf certificate-entity {
+        type brocade-security-type:certificate-entity-type;
+        description
+           "The certificate entity (CSR, CA, or switch certificate).";
+      }
+      leaf local-certificate {
+        when "../certificate-entity = cert";
+        type boolean;
+        description
+           "The certificate is a local certificate. This is true when
+            the certificate is created on the same switch i.e. when
+            using self-signed certificate or in case of CA signed certificate
+            when the CSR was generated locally for signing by the CA.
+
+              true: The certificate is local certificate.
+              false: The certificate is a remote certificate.
+           ";
+      }
+      leaf certificate-name {
+        type string {
+          length "1..max";
+          pattern "[ -~]+";
+        }
+        description
+          "
+          The CSR, CA, switch certificate name installed
+          on the switch.
+          ";
+      }
+      leaf certificate {
+        type string {
+          length "1..max";
+          pattern "[ -~]+";
+        }
+        description
+          "
+          The certificate includes details of issuer, signature,
+          dates, subject etc.
+          ";
+      }
+      leaf keypair-tag {
+        when "../local-certificate = true";
+        type string {
+          length "1..31";
+          pattern "[a-zA-Z0-9~@%_+:-]{1,31}";
+        }
+        description
+          "
+          The keypair tag is a user-defined name used to identify a local
+          certificate uniquely.
+          ";
+      }
+      leaf certificate-hexdump {
+        type string {
+          length "1..max";
+          pattern "[ -~]+";
+        }
+        description
+          "
+          The CSR, CA or switch certificates, in raw
+          hexadecimal format, installed on the switch.
+          ";
+      }
+    }
+  }
+}

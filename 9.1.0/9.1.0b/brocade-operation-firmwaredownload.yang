@@ -1,0 +1,194 @@
+module brocade-operation-firmwaredownload {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-firmwaredownload";
+  prefix firmwaredownload-operation;
+
+  import "ietf-inet-types" {
+    prefix inet;
+  }
+
+  import "brocade-operation-types" {
+    prefix operation-types;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This yang module defines firmwaredownload operation definitions. 
+          
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-09-14 {
+    description
+      "
+      FOS 9.1.0
+      ---------
+      Updated the description for activate leaf.
+      Introduced new leaf firmware-sync.
+      Refine descriptions.
+
+      FOS 9.0.0
+      -----
+      Initial release for firmwaredownload operation. 
+      Refine descriptions.
+      ";
+    reference
+      "None";
+  }
+
+  rpc firmwaredownload {
+    description 
+      "
+      The RPC command definition to trigger the firmware download operation.
+      ";
+
+    input {
+      container firmwaredownload-parameters {
+      description
+        "
+        The firmware download operation input container.
+        ";
+
+      leaf eula-action {
+        type operation-types:eula-action-type;
+        default "decline-eula";
+        description
+          "
+          The End User License Agreement(EULA) actions for firmware
+          download. Note that the firmware download process requires
+          that you accept the EULA.
+          .
+          ";
+      }
+      leaf host {
+        type inet:host;
+        description 
+          "
+          The IPv4 or IPv6 address or host name for the remote server.
+          ";
+      }
+      leaf user-name {
+        type string {
+          length "1..128";
+          pattern "[ -~]+";
+        }
+        description 
+          "
+          The user name of the remote server that is used to copy
+          the firmware download files. 
+          ";
+      }
+      leaf password {
+        type string {
+          length "0..128";
+          pattern "[ -~]*";
+        }
+        description 
+          "
+          The password for the remote server used to copy 
+          the firmware download files. The password should be
+          base64 encoded. Refer to RFC 3414.
+          ";
+      }
+      leaf remote-directory {
+        type string {
+          length "1..1023";
+          pattern "[ -~]+";
+        }
+        description
+          "
+          The fully qualified path to the remote server directory from 
+          which to transfer the firmware download. 
+          ";
+      }
+      leaf protocol {
+        type operation-types:protocol;
+        description
+	  "
+           The file transfer protocol. The values are ftp (File Transfer 
+           Protocol), scp (Secure Copy Protocol), sftp (Secure FTP), or
+           http (HyperText Transfer Protocol).
+           ";
+      }
+      leaf port {
+        when "../protocol = scp or ../protocol = sftp or ../protocol = http";
+        type uint32 {
+          range "1..65535";
+        }
+        description
+          "
+          The user-defined port number for the specified file transfer
+          protocol (scp, sftp, or http). 
+          ";
+      }
+      leaf stage {
+	when "../eula-action != display-eula";
+        type boolean;
+        description
+           "
+           Downloads the firmware to a secondary partition
+           without rebooting and activation.
+           ";
+      }
+      leaf activate {
+        type boolean;
+        description
+           "
+           Activates the firmware, if not already activated.
+           true: Activates the firmware. Do not include any other
+           input parameters with this action.    
+           ";
+      }
+      leaf firmware-sync {
+        type boolean;
+        description
+           "
+           Synchronizes the firmware on the active CP to the standby CP.
+           true: Synchronizes the firmware. Do not include any other
+           input parameters with this action.
+           ";
+      }
+      leaf clean-install {
+        when "../stage = false and ../eula-action != display-eula";
+        type boolean;
+        description
+	   "
+           Initiates a clean reinstall of the firmware.
+           ";
+     }
+    }		
+   }
+
+   output {
+     uses operation-types:show-status-group {
+       description
+         "
+         The firmware download operation status container.
+         ";
+     }
+   }
+  }
+}

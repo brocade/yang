@@ -1,0 +1,125 @@
+module brocade-operation-device-management {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-device-management";
+  prefix device-mgmt;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for managing
+    HBA devices.
+     
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-10-30 {
+    description
+      "
+      Fabric OS 9.0.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  grouping device-management-group {
+    description 
+      "
+      It defines the group of leafs associated with the 
+      device management operation. 
+      ";
+
+    container device {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "
+        HBA device query parameters for the device management operations.
+        .
+        ";
+      leaf n-port-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "
+          The world wide Port name (PWWN) of the specified device.
+          ";
+      }
+      leaf n-port-id {
+        type fibrechannel:fcid-hex-string-type;
+        description
+          "
+          The Fibre Channel ID (FCID) of the device (hexadecimal format).
+          ";
+      }
+      leaf version {
+        type uint8;
+        description
+          "
+          HBA registers with this version identifier. Switch can handle 
+          the requests only if the input version is registered/supported
+          by the device. 
+          Device will return the supported version in the response. 
+          ";
+      }
+      leaf payload {
+        type string {
+          pattern "[ -~]*";
+        }
+        description
+          "
+          It refers to opaque payload and response buffer in base64 format. 
+          ";
+      }
+   	}
+  }
+
+  rpc device-management {
+    description
+      "
+      The RPC command definition for Brocade device management operations.
+      ";
+
+    input {
+      uses device-management-group {
+        description
+          "
+          The input parameters used for the device management operations.
+          ";
+      }
+    }
+    output {
+      uses device-management-group {
+        description
+          "
+          The device response container.
+          ";
+      }
+    }
+  }
+}

@@ -1,0 +1,133 @@
+module brocade-operation-date {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-date";
+  prefix brocade-operation-date;
+  import brocade-operation-types {
+    prefix brocade-operation-types;
+  }
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module 'brocade-operation-date' to support
+    date commands.
+          
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+
+  revision 2021-09-13 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+        Refined descriptions
+      
+      ";
+    reference
+      "None";
+  }
+  rpc date {
+    description
+      "The container for date commands.";
+    input {
+      container date-operation-parameters {
+        description
+          "
+          The container to configure the system date.
+          ";
+        leaf day-of-month {
+          type uint16 {
+           range "1..31";
+          }
+          mandatory true;
+          description
+            "
+            The day of the month. 
+            ";
+        }
+        leaf month {
+          type brocade-operation-types:month-type;
+          mandatory true;
+          description
+            "
+            The month of the year.
+            (for example, jan, feb, mar, apr, and so on).
+            ";
+        }
+        leaf year {
+          type uint16 {
+            range "1970..max";
+          }
+          mandatory true;
+          description
+            "
+            The year. The system supports the
+            year from 1970.
+            ";
+        }
+        leaf hour {
+          type uint16 {
+            range "0..23";
+          }
+          mandatory true;
+          description
+            "
+            The hour.
+            ";
+        }
+        leaf minute {
+          type uint16 {
+            range "0..59";
+          }
+          mandatory true;
+          description
+            "
+            The minute.
+            ";
+        }
+      }
+    }
+    output {
+      container date-operation-status {
+        description
+          "
+          The status of the date operation.
+          ";
+        leaf status-message {
+          type string {
+            length "1..1024";
+            pattern "[ -~]+";
+          }
+          description
+            "
+            This is status message to show the errors or
+            success of date operation.
+            ";
+        }
+      }
+    }
+  }
+}

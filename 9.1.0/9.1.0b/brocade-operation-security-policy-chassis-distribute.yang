@@ -1,0 +1,154 @@
+module brocade-operation-security-policy-chassis-distribute {
+
+  yang-version 1.1;
+  namespace
+  "urn:brocade.com:mgmt:brocade-operation-security-policy-chassis-distribute";
+  prefix brocade-operation-security-policy-chassis-distribute;
+  
+  import "brocade-security-yang-types" {
+    prefix brocade-security-type;
+  }
+  
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for
+    managing security related policies and configurations on a switch chassis.
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-19 {
+    description
+      "
+      
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      
+      ";
+    reference
+      "None";
+  }
+  rpc security-policy-chassis-distribute {
+    description
+      "
+      The RPC command definition for chassiss wide distribution of IP filter
+      polices on Brocade switch(es).
+      ";
+    input {
+      container policy-chassis-distribute-parameters {
+        if-feature fibrechannel:fibrechannel_switch_platform;
+        description
+          "
+          Parameters for chassis distribution of security database.
+          ";
+        container policy-types {
+          description
+            "
+            Security database(s) to be distributed.
+            ";
+          leaf-list type {
+            type brocade-security-type:chassis-distribute-policy-type;
+            description
+              "
+              Policy name of the security database(s) to be distributed.
+              ";
+          }
+        }
+        container destination-domains {
+          if-feature fibrechannel:fibrechannel_non_virtual_fabric_platform;
+          description
+            "
+            List of switches that should receive the data distribution.
+            ";
+          leaf-list domain-id {
+            type brocade-security-type:chassis-distribute-domain-type;
+            description
+              "
+              Domain ID that should receive the data distribution.
+              A wildcard (*) may be specified to include all switches in the
+              fabric.
+              This operand is required and valid only when Virtual Fabrics are
+              disabled.
+              ";
+          }
+        }
+        leaf vf-id {
+          if-feature fibrechannel:fibrechannel_virtual_fabric_platform;
+          type fibrechannel:fabric-id-type;
+          description
+            "
+            Specifies the fabric ID that should receive IP filter
+            distribution. The valid values for FID are from 1 through 128.
+            Database is distributed to all chassis that are connected to the
+            specified logical switch (FID) and are configured to accept the
+            distribution.
+            This operand is required and valid only when the originating switch
+            is in Virtual Fabric mode.
+            ";
+        }
+      }
+    }
+    output {
+      list chassis-distribute-operation-status {
+        description
+          "Chassis distribute operation status";
+	  uses brocade-security-type:ipfilter-policy-info-group {
+          description 
+            "
+            Chassis distribute operation succeeded for the given topology.
+            ";
+        }
+        leaf vf-id {
+          if-feature fibrechannel:fibrechannel_virtual_fabric_platform;
+          type fibrechannel:fabric-id-type;
+          description
+            "
+            Specifies the fabric ID that received IP filter distribution. The
+            valid values for FID are from 1 through 128.
+            Database is distributed to all chassis that are connected to the
+            specified logical switch (FID) and are configured to accept the
+            distribution.
+            This field will be empty for NON-VF destination.
+            ";
+        }
+        leaf  distribute-supported {
+          type boolean;
+          description
+            "
+            Specifies whether the the distribution is supported on the
+            receiving chassis.
+            true : Specified chassis supports distribution. 
+            false: Specified chassis does not support distribution. 
+            ";
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,816 @@
+module brocade-ficon {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-ficon";
+  prefix brocade-ficon;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module defines the YANG module brocade-ficon, which allows
+    management of some FICON Control Unit Port(CUP) parameters as well as
+    providing FICON related information from the Management Server(i.e. RNID,
+    LIRR, RLIR data).
+
+    Copyright © 2020 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2019-10-16 {
+    description
+      "Initial release (FOS 9.0.0).";
+
+    reference
+      "
+      ANSI INCITS xxx-20xx, Fibre Channel - Single-Byte Command Code Sets
+      Mapping Protocol - 5 (FC-SB-5).
+
+      ANSI INCITS xxx-20xx, Fibre Channel - Link Services (FC-LS-3).
+
+      IBM Document Number: BCD1061101, FICON Director Programming Interface
+      (PI Spec).
+      ";
+  }
+
+  typedef logical-path-operational-states {
+    type enumeration {
+      enum "Oper" {
+        description
+          "A logical path is in operational state.";
+      }
+      enum "Reset" {
+        description
+          "A logical path is in reset state.";
+      }
+    }
+    description
+      "Describes the set of operational states for a logical path";
+  }
+
+  container brocade-ficon {
+    description
+      "
+      Configuration related information for FICON Control Unit Port (CUP) and
+      Management Server FICON data.
+      ";
+
+    /* We only have one CUP object for a logical switch so this is defined as a
+     * container rather than a list.
+     */
+    container cup {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      description
+        "FICON Control Unit Port(CUP) configuration parameters.";
+      leaf fmsmode-enabled {
+        type boolean;
+        description
+          "
+          Indicates whether Ficon Management Server(FMS) Mode is enabled in the
+          logical switch.
+
+          FMS mode can only be enabled through the rest interface.  If a set
+          request is received with fmsmode-enabled=false an error will be
+          returned.
+
+          false : FMS Mode disabled
+          true  : FMS Mode enabled
+          ";
+      }
+      leaf programmed-offline-state-control {
+        type boolean;
+        description
+          "
+          The Programmed Offline State Control property indicates whether
+          programmed control of the offline state is allowed or prohibited.
+
+          Programmed control refers to an IBM host sending the 0xFD Set Offline
+          CCW to the CUP to disable a logical switch.
+
+          false : Programmed control is prohibited
+          true  : Programmed control is allowed
+          ";
+      }
+      leaf user-alert-mode {
+        type boolean;
+        config false;
+        description
+          "
+          The User Alert Mode property indicates whether User Alert Mode is
+          enabled or disabled.
+
+          When enabled, this mode causes the EFC Server to send a general
+          warning indication to the EFC Server user whenever the EFC Server user
+          attempts an action which will write FICON Director parameters. The EFC
+          Server user may override this warning. When disabled, the general
+          warning indication does not take place.
+
+          false : User Alert Mode is disabled.
+          true  : User Alert Mode is enabled.
+          ";
+      }
+      leaf active-equal-saved-mode {
+        type boolean;
+        description
+          "
+          The Active=Saved Mode property indicates whether Active=Saved Mode is
+          enabled or disabled.
+          Active=Saved Mode controls updating of the CUP IPL configuration file.
+
+          When Active=Saved Mode is enabled the IPL file is updated with
+          configuration changes along with the active configuration.
+
+          When Active=Saved Mode is disabled the IPL file is not updated with
+          changes to the active configuration.  In this case a reboot or
+          activation of another configuration file will lose configuration
+          changes made to the active configuration.
+
+          false : Active=Saved Mode is disabled.
+          true  : Active=Saved Mode is enabled.
+          ";
+      }
+      leaf director-clock-alert-mode {
+        type boolean;
+        description
+          "
+          The Director Clock Alert Mode property indicates whether Director
+          Clock Alert Mode is enabled or disabled.
+
+          When this mode is enabled a general warning will be displayed on the
+          EFC server when a user attempts to set the Time-Stamp clock.  When
+          enabled this mode also causes an error message to be displayed when a
+          user attempts to activate any function that automatically sets the
+          Time-Stamp clock.
+
+          false : Director Clock Alert Mode is disabled.
+          true  : Director Clock Alert Mode is enabled.
+          ";
+      }
+      leaf mihpto {
+        when "../fmsmode-enabled = true";
+        type uint32;
+        config false;
+        description
+          "
+          Contains the current value of the Missing Interrupt Handler Primary
+          Timeout.
+          This value is only available when FMS mode is enabled.
+          This value cannot be changed through the rest api.
+          See the IBM PI Spec for definitions of the contents.
+          ";
+      }
+      leaf unsolicited-alert-mode-fru-enabled {
+        type boolean;
+        description
+          "
+          Indicates if Unsolicited Alerts for FRU events are enabled.
+
+          false : FRU alerts disabled
+          true  : FRU alerts enabled
+          ";
+      }
+      leaf unsolicited-alert-mode-hsc-enabled {
+        type boolean;
+        description
+          "
+          Indicates if Unsolicited Alerts for Health Summary Code(HSC) events
+          are enabled.
+
+          false : HSC alerts disabled
+          true  : HSC alerts enabled
+          ";
+      }
+      leaf unsolicited-alert-mode-invalid-attach-enabled {
+        type boolean;
+        description
+          "
+          Indicates if Unsolicited Alerts for Invalid Attachment events are
+          enabled.
+
+          false : Invalid Attachment alerts disabled
+          true  : Invalid Attachment alerts enabled
+          ";
+      }
+    }
+    list logical-path {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      key "link-address channel-image-id";
+      description
+        "
+        A list of Logical Paths that are currently established to the Control
+        Unit Port(CUP).
+
+        Setting the Current Reporting Path is supported through this interface.
+        To set the current reporting path you must supply the key(link-address
+        and channel-image-id) and a reporting-path-state value of Current.
+        ";
+      leaf link-address {
+        type fibrechannel:brocade-hex-string-type {
+          length "6";	// 2 bytes is 4 characters plus 2 for 0x
+        }
+        description
+          "
+          The link address(first two bytes of Port Identifier(PID)) of the
+          logical path.
+          This is part of the composite key that must be supplied to set the
+          Current Reporting Path.
+          ";
+      }
+      leaf channel-image-id {
+        type fibrechannel:brocade-hex-string-type {
+          length "4";	// 1 byte is 2 characters plus 2 for 0x
+        }
+        description
+          "
+          The channel Image ID of the logical path.
+          This is part of the composite key that must be supplied to set the
+          Current Reporting Path.
+          ";
+      }
+      leaf operational-state {
+        type logical-path-operational-states;
+        config false;
+        description
+          "The operational state of the logical path.";
+      }
+      leaf reporting-path-state {
+        type string {
+          length "0..30";
+          pattern "(Primary|Alternate|Current)*";
+        }
+        description
+          "
+          The reporting path state of the logical path.
+
+          The reporting path state could be zero or more of the following values
+          Primary   : Primary Reporting Path
+          Alternate : Alternate Reporting Path
+          Current   : Current Reporting Path
+
+          To set the Current Reporting Path the reporting-path-state property
+          must be supplied and the only valid value that can be supplied is
+          Current.
+          ";
+      }
+    }
+
+    list rnid {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      key "link-address";
+      config false;
+      description
+        "
+        A list of Read Node Identifier(RNID) records from the FICON database.
+        All RNID records for the entire fabric are returned unless a
+        link-address is specified to return only a single RNID record.
+        The RNID records are simply reporting the state data for connected
+        devices so you cannot create or update RNID records.
+
+        Most of the properties correspond to the definition of the RNID record
+        in FC-SB and additional definition can be found in the spec.
+        ";
+      leaf link-address {
+        type fibrechannel:brocade-hex-string-type {
+          length "6";	// 2 bytes is 4 characters plus 2 for 0x
+        }
+        description
+          "
+          The link address(first two bytes of Port Identifier(PID)) of the RNID
+          record.
+          ";
+      }
+      leaf format {
+        type fibrechannel:brocade-hex-string-type {
+          length "4";	// 1 byte is 2 characters plus 2 for 0x
+        }
+        description
+          "
+          The Format field from the RNID record.
+
+          0x18 : indicates the record is a FICON node identifier
+          ";
+      }
+      leaf port-type {
+        type fibrechannel:port-type-string-type;
+        description
+          "
+          The port type of the RNID record.  i.e. n-port, e-port, etc.
+
+          See the fibrechannel:port-type-string-type for more information.
+          ";
+      }
+      leaf registered-port-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The Registered Port WWN";
+      }
+      leaf registered-node-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The Registered Node WWN";
+      }
+      leaf flags {
+        type fibrechannel:brocade-hex-string-type {
+          length "4";	// 1 byte is 2 characters plus 2 for 0x
+        }
+        description
+          "The Flags field from the RNID record.";
+      }
+      leaf node-parameters {
+        type fibrechannel:brocade-hex-string-type {
+          length "8";	// 3 bytes is 6 characters plus 2 for 0x
+        }
+        description
+          "The Node Parameters field from the RNID record.";
+      }
+      leaf type-number {
+        type string {
+          length "0..6";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The Type Number of the node that describes the machine type of the
+          device
+          ";
+      }
+      leaf model-number {
+        type string {
+          length "0..3";
+          pattern "[ -~]*";
+        }
+        description
+          "The Model Number of the device";
+      }
+      leaf manufacturer {
+        type string {
+          length "0..3";
+          pattern "[ -~]*";
+        }
+        description
+          "The Model Number or code of the device";
+      }
+      leaf plant {
+        type string {
+          length "0..2";
+          pattern "[ -~]*";
+        }
+        description
+          "The Manufacturer Plant name or code of the device";
+      }
+      leaf sequence-number {
+        type string {
+          length "0..12";
+          pattern "[ -~]*";
+        }
+        description
+          "The Sequence Number of the device";
+      }
+      leaf tag {
+        type fibrechannel:brocade-hex-string-type {
+          length "6";	// 2 bytes is 4 characters plus 2 for 0x
+        }
+        description
+          "The physical identifier of the device";
+      }
+    }
+
+    list switch-rnid {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      key "switch-address";
+      config false;
+      description
+        "
+        A list of Switch Read Node Identifier(RNID) records from the FICON
+        database.
+        All Switch RNID records for the entire fabric are returned unless a
+        switch-addr is specified to return only a single Switch RNID record.
+        The Switch RNID records are simply reporting the state data for
+        connected devices so you cannot create or update Switch RNID records.
+
+        Most of the properties correspond to the definition of the RNID record
+        in FC-SB and additional definition can be found in the spec.
+        ";
+      leaf switch-address {
+        type fibrechannel:brocade-hex-string-type {
+          length "4";	// 1 byte is 2 characters plus 2 for 0x
+        }
+        description
+          "The switch address(domain ID) of the Switch RNID record.";
+      }
+      leaf switch-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The Switch Node WWN";
+      }
+      leaf flags {
+        type fibrechannel:brocade-hex-string-type {
+          length "4";	// 1 byte is 2 characters plus 2 for 0x
+        }
+        description
+          "The Flags field from the Switch RNID record.";
+      }
+      leaf node-parameters {
+        type fibrechannel:brocade-hex-string-type {
+          length "8";	// 3 bytes is 6 characters plus 2 for 0x
+        }
+        description
+          "The Node Parameters field from the Switch RNID record.";
+      }
+      leaf type-number {
+        type string {
+          length "0..6";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The Type Number of the node that describes the machine type of the
+          switch.
+          ";
+      }
+      leaf model-number {
+        type string {
+          length "0..3";
+          pattern "[ -~]*";
+        }
+        description
+          "The Model Number of the switch";
+      }
+      leaf manufacturer {
+        type string {
+          length "0..3";
+          pattern "[ -~]*";
+        }
+        description
+          "The Model Number or code of the switch";
+      }
+      leaf plant {
+        type string {
+          length "0..2";
+          pattern "[ -~]*";
+        }
+        description
+          "The Manufacturer Plant name or code of the switch";
+      }
+      leaf sequence-number {
+        type string {
+          length "0..12";
+          pattern "[ -~]*";
+        }
+        description
+          "The Sequence Number of the switch";
+      }
+      leaf tag {
+        type fibrechannel:brocade-hex-string-type {
+          length "6";	// 2 bytes is 4 characters plus 2 for 0x
+        }
+        description
+          "The physical identifier of the switch";
+      }
+    }
+
+    list lirr {
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      key "link-address";
+      config false;
+      description
+        "
+        A list of Link Incident Registration Record(LIRR) records from the FICON
+        database.
+        All LIRR records for the entire fabric are returned unless a
+        link-address is specified to return only a single LIRR record.
+        The LIRR records are simply reporting the state data for registered
+        devices so you cannot create or update LIRR records.
+        ";
+      leaf link-address {
+        type fibrechannel:brocade-hex-string-type {
+          length "6";	// 2 bytes is 4 characters plus 2 for 0x
+        }
+        description
+          "
+          The link address(first two bytes of Port Identifier(PID)) of the LIRR
+          record.
+          ";
+      }
+      leaf format {
+        type fibrechannel:brocade-hex-string-type {
+          length "4";	// 1 byte is 2 characters plus 2 for 0x
+        }
+        description
+          "
+          The Format field from the LIRR record.
+
+          0x18 : indicates the record is a FICON node identifier
+          ";
+      }
+      leaf port-type {
+        type fibrechannel:port-type-string-type;
+        description
+          "
+          The port type of the LIRR record.  i.e. n-port, e-port, etc.
+
+          See fibrechannel:port-type-string-type for specific values
+          ";
+      }
+      leaf listener-port-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The Listener Port WWN";
+      }
+      leaf switch-port-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The Switch Port WWN";
+      }
+      leaf listener-type {
+        type string {
+          length "0..15";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The Listener Type field from the LIRR record.
+          For example, Conditional-C, Conditional-S, etc.
+          ";
+      }
+    }
+
+    list rlir {
+      /*
+       * NOTE: the RLIR records are read-only and there is no combination of
+       * properties that would guarantee a list record is unique so no key is
+       * defined
+       */
+      if-feature fibrechannel:fibrechannel_switch_platform;
+      config false;
+      description
+        "
+        A list of Registered Link Incident Record(RLIR) records from the FICON
+        database.
+        All RLIR records for the entire fabric.  There is no unique key to allow
+        selection of a single RLIR record.
+        The RLIR records are simply reporting the state data for connected
+        devices so you cannot create or update RLIR records.
+
+        Some of the properties correspond to the definition of the RLIR record
+        in FC-LS and the RNID record in FC-SB and additional definition can be
+        found in the specs.
+        ";
+      leaf link-address {
+        type fibrechannel:brocade-hex-string-type {
+          length "6";	// 2 bytes is 4 characters plus 2 for 0x
+        }
+        description
+          "
+          The link address(first two bytes of Port Identifier(PID)) of the RLIR
+          record.
+          ";
+      }
+      leaf format {
+        type fibrechannel:brocade-hex-string-type {
+          length "4";	// 1 byte is 2 characters plus 2 for 0x
+        }
+        description
+          "
+          The Format field from the RLIR record.
+
+          0x18 : indicates the record is a FICON node identifier
+          ";
+      }
+      leaf port-type {
+        type fibrechannel:port-type-string-type;
+        description
+          "
+          The port type of the RLIR record.  i.e. n-port, e-port, etc.
+
+          See fibrechannel:port-type-string-type for specific values 
+          ";
+      }
+      leaf port-index {
+        type fibrechannel:user-port-number-type;
+        description
+          "The Physical Port Number field from the RLIR record.";
+      }
+      leaf incident-count {
+        type uint8;
+        description
+          "
+          The Incident Count field from the RLIR record.
+          This number increases by 1 for each incident within the switch.
+          ";
+      }
+      leaf time-stamp-format {
+        type uint8;
+        description
+          "The Time Stamp Format field from the RLIR record.";
+      }
+      leaf time-stamp {
+        type string {
+          length "0..40";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          An ASCII string representation of the Time Stamp field from the RLIR
+          record.
+          ";
+      }
+      leaf port-status {
+        type string {
+          length "0..25";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The Port Status field from the RLIR record.
+          This value is returned as a string indicating the status.
+          i.e. Link not operational
+          ";
+      }
+      leaf link-failure-type {
+        type string {
+          length "0..35";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The Link Failure Type field from the RLIR record.
+          This value is returned as a string indicating the type of
+          link failure.
+          i.e. Loss of Signal or synchronization
+          ";
+      }
+      leaf registered-port-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The Registered Port WWN";
+      }
+      leaf registered-node-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The Registered Node WWN";
+      }
+      leaf port-flags {
+        type fibrechannel:brocade-hex-string-type {
+          length "4";	// 1 byte is 2 characters plus 2 for 0x
+        }
+        description
+          "The Flags field from the the RLIR record.";
+      }
+      leaf port-node-parameters {
+        type fibrechannel:brocade-hex-string-type {
+          length "8";	// 3 bytes is 6 characters plus 2 for 0x
+        }
+        description
+          "The Node Parameters field from the RLIR record.";
+      }
+      leaf port-type-number {
+        type string {
+          length "0..6";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The Type Number of the node that describes the machine type of the
+          device.
+          ";
+      }
+      leaf port-model-number {
+        type string {
+          length "0..3";
+          pattern "[ -~]*";
+        }
+        description
+          "The Model Number of the device";
+      }
+      leaf port-manufacturer {
+        type string {
+          length "0..3";
+          pattern "[ -~]*";
+        }
+        description
+          "The Model Number or code of the device";
+      }
+      leaf port-plant {
+        type string {
+          length "0..2";
+          pattern "[ -~]*";
+        }
+        description
+          "The Manufacturer Plant name or code of the device";
+      }
+      leaf port-sequence-number {
+        type string {
+          length "0..12";
+          pattern "[ -~]*";
+        }
+        description
+          "The Sequence Number of the device";
+      }
+      leaf port-tag {
+        type fibrechannel:brocade-hex-string-type {
+          length "6";	// 2 bytes is 4 characters plus 2 for 0x
+        }
+        description
+          "The physical identifier of the device";
+      }
+      leaf switch-port-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The Switch Port WWN";
+      }
+      leaf switch-node-wwn {
+        type fibrechannel:wwn-type;
+        description
+          "The Switch Node WWN";
+      }
+      leaf switch-flags {
+        type fibrechannel:brocade-hex-string-type {
+          length "4";	// 1 byte is 2 characters plus 2 for 0x
+        }
+        description
+          "The Flags field from the the RLIR record.";
+      }
+      leaf switch-node-parameters {
+        type fibrechannel:brocade-hex-string-type {
+          length "8";	// 3 bytes is 6 characters plus 2 for 0x
+        }
+        description
+          "The Node Parameters field from the RLIR record.";
+      }
+      leaf switch-type-number {
+        type string {
+          length "0..6";
+          pattern "[ -~]*";
+        }
+        description
+          "
+          The Type Number of the node that describes the machine type of the
+          device.
+          ";
+      }
+      leaf switch-model-number {
+        type string {
+          length "0..3";
+          pattern "[ -~]*";
+        }
+        description
+          "The Model Number of the device";
+      }
+      leaf switch-manufacturer {
+        type string {
+          length "0..3";
+          pattern "[ -~]*";
+        }
+        description
+          "The Model Number or code of the device";
+      }
+      leaf switch-plant {
+        type string {
+          length "0..2";
+          pattern "[ -~]*";
+        }
+        description
+          "The Manufacturer Plant name or code of the device";
+      }
+      leaf switch-sequence-number {
+        type string {
+          length "0..12";
+          pattern "[ -~]*";
+        }
+        description
+          "The Sequence Number of the device";
+      }
+      leaf switch-tag {
+        type fibrechannel:brocade-hex-string-type {
+          length "6";	// 2 bytes is 4 characters plus 2 for 0x
+        }
+        description
+          "The physical identifier of the device";
+      }
+    }
+  }
+}

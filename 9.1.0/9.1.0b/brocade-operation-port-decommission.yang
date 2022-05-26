@@ -1,0 +1,116 @@
+module brocade-operation-port-decommission {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-port-operation-decommission";
+  prefix port-decommission-ops;
+
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+  import brocade-operation-types {
+    prefix operation;
+  }
+
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for managing port
+    operations.
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-06-01 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  typedef port-decommission-operation-type {
+    type enumeration {
+      enum port {
+        description
+          "
+          Decommission a port
+          ";
+      }
+      enum qsfp-port {
+        description
+          "
+          Decommission a QSFP module
+          ";
+      }
+    }
+    description
+      "
+      Enumerates the types of port decommissioning operations that are
+      available.
+      ";
+  }
+
+  rpc port-decommission {
+    description
+      "
+      The RPC command for triggering the port decommissioning operation.
+      ";
+    input {
+      list port-decommission-parameters {
+        description
+          "
+          The parameters required for port operations.
+          .
+          ";
+        leaf slot-port {
+          type fibrechannel:slot-port-name-type;
+          description
+            "
+            The slot/port of the port.
+            ";
+        }
+        leaf port-decommission-type {
+          type port-decommission-operation-type;
+          description
+            "
+            The operation being performed for the port.
+            ";
+        }
+      }
+    }
+
+    output {
+      uses operation:show-status-group {
+        description
+          "
+          The port decommissioning operation status container.
+          ";
+      }
+    }
+  }
+}

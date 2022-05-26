@@ -1,0 +1,99 @@
+module brocade-operation-configdownload {
+
+  yang-version 1.1;
+  namespace "urn:brocade.com:mgmt:brocade-operation-configdownload";
+  prefix brocade-configdownload;
+
+  import "brocade-operation-types" {
+    prefix operation-types;
+  }
+  import fibrechannel-yang-types {
+    prefix fibrechannel;
+  }
+
+ 
+  organization
+    "Broadcom Inc.";
+
+  contact
+    "
+    Address:
+
+      1320 Ridder Park Road
+      San Jose, CA 95131
+      USA
+
+    Support:
+
+      https://www.broadcom.com/support/fibre-channel-networking/
+
+    Website:
+
+      https://www.broadcom.com/products/fibre-channel-networking/software/
+
+    ";
+
+  description
+    "
+    This module contains a collection of YANG definitions for restoring  
+    the configuration on a switch.
+
+    Copyright © 2021 Broadcom. All rights reserved. The term 'Broadcom' refers
+    to Broadcom Inc. and/or its subsidiaries.
+    ";
+
+  revision 2021-11-10 {
+    description
+      "
+      Fabric OS 9.1.0
+      ---------------
+        Initial release
+      ";
+    reference
+      "None";
+  }
+
+  rpc configdownload {
+    description
+      "
+      The RPC command definition for the configuration download operation
+      on a Brocade switch.
+      ";
+    input {
+      container configdownload-parameters {
+        description
+          "The configuration download operation input parameters.";
+
+        uses operation-types:config-upload-download-parameters;
+        leaf source-vf-id {
+          when "(../config-upload-download-option = 'fabric-id')";
+          type fibrechannel:fabric-id-type;
+          description
+            "
+            The source fabric ID. The configuration from the source vf-id
+            to be downloaded to the provided vf-id.  
+            ";
+        }
+        leaf config-input-buffer {
+          type string {
+            length "1..max";
+              pattern "[ -~]+";
+          }
+          mandatory true;
+          description
+            "
+            Send the entire configuration file content as an input. 
+            The configuration payload must be encoded to base64 format. 
+            Refer to RFC 3414 for more details about the base64 encode method.
+            ";
+        }
+      }
+    }
+    output {
+      uses operation-types:show-status-group {
+        description
+          "The status of the configuration download operation.";
+      }
+    }
+  }
+}
